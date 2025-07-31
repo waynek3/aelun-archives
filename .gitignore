@@ -1,0 +1,16 @@
+# Ignore Node.js dependency folder
+node_modules/
+
+# Ignore Operating System files
+.DS_Store
+Thumbs.db
+
+# Ignore VS Code specific settings folder
+.vscode/
+
+# Ignore build output folders
+dist/
+build/
+
+# Ignore log files
+*.log
