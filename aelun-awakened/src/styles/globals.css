@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #1A1A2E;
+  --color-text: #E8E8E8;
+  --color-success: #00FF00;
+  --color-focus: #FFFF00;
+  --color-danger: #FF4444;
+  --color-info: #44CCFF;
+  --color-warning: #FF8800;
+  --color-meta: #8844FF;
+  --color-disabled: #666666;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Courier New', 'Consolas', 'IBM Plex Mono', monospace;
+  font-size: 1rem;
+  line-height: 1.4;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Base button styles */
+.btn {
+  @apply font-mono border-2 transition-all duration-100 ease-in-out;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.btn:focus {
+  @apply outline-none ring-2 ring-yellow-400 ring-offset-2 ring-offset-slate-900;
+}
+
+.btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Primary button */
+.btn-primary {
+  @apply border-green-500 text-green-500 bg-transparent;
+  border-style: double;
+}
+
+.btn-primary:hover:not(:disabled) {
+  @apply border-yellow-400 text-yellow-400;
+  box-shadow: 0 0 8px rgba(255, 255, 0, 0.3);
+}
+
+/* Secondary button */
+.btn-secondary {
+  @apply border-cyan-400 text-cyan-400 bg-transparent;
+  border-style: solid;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  @apply border-yellow-400 text-yellow-400;
+}
+
+/* Warning button */
+.btn-warning {
+  @apply border-orange-500 text-orange-500 bg-transparent;
+  border-style: solid;
+}
+
+.btn-warning:hover:not(:disabled) {
+  @apply border-red-500 text-red-500;
+}
+
+/* Panel styles */
+.panel {
+  @apply border border-cyan-400 bg-slate-900/50 backdrop-blur-sm;
+  border-style: solid;
+}
+
+.panel-double {
+  @apply border border-green-500;
+  border-style: double;
+}
+
+.panel-heavy {
+  @apply border border-red-500;
+  border-style: solid;
+  border-width: 3px;
+}
+
+/* Stat bar styles */
+.stat-bar {
+  @apply flex items-center gap-2;
+}
+
+.stat-bar-fill {
+  @apply bg-green-500;
+  height: 8px;
+  min-width: 4px;
+}
+
+.stat-bar-empty {
+  @apply bg-gray-500;
+  height: 8px;
+  min-width: 4px;
+}
+
+/* Progress bar styles */
+.progress-bar {
+  @apply flex items-center gap-2;
+}
+
+.progress-fill {
+  @apply bg-green-500;
+  height: 12px;
+  min-width: 4px;
+}
+
+.progress-empty {
+  @apply bg-gray-500;
+  height: 12px;
+  min-width: 4px;
+}
+
+/* Tag styles */
+.tag {
+  @apply text-cyan-400 uppercase text-sm;
+}
+
+/* Animation styles */
+@keyframes dice-roll {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(90deg); }
+  50% { transform: rotate(180deg); }
+  75% { transform: rotate(270deg); }
+}
+
+.dice-rolling {
+  animation: dice-roll 0.1s infinite;
+}
+
+@keyframes flash-success {
+  0%, 100% { border-color: var(--color-success); }
+  50% { border-color: var(--color-focus); }
+}
+
+@keyframes flash-danger {
+  0%, 100% { border-color: var(--color-danger); }
+  50% { border-color: var(--color-focus); }
+}
+
+.flash-success {
+  animation: flash-success 0.2s 3;
+}
+
+.flash-danger {
+  animation: flash-danger 0.2s 3;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  body {
+    font-size: 0.95rem;
+  }
+  
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .dice-rolling,
+  .flash-success,
+  .flash-danger {
+    animation: none;
+    transition: none;
+  }
+}
