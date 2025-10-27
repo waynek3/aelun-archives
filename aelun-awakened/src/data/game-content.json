@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "actionCards": [
+    {
+      "id": "pray",
+      "name": "Pray",
+      "description": "Offer a prayer to powers known and unknown.",
+      "actionType": "Targeted",
+      "tags": ["Universal"],
+      "timescales": ["Day", "3-Hour", "20-Min", "Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["divine_blessing"] }
+      ]
+    },
+    {
+      "id": "travel",
+      "name": "Travel...",
+      "description": "Journey to a new location.",
+      "actionType": "Targeted",
+      "tags": ["Universal"],
+      "timescales": ["Day", "3-Hour", "20-Min"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["scout_ahead"] }
+      ]
+    },
+    {
+      "id": "take_it_in",
+      "name": "Take It In",
+      "description": "Observe your surroundings and collect yourself.",
+      "actionType": "Untargeted",
+      "tags": ["Universal"],
+      "timescales": ["Day", "3-Hour", "20-Min"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["heightened_awareness"] }
+      ]
+    },
+    {
+      "id": "work",
+      "name": "Work",
+      "description": "Perform routine labor and tasks.",
+      "actionType": "Untargeted",
+      "tags": ["Homestead"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["efficient_worker"] }
+      ]
+    },
+    {
+      "id": "quick_attack",
+      "name": "Quick Attack",
+      "description": "A fast, low-damage strike.",
+      "actionType": "Untargeted",
+      "tags": ["Combat"],
+      "timescales": ["Encounter"],
+      "diceModifier": "+1d4",
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["quick_attack_plus_one", "riposte"] },
+        { "tier": 1, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["flurry_of_blows", "counter_attack"] }
+      ]
+    }
+  ],
+  "predicateCards": [
+    {
+      "id": "homestead",
+      "name": "The Homestead",
+      "description": "A place of routine and rest.",
+      "sceneTags": ["Homestead"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "work": [
+          { "condition": "roll >= 10", "outcome": "gain_resource", "parameters": { "resource": "goods", "amount": 1 } },
+          { "condition": "roll < 10", "outcome": "minor_setback", "parameters": { "text": "Fatigue slows your pace." } }
+        ],
+        "take_it_in": [
+          { "condition": "roll >= 12", "outcome": "restore", "parameters": { "hp": 2 } },
+          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+        ],
+        "pray": [
+          { "condition": "roll >= 14", "outcome": "change_affinity", "parameters": { "entity": "local_spirit", "change": 1 } },
+          { "condition": "roll < 14", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {},
+      "exits": ["gnarled_woods"]
+    },
+    {
+      "id": "gnarled_woods",
+      "name": "The Gnarled Woods",
+      "description": "Twisted branches and lurking eyes.",
+      "sceneTags": ["Forest", "Wilderness", "Dangerous"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "quick_attack": [
+          { "condition": "roll >= 15", "outcome": "deal_damage", "parameters": { "dice": "1d6" } },
+          { "condition": "roll < 15", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+        ],
+        "take_it_in": [
+          { "condition": "roll >= 10", "outcome": "discover_location", "parameters": { "location": "hidden_glade" } },
+          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+        ],
+        "pray": [
+          { "condition": "roll >= 12", "outcome": "change_affinity", "parameters": { "entity": "forest_spirits", "change": 1 } },
+          { "condition": "roll < 12", "outcome": "anger_entity", "parameters": { "entity": "forest_spirits", "change": -1 } }
+        ]
+      },
+      "stateFlags": {"danger": true},
+      "exits": ["homestead"]
+    },
+    {
+      "id": "village_square",
+      "name": "Village Square",
+      "description": "Market chatter and familiar faces.",
+      "sceneTags": ["Settlement"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "take_it_in": [
+          { "condition": "roll >= 10", "outcome": "gain_resource", "parameters": { "resource": "info", "amount": 1 } },
+          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+        ],
+        "pray": [
+          { "condition": "roll >= 13", "outcome": "change_affinity", "parameters": { "entity": "monastery", "change": 1 } },
+          { "condition": "roll < 13", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {},
+      "exits": ["homestead"]
+    }
+  ],
+  "traits": [
+    {"id": "devout", "name": "Devout", "type": "Passive", "effect": "+1d4 to Divine actions"},
+    {"id": "scarred", "name": "Scarred", "type": "Passive", "effect": "-1 social, +1 intimidation"},
+    {"id": "lucky", "name": "Lucky", "type": "Triggered", "effect": "Reroll one die per day"},
+    {"id": "outlaw", "name": "Outlaw", "type": "Passive", "effect": "Negative affinity with law"},
+    {"id": "warrior", "name": "Warrior", "type": "Passive", "effect": "+1d4 to combat"}
+  ],
+  "lifepaths": [
+    {
+      "id": "wanderer_path",
+      "name": "Wanderer",
+      "steps": [
+        {"id": "origin_village", "prompt": "Where did you grow up?", "choices": [
+          {"id": "village", "name": "Village", "stats": {"strength": 1}, "traits": ["scarred"], "cards": ["take_it_in"]},
+          {"id": "monastery", "name": "Monastery", "stats": {"will": 1}, "traits": ["devout"], "cards": ["pray"]}
+        ]},
+        {"id": "formative_event", "prompt": "What shaped your youth?", "choices": [
+          {"id": "war", "name": "War", "stats": {"fortitude": 1}, "traits": ["warrior"], "cards": ["quick_attack"]},
+          {"id": "loss", "name": "Loss", "stats": {"insight": 1}, "traits": ["lucky"], "cards": ["take_it_in"]}
+        ]}
+      ]
+    }
+  ]
+}
