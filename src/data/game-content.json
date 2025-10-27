@@ -145,6 +145,38 @@
         {"id": "formative_event", "prompt": "What shaped your youth?", "choices": [
           {"id": "war", "name": "War", "stats": {"fortitude": 1}, "traits": ["warrior"], "cards": ["quick_attack"]},
           {"id": "loss", "name": "Loss", "stats": {"insight": 1}, "traits": ["lucky"], "cards": ["take_it_in"]}
+        ]},
+        {"id": "mentor", "prompt": "Who mentored you?", "choices": [
+          {"id": "soldier", "name": "A Veteran Soldier", "stats": {"strength": 1}, "traits": ["warrior"], "cards": ["quick_attack"]},
+          {"id": "scribe", "name": "A Patient Scribe", "stats": {"insight": 1}, "traits": ["devout"], "cards": ["take_it_in"]}
+        ]},
+        {"id": "trial", "prompt": "What trial did you endure?", "choices": [
+          {"id": "hunger", "name": "A Season of Hunger", "stats": {"fortitude": 1}, "traits": ["scarred"]},
+          {"id": "exile", "name": "Exile from Home", "stats": {"charisma": 1}, "traits": ["outlaw"]}
+        ]},
+        {"id": "calling", "prompt": "What calling pulled you onward?", "choices": [
+          {"id": "wanderlust", "name": "Wanderlust", "stats": {"agility": 1}, "cards": ["travel"]},
+          {"id": "faith", "name": "A Whisper of Faith", "stats": {"will": 1}, "cards": ["pray"]}
+        ]},
+        {"id": "companion", "prompt": "Who travelled with you?", "choices": [
+          {"id": "hound", "name": "A Faithful Hound", "stats": {"insight": 1}},
+          {"id": "stranger", "name": "A Quiet Stranger", "stats": {"charisma": 1}}
+        ]},
+        {"id": "lesson", "prompt": "What lesson stuck with you?", "choices": [
+          {"id": "observe", "name": "Observe First", "stats": {"insight": 1}, "cards": ["take_it_in"]},
+          {"id": "act", "name": "Act Quickly", "stats": {"agility": 1}, "cards": ["quick_attack"]}
+        ]},
+        {"id": "debt", "prompt": "What debt do you owe?", "choices": [
+          {"id": "monastery_debt", "name": "The Monastery", "stats": {"will": 1}},
+          {"id": "bandits_debt", "name": "The Silver Hand", "stats": {"strength": 1}}
+        ]},
+        {"id": "oath", "prompt": "What oath did you swear?", "choices": [
+          {"id": "protect", "name": "Protect the Weak", "stats": {"fortitude": 1}},
+          {"id": "seek", "name": "Seek the Hidden", "stats": {"insight": 1}}
+        ]},
+        {"id": "arrival", "prompt": "Why did you come to Aelun?", "choices": [
+          {"id": "quest", "name": "A personal quest", "cards": ["travel"]},
+          {"id": "exile_reason", "name": "Driven by exile", "cards": ["take_it_in"]}
         ]}
       ]
     }

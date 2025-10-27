@@ -815,6 +815,7 @@ This document represents the complete game design vision for Aelun Awakened. All
 
 **Version Control:**
 - v1.1 - October 27, 2025 - Phase 1 implementation complete (types, data, persistence scaffolding)
+- v1.2 - October 27, 2025 - Sprint 5 Part 1 complete (interactive Lifepath structure implemented)
 - v1.0 - October 26, 2025 - Initial consolidated master document
 - Future versions will be tracked with changelog at document start
 

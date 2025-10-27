@@ -1559,4 +1559,5 @@ This document defines the complete technical architecture for Aelun Awakened. Al
 
 **Version Control:**
 - v1.1 - October 27, 2025 - Phase 1 implementation complete (types, initial data, persistence scaffolding)
+- v1.2 - October 27, 2025 - Sprint 5 Part 1: lifepath engine and UI scaffolding implemented
 - v1.0 - October 26, 2025 - Initial consolidated master document
