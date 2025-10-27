@@ -1,9 +1,30 @@
+import { useEffect, useState } from 'react'
 import { useUIStore } from '@/stores/uiStore'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 
 export default function MainMenuScreen() {
   const setScreen = useUIStore((s) => s.setScreen)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    // Add a small delay to ensure proper rendering
+    const timer = setTimeout(() => {
+      setIsLoaded(true)
+    }, 100)
+    
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (!isLoaded) {
+    return (
+      <ScreenContainer>
+        <div className="text-center py-12">
+          <div className="text-green-500 text-lg">Loading...</div>
+        </div>
+      </ScreenContainer>
+    )
+  }
 
   return (
     <ScreenContainer>

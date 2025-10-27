@@ -21,11 +21,18 @@ export default function GameLoopScreen() {
     let mounted = true
     async function load() {
       setLoading(true)
-      const [preds, acts] = await Promise.all([getPredicateCards(), getActionsArray()])
-      if (!mounted) return
-      setPredicateMap(preds)
-      setActions(acts)
-      setLoading(false)
+      try {
+        const [preds, acts] = await Promise.all([getPredicateCards(), getActionsArray()])
+        if (!mounted) return
+        setPredicateMap(preds)
+        setActions(acts)
+      } catch (error) {
+        console.error('Failed to load game content:', error)
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
     }
     load()
     return () => {
@@ -33,16 +40,24 @@ export default function GameLoopScreen() {
     }
   }, [])
 
+  // Redirect to main menu if no character
+  useEffect(() => {
+    if (!loading && !character) {
+      setScreen('MainMenu')
+    }
+  }, [loading, character, setScreen])
+
   const currentPredicate = useMemo(() => {
-    const id = character?.worldState.location || 'homestead'
+    if (!character) return null
+    const id = character.worldState?.location || 'homestead'
     return predicateMap[id] ?? null
-  }, [predicateMap, character?.worldState.location])
+  }, [predicateMap, character])
 
   const availableActions = useMemo(() => {
     if (!currentPredicate) return []
     return filterActionsByContext({
-      sceneTags: currentPredicate.sceneTags,
-      timescale: currentPredicate.timescale,
+      sceneTags: currentPredicate.sceneTags || [],
+      timescale: currentPredicate.timescale || 'Day',
       actions,
     })
   }, [currentPredicate, actions])
@@ -51,6 +66,27 @@ export default function GameLoopScreen() {
     // For Sprint 7: click handling only, no resolution yet
     // In a later sprint, this will navigate to DicePool or Target selection
     console.log('Selected action', cardId)
+  }
+
+  // Show loading or redirect if no character
+  if (loading) {
+    return (
+      <ScreenContainer>
+        <div className="py-6 space-y-4">
+          <div className="panel p-4 text-sm text-cyan-400">Loading...</div>
+        </div>
+      </ScreenContainer>
+    )
+  }
+
+  if (!character) {
+    return (
+      <ScreenContainer>
+        <div className="py-6 space-y-4">
+          <div className="panel p-4 text-sm text-cyan-400">No character found. Returning to main menu...</div>
+        </div>
+      </ScreenContainer>
+    )
   }
 
   return (
@@ -63,23 +99,17 @@ export default function GameLoopScreen() {
           </div>
         </header>
 
-        {loading ? (
-          <div className="panel p-4 text-sm text-cyan-400">Loading...</div>
-        ) : (
-          <>
-            <ScenePanel predicate={currentPredicate} />
-            <ActionWheel actions={availableActions} onSelect={handleSelectAction} />
-            <StatusBar
-              hp={{ current: character?.currentHP ?? 10, max: character?.maxHP ?? 10 }}
-              traitsCount={character?.traits.length ?? 0}
-              turn={character?.turnCount ?? 0}
-              timescale={currentPredicate?.timescale ?? 'Day'}
-            />
-            <div className="mt-2">
-              <Button variant="secondary" onClick={() => setScreen('MainMenu')}>◄ BACK TO MENU</Button>
-            </div>
-          </>
-        )}
+        <ScenePanel predicate={currentPredicate} />
+        <ActionWheel actions={availableActions} onSelect={handleSelectAction} />
+        <StatusBar
+          hp={{ current: character.currentHP ?? 10, max: character.maxHP ?? 10 }}
+          traitsCount={character.traits?.length ?? 0}
+          turn={character.turnCount ?? 0}
+          timescale={currentPredicate?.timescale ?? 'Day'}
+        />
+        <div className="mt-2">
+          <Button variant="secondary" onClick={() => setScreen('MainMenu')}>◄ BACK TO MENU</Button>
+        </div>
       </div>
     </ScreenContainer>
   )
