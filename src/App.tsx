@@ -8,24 +8,11 @@ import CompendiumScreen from '@/components/screens/CompendiumScreen'
 import GraveyardScreen from '@/components/screens/GraveyardScreen'
 import PauseMenuScreen from '@/components/screens/PauseMenuScreen'
 import { Modal } from '@/components/ui/Modal'
-import { useEffect, useRef } from 'react'
 
 function App() {
-  // DEBUG: Track render count
-  const renderCount = useRef(0)
-  renderCount.current++
-  
-  // FIX: Use separate selectors to avoid creating new objects on every render
   const screen = useUIStore((s) => s.screen)
   const modal = useUIStore((s) => s.modal)
   const closeModal = useUIStore((s) => s.closeModal)
-  
-  useEffect(() => {
-    console.log('[DEBUG App] Render #', renderCount.current, 'Screen:', screen, 'Modal open:', modal.open)
-    if (renderCount.current > 50) {
-      console.error('[DEBUG App] INFINITE LOOP DETECTED - More than 50 renders!')
-    }
-  })
 
   const Screen = (() => {
     switch (screen) {
@@ -43,6 +30,9 @@ function App() {
         return <GraveyardScreen />
       case 'PauseMenu':
         return <PauseMenuScreen />
+      case 'Outcome':
+        // Outcome screen is handled within GameLoopScreen
+        return <MainMenuScreen />
       default:
         return <MainMenuScreen />
     }

@@ -2,9 +2,26 @@ Sprint 6 (Lifepath Part 2) implemented: CharacterSummaryScreen added, name input
 
 Sprint 7 (Game Loop & Actions) implemented: Added `lib/engine/actionFilter.ts` for tag/timescale filtering; `lib/utils/content.ts` to load actions/predicates from IndexedDB; created `components/game/ScenePanel.tsx`, `ActionWheel.tsx`, and `StatusBar.tsx`; integrated into `GameLoopScreen` with loading state and clickable action buttons (no resolution yet). Lint clean.
 
-Sprint 7 Bug Fixes (Current): Fixed React error #185 by ensuring seeding completes before rendering to prevent hydration mismatches. Fixed menu flash issue by adding proper loading states to MainMenuScreen. Added error handling and character validation to GameLoopScreen. All builds passing, no linter errors.
+Sprint 7 Bug Fixes (Completed): Fixed React error #185 by ensuring seeding completes before rendering to prevent hydration mismatches. Fixed menu flash issue by adding proper loading states to MainMenuScreen. Added error handling and character validation to GameLoopScreen. All builds passing, no linter errors.
 
-Current Status: Sprint 7 complete with bug fixes. Ready for Sprint 8 (Dice System & Rolling) implementation.
+Sprint 8 (Dice System & Rolling) - COMPLETED:
+- Implemented complete dice system engine with advantage dice and bonus dice
+- Created dice pool builder from character stats and traits
+- Added DiceDisplay component with Unicode die faces
+- Built DicePoolScreen with rolling animation
+- Integrated with GameLoopScreen action selection
+- Build size: 213.53 kB (66.62 kB gzipped) - within target
+
+Sprint 9 (Predicate Engine - Core Resolution) - COMPLETED:
+- Implemented predicate engine for action resolution
+- Created outcome executor for applying effects to character
+- Added Web Worker for heavy computation offloading
+- Built OutcomeScreen for displaying results
+- Integrated complete turn loop: Action → Dice → Outcome → Continue
+- Cleaned up debug code and console logs
+- All TypeScript errors resolved, build passing
+
+Current Status: Sprint 9 complete. Core gameplay loop fully functional. Ready for Sprint 10 (Turn Loop Integration) or Sprint 11 (Death & Graveyard).
 
 ## PROJECT COMPLETION STATUS (Updated October 27, 2025)
 
@@ -61,26 +78,34 @@ Current Status: Sprint 7 complete with bug fixes. Ready for Sprint 8 (Dice Syste
   - Action filtering by tags and timescale
   - Content loading from IndexedDB
 
-**Phase 3: Core Gameplay (Sprint 8) - COMPLETE**
+**Phase 3: Core Gameplay (Sprints 8-9) - COMPLETE**
 - ✅ Sprint 8: Dice System & Rolling
   - Dice system engine with advantage dice and bonus dice
   - Dice pool builder from character stats and traits
   - DiceDisplay component with Unicode die faces
   - DicePoolScreen with rolling animation
   - Integration with GameLoopScreen action selection
-  - Build size: 210.65 kB (65.70 kB gzipped) - within target
+  - Build size: 213.53 kB (66.62 kB gzipped) - within target
+
+- ✅ Sprint 9: Predicate Engine (Core Resolution)
+  - Implemented predicate engine for action resolution
+  - Created outcome executor for applying effects to character
+  - Added Web Worker for heavy computation offloading
+  - Built OutcomeScreen for displaying results
+  - Integrated complete turn loop: Action → Dice → Outcome → Continue
+  - Cleaned up debug code and console logs
+  - All TypeScript errors resolved, build passing
 
 ### 🔄 CURRENT PHASE
 
-**Phase 3: Core Gameplay (Sprint 9) - IN PROGRESS**
-- ⏳ Sprint 9: Predicate Engine (Core Resolution)
-  - Target: Implement action resolution system
+**Phase 3: Core Gameplay (Sprint 10) - READY TO BEGIN**
+- ⏳ Sprint 10: Turn Loop Integration
+  - Target: Complete the full turn cycle
   - Status: Ready to begin implementation
 
 ### 📋 NEXT PHASES
 
-**Phase 3: Core Gameplay (Sprints 9-10)**
-- Sprint 9: Predicate Engine (Core Resolution)
+**Phase 3: Core Gameplay (Sprint 10)**
 - Sprint 10: Turn Loop Integration
 
 **Phase 4: Meta-Progression (Sprints 11-13)**
@@ -95,7 +120,7 @@ Current Status: Sprint 7 complete with bug fixes. Ready for Sprint 8 (Dice Syste
 
 ### 🎯 IMMEDIATE NEXT STEPS
 
-1. **Sprint 8 Implementation**: Dice System & Rolling mechanics
+1. **Sprint 10 Implementation**: Turn Loop Integration
 2. **Branch Cleanup**: Merge current work to main
 3. **Testing**: Add comprehensive unit tests for new features
 4. **Performance**: Optimize bundle size and loading times

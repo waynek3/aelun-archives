@@ -25,6 +25,8 @@ export interface LifepathChoice {
 export interface WorldState {
   location: string; // predicate id
   flags: Record<string, unknown>;
+  resources?: Record<string, number>;
+  discovered?: Record<string, string[]>;
   time: {
     timescale: string;
     turnCount: number;

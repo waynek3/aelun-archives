@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 import { useUIStore } from '@/stores/uiStore'
@@ -8,29 +8,21 @@ import { ActionWheel } from '@/components/game/ActionWheel'
 import { StatusBar } from '@/components/game/StatusBar'
 import { getPredicateCards, getActionsArray } from '@/lib/utils/content'
 import { filterActionsByContext } from '@/lib/engine/actionFilter'
+import { gameEngine } from '@/lib/utils/workerClient'
+import { executeOutcomeEffects } from '@/lib/engine/outcomeExecutor'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 import type { DiceResult } from '@/lib/engine/diceSystem'
+import type { Outcome } from '@/lib/engine/predicateEngine'
 
 export default function GameLoopScreen() {
-  // DEBUG: Track render count
-  const renderCount = useRef(0)
-  renderCount.current++
-  
   const setScreen = useUIStore((s) => s.setScreen)
   const character = useGameStore((s) => s.character)
   const [loading, setLoading] = useState(true)
-  
-  useEffect(() => {
-    console.log('[DEBUG GameLoopScreen] Render #', renderCount.current, 'Loading:', loading, 'Has character:', !!character)
-    if (renderCount.current > 50) {
-      console.error('[DEBUG GameLoopScreen] INFINITE LOOP DETECTED!')
-    }
-  })
 
   const [predicateMap, setPredicateMap] = useState<Record<string, PredicateCard>>({})
   const [actions, setActions] = useState<ActionCard[]>([])
   const [selectedAction, setSelectedAction] = useState<ActionCard | null>(null)
-  const [, setDiceResult] = useState<DiceResult | null>(null)
+  const [outcome, setOutcome] = useState<Outcome | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -74,15 +66,53 @@ export default function GameLoopScreen() {
     const action = actions.find(a => a.id === cardId)
     if (action) {
       setSelectedAction(action)
-      // For Sprint 8: Navigate to dice pool screen
-      // In Sprint 9: This will handle targeted vs untargeted actions differently
+      // For targeted actions, we'd show target selection
+      // For now, all actions go to dice pool
     }
   }
 
-  function handleDiceResult(result: DiceResult) {
-    setDiceResult(result)
-    // For Sprint 9: This will trigger outcome resolution
-    console.log('Dice result:', result)
+  async function handleDiceResult(result: DiceResult) {
+    if (!character || !selectedAction || !currentPredicate) return;
+    
+    try {
+      // Resolve the action using the predicate engine
+      const actionOutcome = await gameEngine.resolveAction({
+        actionCard: selectedAction,
+        predicateCard: currentPredicate,
+        character,
+        diceResult: result
+      });
+      
+      // Apply effects to character
+      const { updatedCharacter, notifications } = executeOutcomeEffects(character, actionOutcome.effects);
+      
+      // Update character in store
+      useGameStore.getState().setCharacter(updatedCharacter);
+      
+      // Show notifications
+      notifications.forEach(notification => {
+        useUIStore.getState().notify(notification);
+      });
+      
+      // Set outcome for display
+      setOutcome(actionOutcome);
+      
+    } catch (error) {
+      console.error('Failed to resolve action:', error);
+      // Show error outcome
+      setOutcome({
+        text: 'Something went wrong with your action.',
+        effects: [],
+        stateChanges: {},
+        success: false
+      });
+    }
+  }
+
+  function handleContinueFromOutcome() {
+    // Reset state and return to game loop
+    setSelectedAction(null);
+    setOutcome(null);
   }
 
   // function handleBackToGame() {
@@ -114,9 +144,21 @@ export default function GameLoopScreen() {
     )
   }
 
+  // Show outcome screen if we have an outcome
+  if (outcome) {
+    const OutcomeScreen = React.lazy(() => import('./OutcomeScreen'))
+    return (
+      <React.Suspense fallback={<div className="panel p-4 text-sm text-cyan-400">Loading outcome...</div>}>
+        <OutcomeScreen
+          outcome={outcome}
+          onContinue={handleContinueFromOutcome}
+        />
+      </React.Suspense>
+    )
+  }
+
   // Show dice pool screen if action is selected
   if (selectedAction && currentPredicate) {
-    // Dynamic import for dice pool screen
     const DicePoolScreen = React.lazy(() => import('./DicePoolScreen'))
     return (
       <React.Suspense fallback={<div className="panel p-4 text-sm text-cyan-400">Loading dice pool...</div>}>
