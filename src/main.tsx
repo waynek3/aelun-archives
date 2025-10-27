@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
@@ -9,15 +8,11 @@ async function initializeApp() {
   try {
     await seedIfNeeded()
   } catch (error) {
-    console.warn('Failed to seed data:', error)
+    console.error('Failed to seed data:', error)
   }
   
   const root = createRoot(document.getElementById('root')!)
-  root.render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
-  )
+  root.render(<App />)
 }
 
 // Initialize app after DOM is ready

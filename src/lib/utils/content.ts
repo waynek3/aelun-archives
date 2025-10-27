@@ -2,7 +2,7 @@ import { openDB } from '@/lib/persistence/indexedDB'
 import { DB_NAME, DB_VERSION, upgrade } from '@/lib/persistence/migrations'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 
-let cache: {
+const cache: {
   actions?: Record<string, ActionCard>
   predicates?: Record<string, PredicateCard>
 } = {}
@@ -10,12 +10,12 @@ let cache: {
 async function loadAll(): Promise<void> {
   const db = await openDB({ name: DB_NAME, version: DB_VERSION, upgrade })
 
-  function getAll(store: string): Promise<any[]> {
+  function getAll(store: string): Promise<Array<ActionCard | PredicateCard>> {
     return new Promise((resolve, reject) => {
       const tx = db.transaction('gameContent', 'readonly')
       const idx = tx.objectStore('gameContent').index('type')
       const req = idx.getAll(store)
-      req.onsuccess = () => resolve(req.result as any[])
+      req.onsuccess = () => resolve(req.result as Array<ActionCard | PredicateCard>)
       req.onerror = () => reject(req.error)
     })
   }

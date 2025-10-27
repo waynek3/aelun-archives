@@ -10,7 +10,9 @@ export function ScenePanel({ predicate }: ScenePanelProps) {
   const desc = predicate?.description ?? '...'
   const tags = predicate?.sceneTags ?? []
   const timescale = predicate?.timescale ?? 'Day'
-  const danger = (predicate?.stateFlags as any)?.danger === true
+  const danger = predicate?.stateFlags && typeof predicate.stateFlags === 'object' && 'danger' in predicate.stateFlags 
+    ? predicate.stateFlags.danger === true 
+    : false
 
   return (
     <Panel className="p-4" aria-live="polite" role="region">
