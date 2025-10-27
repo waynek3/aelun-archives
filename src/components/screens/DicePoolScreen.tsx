@@ -14,9 +14,11 @@ interface DicePoolScreenProps {
   actionCard: ActionCard;
   predicateCard: PredicateCard;
   onResult: (result: DiceResult) => void;
+  targetId?: string;
+  duplicateCards?: number;
 }
 
-export default function DicePoolScreen({ actionCard, predicateCard, onResult }: DicePoolScreenProps) {
+export default function DicePoolScreen({ actionCard, predicateCard, onResult, targetId, duplicateCards = 0 }: DicePoolScreenProps) {
   const setScreen = useUIStore((s) => s.setScreen);
   const character = useGameStore((s) => s.character);
   const [dicePool, setDicePool] = useState<ReturnType<typeof buildDicePool> | null>(null);
@@ -30,15 +32,16 @@ export default function DicePoolScreen({ actionCard, predicateCard, onResult }: 
       const pool = buildDicePool({
         character,
         actionCard,
-        duplicateCards: 0 // TODO: Allow duplicate cards in future
+        duplicateCards,
+        targetId
       });
       setDicePool(pool);
       
       // Calculate DC
-      const difficulty = getDifficultyClass(actionCard, predicateCard.sceneTags || []);
+      const difficulty = getDifficultyClass(actionCard, predicateCard.sceneTags || [], targetId);
       setDc(difficulty);
     }
-  }, [character, actionCard, predicateCard]);
+  }, [character, actionCard, predicateCard, targetId, duplicateCards]);
 
   const handleRoll = async () => {
     if (!dicePool) return;
@@ -82,6 +85,25 @@ export default function DicePoolScreen({ actionCard, predicateCard, onResult }: 
         <Panel className="p-4">
           <h3 className="text-cyan-400 font-bold uppercase mb-2">{actionCard.name}</h3>
           <p className="text-sm text-gray-300 mb-2">{actionCard.description}</p>
+          
+          {/* Target Info */}
+          {targetId && (
+            <div className="mb-2 p-2 bg-yellow-400/10 border border-yellow-400/30 rounded">
+              <div className="text-sm text-yellow-400 font-bold">
+                TARGET: {targetId.replace(/_/g, ' ').toUpperCase()}
+              </div>
+            </div>
+          )}
+          
+          {/* Duplicate Cards Info */}
+          {duplicateCards > 0 && (
+            <div className="mb-2 p-2 bg-green-400/10 border border-green-400/30 rounded">
+              <div className="text-sm text-green-400 font-bold">
+                DUPLICATE CARDS: {duplicateCards} (Advantage Dice: {duplicateCards + 1})
+              </div>
+            </div>
+          )}
+          
           <div className="flex gap-2 text-xs">
             {actionCard.tags.map(tag => (
               <span key={tag} className="tag">[{tag.toUpperCase()}]</span>

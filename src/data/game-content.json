@@ -6,10 +6,24 @@
       "name": "Pray",
       "description": "Offer a prayer to powers known and unknown.",
       "actionType": "Targeted",
-      "tags": ["Universal"],
-      "timescales": ["Day", "3-Hour", "20-Min", "Encounter"],
+      "tags": [
+        "Universal"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour",
+        "20-Min",
+        "Encounter"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["divine_blessing"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "divine_blessing"
+          ]
+        }
       ]
     },
     {
@@ -17,10 +31,23 @@
       "name": "Travel...",
       "description": "Journey to a new location.",
       "actionType": "Targeted",
-      "tags": ["Universal"],
-      "timescales": ["Day", "3-Hour", "20-Min"],
+      "tags": [
+        "Universal"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour",
+        "20-Min"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["scout_ahead"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "scout_ahead"
+          ]
+        }
       ]
     },
     {
@@ -28,10 +55,23 @@
       "name": "Take It In",
       "description": "Observe your surroundings and collect yourself.",
       "actionType": "Untargeted",
-      "tags": ["Universal"],
-      "timescales": ["Day", "3-Hour", "20-Min"],
+      "tags": [
+        "Universal"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour",
+        "20-Min"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["heightened_awareness"] }
+        {
+          "tier": 0,
+          "requiresFailures": 2,
+          "maxUnlocks": 1,
+          "pool": [
+            "heightened_awareness"
+          ]
+        }
       ]
     },
     {
@@ -39,10 +79,22 @@
       "name": "Work",
       "description": "Perform routine labor and tasks.",
       "actionType": "Untargeted",
-      "tags": ["Homestead"],
-      "timescales": ["Day", "3-Hour"],
+      "tags": [
+        "Homestead"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["efficient_worker"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "efficient_worker"
+          ]
+        }
       ]
     },
     {
@@ -50,12 +102,32 @@
       "name": "Quick Attack",
       "description": "A fast, low-damage strike.",
       "actionType": "Untargeted",
-      "tags": ["Combat"],
-      "timescales": ["Encounter"],
+      "tags": [
+        "Combat"
+      ],
+      "timescales": [
+        "Encounter"
+      ],
       "diceModifier": "+1d4",
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["quick_attack_plus_one", "riposte"] },
-        { "tier": 1, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["flurry_of_blows", "counter_attack"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "quick_attack_plus_one",
+            "riposte"
+          ]
+        },
+        {
+          "tier": 1,
+          "requiresFailures": 3,
+          "maxUnlocks": 1,
+          "pool": [
+            "flurry_of_blows",
+            "counter_attack"
+          ]
+        }
       ]
     },
     {
@@ -63,11 +135,24 @@
       "name": "Heavy Strike",
       "description": "A powerful, slow attack that deals significant damage.",
       "actionType": "Untargeted",
-      "tags": ["Combat", "Physical"],
-      "timescales": ["Encounter"],
+      "tags": [
+        "Combat",
+        "Physical"
+      ],
+      "timescales": [
+        "Encounter"
+      ],
       "diceModifier": "+2d4",
       "failureField": [
-        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["devastating_blow", "berserker_rage"] }
+        {
+          "tier": 0,
+          "requiresFailures": 2,
+          "maxUnlocks": 1,
+          "pool": [
+            "devastating_blow",
+            "berserker_rage"
+          ]
+        }
       ]
     },
     {
@@ -75,10 +160,23 @@
       "name": "Defend",
       "description": "Raise your guard and prepare for incoming attacks.",
       "actionType": "Untargeted",
-      "tags": ["Combat", "Defensive"],
-      "timescales": ["Encounter"],
+      "tags": [
+        "Combat",
+        "Defensive"
+      ],
+      "timescales": [
+        "Encounter"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["shield_bash", "counter_stance"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "shield_bash",
+            "counter_stance"
+          ]
+        }
       ]
     },
     {
@@ -86,11 +184,24 @@
       "name": "Sneak Attack",
       "description": "Strike from the shadows when your target is unaware.",
       "actionType": "Targeted",
-      "tags": ["Combat", "Stealth"],
-      "timescales": ["Encounter"],
+      "tags": [
+        "Combat",
+        "Stealth"
+      ],
+      "timescales": [
+        "Encounter"
+      ],
       "diceModifier": "+3d4",
       "failureField": [
-        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["backstab", "shadow_strike"] }
+        {
+          "tier": 0,
+          "requiresFailures": 2,
+          "maxUnlocks": 1,
+          "pool": [
+            "backstab",
+            "shadow_strike"
+          ]
+        }
       ]
     },
     {
@@ -98,10 +209,24 @@
       "name": "Heal",
       "description": "Restore health through natural recovery or basic medicine.",
       "actionType": "Untargeted",
-      "tags": ["Healing", "Universal"],
-      "timescales": ["Day", "3-Hour"],
+      "tags": [
+        "Healing",
+        "Universal"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["greater_heal", "healing_herbs"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "greater_heal",
+            "healing_herbs"
+          ]
+        }
       ]
     },
     {
@@ -109,10 +234,24 @@
       "name": "Bargain",
       "description": "Negotiate for better prices or favorable terms.",
       "actionType": "Targeted",
-      "tags": ["Social", "Trade"],
-      "timescales": ["Day", "3-Hour"],
+      "tags": [
+        "Social",
+        "Trade"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["master_negotiator", "silver_tongue"] }
+        {
+          "tier": 0,
+          "requiresFailures": 2,
+          "maxUnlocks": 1,
+          "pool": [
+            "master_negotiator",
+            "silver_tongue"
+          ]
+        }
       ]
     },
     {
@@ -120,10 +259,24 @@
       "name": "Intimidate",
       "description": "Use fear and threats to get your way.",
       "actionType": "Targeted",
-      "tags": ["Social", "Aggressive"],
-      "timescales": ["Encounter", "3-Hour"],
+      "tags": [
+        "Social",
+        "Aggressive"
+      ],
+      "timescales": [
+        "Encounter",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["terrifying_presence", "menacing_glare"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "terrifying_presence",
+            "menacing_glare"
+          ]
+        }
       ]
     },
     {
@@ -131,10 +284,24 @@
       "name": "Persuade",
       "description": "Use charm and logic to convince others.",
       "actionType": "Targeted",
-      "tags": ["Social", "Diplomatic"],
-      "timescales": ["Day", "3-Hour"],
+      "tags": [
+        "Social",
+        "Diplomatic"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["silver_tongue", "natural_charisma"] }
+        {
+          "tier": 0,
+          "requiresFailures": 2,
+          "maxUnlocks": 1,
+          "pool": [
+            "silver_tongue",
+            "natural_charisma"
+          ]
+        }
       ]
     },
     {
@@ -142,10 +309,24 @@
       "name": "Gather Information",
       "description": "Listen to rumors and learn about your surroundings.",
       "actionType": "Untargeted",
-      "tags": ["Social", "Information"],
-      "timescales": ["Day", "3-Hour"],
+      "tags": [
+        "Social",
+        "Information"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["keen_ears", "gossip_network"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "keen_ears",
+            "gossip_network"
+          ]
+        }
       ]
     },
     {
@@ -153,10 +334,24 @@
       "name": "Craft",
       "description": "Create useful items from available materials.",
       "actionType": "Untargeted",
-      "tags": ["Crafting", "Homestead"],
-      "timescales": ["Day", "3-Hour"],
+      "tags": [
+        "Crafting",
+        "Homestead"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["master_craftsman", "artisan_touch"] }
+        {
+          "tier": 0,
+          "requiresFailures": 2,
+          "maxUnlocks": 1,
+          "pool": [
+            "master_craftsman",
+            "artisan_touch"
+          ]
+        }
       ]
     },
     {
@@ -164,10 +359,24 @@
       "name": "Hunt",
       "description": "Track and hunt wild game for food and materials.",
       "actionType": "Untargeted",
-      "tags": ["Survival", "Wilderness"],
-      "timescales": ["Day", "3-Hour"],
+      "tags": [
+        "Survival",
+        "Wilderness"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["tracker", "wilderness_expert"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "tracker",
+            "wilderness_expert"
+          ]
+        }
       ]
     },
     {
@@ -175,10 +384,24 @@
       "name": "Meditate",
       "description": "Focus your mind and restore your spirit.",
       "actionType": "Untargeted",
-      "tags": ["Spiritual", "Recovery"],
-      "timescales": ["Day", "3-Hour"],
+      "tags": [
+        "Spiritual",
+        "Recovery"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["inner_peace", "spiritual_focus"] }
+        {
+          "tier": 0,
+          "requiresFailures": 2,
+          "maxUnlocks": 1,
+          "pool": [
+            "inner_peace",
+            "spiritual_focus"
+          ]
+        }
       ]
     },
     {
@@ -186,10 +409,24 @@
       "name": "Scout",
       "description": "Carefully explore an area to learn its secrets.",
       "actionType": "Targeted",
-      "tags": ["Exploration", "Stealth"],
-      "timescales": ["Day", "3-Hour"],
+      "tags": [
+        "Exploration",
+        "Stealth"
+      ],
+      "timescales": [
+        "Day",
+        "3-Hour"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["eagle_eyes", "silent_step"] }
+        {
+          "tier": 0,
+          "requiresFailures": 1,
+          "maxUnlocks": 1,
+          "pool": [
+            "eagle_eyes",
+            "silent_step"
+          ]
+        }
       ]
     },
     {
@@ -197,10 +434,23 @@
       "name": "Ritual",
       "description": "Perform a sacred ceremony to commune with higher powers.",
       "actionType": "Untargeted",
-      "tags": ["Spiritual", "Divine"],
-      "timescales": ["Day"],
+      "tags": [
+        "Spiritual",
+        "Divine"
+      ],
+      "timescales": [
+        "Day"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["divine_communion", "sacred_rite"] }
+        {
+          "tier": 0,
+          "requiresFailures": 3,
+          "maxUnlocks": 1,
+          "pool": [
+            "divine_communion",
+            "sacred_rite"
+          ]
+        }
       ]
     },
     {
@@ -208,10 +458,78 @@
       "name": "Forge Alliance",
       "description": "Build lasting relationships with powerful entities.",
       "actionType": "Targeted",
-      "tags": ["Social", "Diplomatic"],
-      "timescales": ["Day"],
+      "tags": [
+        "Social",
+        "Diplomatic"
+      ],
+      "timescales": [
+        "Day"
+      ],
       "failureField": [
-        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["diplomat", "alliance_builder"] }
+        {
+          "tier": 0,
+          "requiresFailures": 2,
+          "maxUnlocks": 1,
+          "pool": [
+            "diplomat",
+            "alliance_builder"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "steal",
+      "name": "Steal",
+      "description": "Take what isn't yours through stealth and cunning.",
+      "actionType": "Targeted",
+      "tags": ["Criminal", "Stealth"],
+      "timescales": ["Encounter", "20-Min"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["pickpocket", "burglar"] }
+      ]
+    },
+    {
+      "id": "investigate",
+      "name": "Investigate",
+      "description": "Search for clues and hidden information.",
+      "actionType": "Untargeted",
+      "tags": ["Universal", "Mental"],
+      "timescales": ["Day", "3-Hour", "20-Min"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["detective", "sleuth"] }
+      ]
+    },
+    {
+      "id": "perform",
+      "name": "Perform",
+      "description": "Entertain others with your talents.",
+      "actionType": "Targeted",
+      "tags": ["Social", "Artistic"],
+      "timescales": ["Day", "3-Hour", "20-Min"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["bard", "entertainer"] }
+      ]
+    },
+    {
+      "id": "research",
+      "name": "Research",
+      "description": "Study and learn about the world around you.",
+      "actionType": "Untargeted",
+      "tags": ["Mental", "Academic"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["scholar", "researcher"] }
+      ]
+    },
+    {
+      "id": "lead",
+      "name": "Lead",
+      "description": "Take charge and guide others.",
+      "actionType": "Targeted",
+      "tags": ["Social", "Leadership"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["commander", "leader"] }
       ]
     }
   ],
@@ -220,278 +538,1112 @@
       "id": "homestead",
       "name": "The Homestead",
       "description": "A place of routine and rest.",
-      "sceneTags": ["Homestead"],
+      "sceneTags": [
+        "Homestead"
+      ],
       "timescale": "Day",
       "outcomeLogic": {
         "work": [
-          { "condition": "roll >= 10", "outcome": "gain_resource", "parameters": { "resource": "goods", "amount": 1 } },
-          { "condition": "roll < 10", "outcome": "minor_setback", "parameters": { "text": "Fatigue slows your pace." } }
+          {
+            "condition": "roll >= 10",
+            "outcome": "gain_resource",
+            "parameters": {
+              "resource": "goods",
+              "amount": 1
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "minor_setback",
+            "parameters": {
+              "text": "Fatigue slows your pace."
+            }
+          }
         ],
         "take_it_in": [
-          { "condition": "roll >= 12", "outcome": "restore", "parameters": { "hp": 2 } },
-          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 12",
+            "outcome": "restore",
+            "parameters": {
+              "hp": 2
+            }
+          },
+          {
+            "condition": "roll < 12",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ],
         "pray": [
-          { "condition": "roll >= 14", "outcome": "change_affinity", "parameters": { "entity": "local_spirit", "change": 1 } },
-          { "condition": "roll < 14", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 14",
+            "outcome": "change_affinity",
+            "parameters": {
+              "entity": "local_spirit",
+              "change": 1
+            }
+          },
+          {
+            "condition": "roll < 14",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "gnarled_woods"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
       "stateFlags": {},
-      "exits": ["gnarled_woods"]
+      "exits": [
+        "gnarled_woods"
+      ]
     },
     {
       "id": "gnarled_woods",
       "name": "The Gnarled Woods",
       "description": "Twisted branches and lurking eyes.",
-      "sceneTags": ["Forest", "Wilderness", "Dangerous"],
+      "sceneTags": [
+        "Forest",
+        "Wilderness",
+        "Dangerous"
+      ],
       "timescale": "Day",
       "outcomeLogic": {
         "quick_attack": [
-          { "condition": "roll >= 15", "outcome": "deal_damage", "parameters": { "dice": "1d6" } },
-          { "condition": "roll < 15", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+          {
+            "condition": "roll >= 15",
+            "outcome": "deal_damage",
+            "parameters": {
+              "dice": "1d6"
+            }
+          },
+          {
+            "condition": "roll < 15",
+            "outcome": "receive_damage",
+            "parameters": {
+              "dice": "1d4"
+            }
+          }
         ],
         "take_it_in": [
-          { "condition": "roll >= 10", "outcome": "discover_location", "parameters": { "location": "hidden_glade" } },
-          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 10",
+            "outcome": "discover_location",
+            "parameters": {
+              "location": "hidden_glade"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ],
         "pray": [
-          { "condition": "roll >= 12", "outcome": "change_affinity", "parameters": { "entity": "forest_spirits", "change": 1 } },
-          { "condition": "roll < 12", "outcome": "anger_entity", "parameters": { "entity": "forest_spirits", "change": -1 } }
+          {
+            "condition": "roll >= 12",
+            "outcome": "change_affinity",
+            "parameters": {
+              "entity": "forest_spirits",
+              "change": 1
+            }
+          },
+          {
+            "condition": "roll < 12",
+            "outcome": "anger_entity",
+            "parameters": {
+              "entity": "forest_spirits",
+              "change": -1
+            }
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "homestead"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
-      "stateFlags": {"danger": true},
-      "exits": ["homestead"]
+      "stateFlags": {
+        "danger": true
+      },
+      "exits": [
+        "homestead"
+      ]
     },
     {
       "id": "village_square",
       "name": "Village Square",
       "description": "Market chatter and familiar faces.",
-      "sceneTags": ["Settlement"],
+      "sceneTags": [
+        "Settlement"
+      ],
       "timescale": "Day",
       "outcomeLogic": {
         "take_it_in": [
-          { "condition": "roll >= 10", "outcome": "gain_resource", "parameters": { "resource": "info", "amount": 1 } },
-          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 10",
+            "outcome": "gain_resource",
+            "parameters": {
+              "resource": "info",
+              "amount": 1
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ],
         "pray": [
-          { "condition": "roll >= 13", "outcome": "change_affinity", "parameters": { "entity": "monastery", "change": 1 } },
-          { "condition": "roll < 13", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 13",
+            "outcome": "change_affinity",
+            "parameters": {
+              "entity": "monastery",
+              "change": 1
+            }
+          },
+          {
+            "condition": "roll < 13",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "homestead"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
       "stateFlags": {},
-      "exits": ["homestead"]
+      "exits": [
+        "homestead"
+      ]
     },
     {
       "id": "ancient_ruins",
       "name": "Ancient Ruins",
       "description": "Crumbling stone and forgotten secrets.",
-      "sceneTags": ["Dungeon", "Mysterious"],
+      "sceneTags": [
+        "Dungeon",
+        "Mysterious"
+      ],
       "timescale": "Day",
       "outcomeLogic": {
         "take_it_in": [
-          { "condition": "roll >= 15", "outcome": "unlock", "parameters": { "category": "lore", "id": "ancient_wisdom" } },
-          { "condition": "roll < 15", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 15",
+            "outcome": "unlock",
+            "parameters": {
+              "category": "lore",
+              "id": "ancient_wisdom"
+            }
+          },
+          {
+            "condition": "roll < 15",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ],
         "scout": [
-          { "condition": "roll >= 12", "outcome": "unlock", "parameters": { "category": "predicates", "id": "hidden_chamber" } },
-          { "condition": "roll < 12", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+          {
+            "condition": "roll >= 12",
+            "outcome": "unlock",
+            "parameters": {
+              "category": "predicates",
+              "id": "hidden_chamber"
+            }
+          },
+          {
+            "condition": "roll < 12",
+            "outcome": "receive_damage",
+            "parameters": {
+              "dice": "1d4"
+            }
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "homestead"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
-      "stateFlags": {"mysterious": true},
-      "exits": ["homestead", "gnarled_woods"]
+      "stateFlags": {
+        "mysterious": true
+      },
+      "exits": [
+        "homestead",
+        "gnarled_woods"
+      ]
     },
     {
       "id": "tavern",
       "name": "The Rusty Anchor Tavern",
       "description": "A warm hearth and cold ale await within.",
-      "sceneTags": ["Settlement", "Social"],
+      "sceneTags": [
+        "Settlement",
+        "Social"
+      ],
       "timescale": "3-Hour",
       "outcomeLogic": {
         "gather_info": [
-          { "condition": "roll >= 10", "outcome": "gain_resource", "parameters": { "resource": "info", "amount": 2 } },
-          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 10",
+            "outcome": "gain_resource",
+            "parameters": {
+              "resource": "info",
+              "amount": 2
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ],
         "bargain": [
-          { "condition": "roll >= 12", "outcome": "gain_resource", "parameters": { "resource": "goods", "amount": 1 } },
-          { "condition": "roll < 12", "outcome": "lose", "parameters": { "resource": "goods", "amount": 1 } }
+          {
+            "condition": "roll >= 12",
+            "outcome": "gain_resource",
+            "parameters": {
+              "resource": "goods",
+              "amount": 1
+            }
+          },
+          {
+            "condition": "roll < 12",
+            "outcome": "lose",
+            "parameters": {
+              "resource": "goods",
+              "amount": 1
+            }
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "village_square"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
       "stateFlags": {},
-      "exits": ["village_square"]
+      "exits": [
+        "village_square"
+      ]
     },
     {
       "id": "monastery",
       "name": "The Monastery of St. Aelun",
       "description": "A place of quiet contemplation and divine power.",
-      "sceneTags": ["Settlement", "Sacred"],
+      "sceneTags": [
+        "Settlement",
+        "Sacred"
+      ],
       "timescale": "Day",
       "outcomeLogic": {
         "pray": [
-          { "condition": "roll >= 10", "outcome": "change_affinity", "parameters": { "entity": "monastery", "change": 2 } },
-          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 10",
+            "outcome": "change_affinity",
+            "parameters": {
+              "entity": "monastery",
+              "change": 2
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ],
         "meditate": [
-          { "condition": "roll >= 12", "outcome": "heal", "parameters": { "value": 3 } },
-          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 12",
+            "outcome": "heal",
+            "parameters": {
+              "value": 3
+            }
+          },
+          {
+            "condition": "roll < 12",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "village_square"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
-      "stateFlags": {"sacred": true},
-      "exits": ["village_square"]
+      "stateFlags": {
+        "sacred": true
+      },
+      "exits": [
+        "village_square"
+      ]
     },
     {
       "id": "bandit_camp",
       "name": "Bandit Camp",
       "description": "A rough collection of tents and stolen goods.",
-      "sceneTags": ["Dangerous", "Criminal"],
+      "sceneTags": [
+        "Dangerous",
+        "Criminal"
+      ],
       "timescale": "Encounter",
       "outcomeLogic": {
         "intimidate": [
-          { "condition": "roll >= 14", "outcome": "change_affinity", "parameters": { "entity": "silver_hand", "change": 1 } },
-          { "condition": "roll < 14", "outcome": "receive_damage", "parameters": { "dice": "1d6" } }
+          {
+            "condition": "roll >= 14",
+            "outcome": "change_affinity",
+            "parameters": {
+              "entity": "silver_hand",
+              "change": 1
+            }
+          },
+          {
+            "condition": "roll < 14",
+            "outcome": "receive_damage",
+            "parameters": {
+              "dice": "1d6"
+            }
+          }
         ],
         "forge_alliance": [
-          { "condition": "roll >= 16", "outcome": "change_affinity", "parameters": { "entity": "silver_hand", "change": 3 } },
-          { "condition": "roll < 16", "outcome": "change_affinity", "parameters": { "entity": "silver_hand", "change": -2 } }
+          {
+            "condition": "roll >= 16",
+            "outcome": "change_affinity",
+            "parameters": {
+              "entity": "silver_hand",
+              "change": 3
+            }
+          },
+          {
+            "condition": "roll < 16",
+            "outcome": "change_affinity",
+            "parameters": {
+              "entity": "silver_hand",
+              "change": -2
+            }
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "gnarled_woods"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
-      "stateFlags": {"dangerous": true, "criminal": true},
-      "exits": ["gnarled_woods"]
+      "stateFlags": {
+        "dangerous": true,
+        "criminal": true
+      },
+      "exits": [
+        "gnarled_woods"
+      ]
     },
     {
       "id": "healing_spring",
       "name": "Healing Spring",
       "description": "A magical pool of crystal-clear water.",
-      "sceneTags": ["Wilderness", "Sacred"],
+      "sceneTags": [
+        "Wilderness",
+        "Sacred"
+      ],
       "timescale": "3-Hour",
       "outcomeLogic": {
         "heal": [
-          { "condition": "roll >= 8", "outcome": "heal", "parameters": { "value": 5 } },
-          { "condition": "roll < 8", "outcome": "heal", "parameters": { "value": 2 } }
+          {
+            "condition": "roll >= 8",
+            "outcome": "heal",
+            "parameters": {
+              "value": 5
+            }
+          },
+          {
+            "condition": "roll < 8",
+            "outcome": "heal",
+            "parameters": {
+              "value": 2
+            }
+          }
         ],
         "meditate": [
-          { "condition": "roll >= 10", "outcome": "change_affinity", "parameters": { "entity": "nature_spirits", "change": 2 } },
-          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 10",
+            "outcome": "change_affinity",
+            "parameters": {
+              "entity": "nature_spirits",
+              "change": 2
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "gnarled_woods"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
-      "stateFlags": {"sacred": true, "healing": true},
-      "exits": ["gnarled_woods"]
+      "stateFlags": {
+        "sacred": true,
+        "healing": true
+      },
+      "exits": [
+        "gnarled_woods"
+      ]
     },
     {
       "id": "trading_post",
       "name": "Trading Post",
       "description": "A bustling hub of commerce and opportunity.",
-      "sceneTags": ["Settlement", "Trade"],
+      "sceneTags": [
+        "Settlement",
+        "Trade"
+      ],
       "timescale": "Day",
       "outcomeLogic": {
         "bargain": [
-          { "condition": "roll >= 12", "outcome": "gain_resource", "parameters": { "resource": "goods", "amount": 2 } },
-          { "condition": "roll < 12", "outcome": "lose", "parameters": { "resource": "goods", "amount": 1 } }
+          {
+            "condition": "roll >= 12",
+            "outcome": "gain_resource",
+            "parameters": {
+              "resource": "goods",
+              "amount": 2
+            }
+          },
+          {
+            "condition": "roll < 12",
+            "outcome": "lose",
+            "parameters": {
+              "resource": "goods",
+              "amount": 1
+            }
+          }
         ],
         "gather_info": [
-          { "condition": "roll >= 10", "outcome": "gain_resource", "parameters": { "resource": "info", "amount": 1 } },
-          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+          {
+            "condition": "roll >= 10",
+            "outcome": "gain_resource",
+            "parameters": {
+              "resource": "info",
+              "amount": 1
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "village_square"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
-      "stateFlags": {"trade": true},
-      "exits": ["village_square"]
+      "stateFlags": {
+        "trade": true
+      },
+      "exits": [
+        "village_square"
+      ]
     },
     {
       "id": "cursed_forest",
       "name": "Cursed Forest",
       "description": "Twisted trees and malevolent spirits.",
-      "sceneTags": ["Forest", "Dangerous", "Cursed"],
+      "sceneTags": [
+        "Forest",
+        "Dangerous",
+        "Cursed"
+      ],
       "timescale": "Day",
       "outcomeLogic": {
         "pray": [
-          { "condition": "roll >= 16", "outcome": "change_affinity", "parameters": { "entity": "nature_spirits", "change": 2 } },
-          { "condition": "roll < 16", "outcome": "receive_damage", "parameters": { "dice": "1d8" } }
+          {
+            "condition": "roll >= 16",
+            "outcome": "change_affinity",
+            "parameters": {
+              "entity": "nature_spirits",
+              "change": 2
+            }
+          },
+          {
+            "condition": "roll < 16",
+            "outcome": "receive_damage",
+            "parameters": {
+              "dice": "1d8"
+            }
+          }
         ],
         "meditate": [
-          { "condition": "roll >= 14", "outcome": "heal", "parameters": { "value": 2 } },
-          { "condition": "roll < 14", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+          {
+            "condition": "roll >= 14",
+            "outcome": "heal",
+            "parameters": {
+              "value": 2
+            }
+          },
+          {
+            "condition": "roll < 14",
+            "outcome": "receive_damage",
+            "parameters": {
+              "dice": "1d4"
+            }
+          }
+        ],
+        "travel": [
+          {
+            "condition": "roll >= 10",
+            "outcome": "transition",
+            "parameters": {
+              "location": "gnarled_woods"
+            }
+          },
+          {
+            "condition": "roll < 10",
+            "outcome": "no_effect",
+            "parameters": {}
+          }
         ]
       },
-      "stateFlags": {"dangerous": true, "cursed": true},
-      "exits": ["gnarled_woods"]
+      "stateFlags": {
+        "dangerous": true,
+        "cursed": true
+      },
+      "exits": [
+        "gnarled_woods"
+      ]
     }
   ],
   "traits": [
-    {"id": "devout", "name": "Devout", "type": "Passive", "effect": "+1d4 to Divine actions"},
-    {"id": "scarred", "name": "Scarred", "type": "Passive", "effect": "-1 social, +1 intimidation"},
-    {"id": "lucky", "name": "Lucky", "type": "Triggered", "effect": "Reroll one die per day"},
-    {"id": "outlaw", "name": "Outlaw", "type": "Passive", "effect": "Negative affinity with law"},
-    {"id": "warrior", "name": "Warrior", "type": "Passive", "effect": "+1d4 to combat"},
-    {"id": "scholar", "name": "Scholar", "type": "Passive", "effect": "+1d4 to information gathering"},
-    {"id": "healer", "name": "Healer", "type": "Passive", "effect": "+1d4 to healing actions"},
-    {"id": "thief", "name": "Thief", "type": "Passive", "effect": "+1d4 to stealth actions"},
-    {"id": "diplomat", "name": "Diplomat", "type": "Passive", "effect": "+1d4 to social actions"},
-    {"id": "survivor", "name": "Survivor", "type": "Passive", "effect": "+1d4 to wilderness actions"},
-    {"id": "craftsman", "name": "Craftsman", "type": "Passive", "effect": "+1d4 to crafting actions"},
-    {"id": "noble", "name": "Noble", "type": "Passive", "effect": "+1d4 to social actions, -1d4 to stealth"},
-    {"id": "hermit", "name": "Hermit", "type": "Passive", "effect": "+1d4 to meditation, -1d4 to social"},
-    {"id": "merchant", "name": "Merchant", "type": "Passive", "effect": "+1d4 to trade actions"},
-    {"id": "explorer", "name": "Explorer", "type": "Passive", "effect": "+1d4 to exploration actions"},
-    {"id": "berserker", "name": "Berserker", "type": "Triggered", "effect": "When damaged, +2d4 to next combat action"},
-    {"id": "wise", "name": "Wise", "type": "Passive", "effect": "+1d4 to insight-based actions"},
-    {"id": "charismatic", "name": "Charismatic", "type": "Passive", "effect": "+1d4 to persuasion and intimidation"},
-    {"id": "agile", "name": "Agile", "type": "Passive", "effect": "+1d4 to agility-based actions"},
-    {"id": "strong", "name": "Strong", "type": "Passive", "effect": "+1d4 to strength-based actions"},
-    {"id": "tough", "name": "Tough", "type": "Passive", "effect": "+1d4 to fortitude-based actions"},
-    {"id": "cursed", "name": "Cursed", "type": "Passive", "effect": "-1d4 to all actions, but +2d4 to spiritual actions"},
-    {"id": "blessed", "name": "Blessed", "type": "Passive", "effect": "+1d4 to all actions, but -2d4 to stealth"},
-    {"id": "mystic", "name": "Mystic", "type": "Passive", "effect": "+1d4 to spiritual and mystical actions"},
-    {"id": "tactician", "name": "Tactician", "type": "Passive", "effect": "+1d4 to strategic actions"},
-    {"id": "wanderer", "name": "Wanderer", "type": "Passive", "effect": "+1d4 to travel and exploration actions"},
-    {"id": "guardian", "name": "Guardian", "type": "Passive", "effect": "+1d4 to defensive actions"},
-    {"id": "seeker", "name": "Seeker", "type": "Passive", "effect": "+1d4 to information and discovery actions"},
-    {"id": "artisan", "name": "Artisan", "type": "Passive", "effect": "+1d4 to crafting and creative actions"},
-    {"id": "sage", "name": "Sage", "type": "Passive", "effect": "+1d4 to knowledge and wisdom actions"}
+    {
+      "id": "devout",
+      "name": "Devout",
+      "type": "Passive",
+      "effect": "+1d4 to Divine actions"
+    },
+    {
+      "id": "scarred",
+      "name": "Scarred",
+      "type": "Passive",
+      "effect": "-1 social, +1 intimidation"
+    },
+    {
+      "id": "lucky",
+      "name": "Lucky",
+      "type": "Triggered",
+      "effect": "Reroll one die per day"
+    },
+    {
+      "id": "outlaw",
+      "name": "Outlaw",
+      "type": "Passive",
+      "effect": "Negative affinity with law"
+    },
+    {
+      "id": "warrior",
+      "name": "Warrior",
+      "type": "Passive",
+      "effect": "+1d4 to combat"
+    },
+    {
+      "id": "scholar",
+      "name": "Scholar",
+      "type": "Passive",
+      "effect": "+1d4 to information gathering"
+    },
+    {
+      "id": "healer",
+      "name": "Healer",
+      "type": "Passive",
+      "effect": "+1d4 to healing actions"
+    },
+    {
+      "id": "thief",
+      "name": "Thief",
+      "type": "Passive",
+      "effect": "+1d4 to stealth actions"
+    },
+    {
+      "id": "diplomat",
+      "name": "Diplomat",
+      "type": "Passive",
+      "effect": "+1d4 to social actions"
+    },
+    {
+      "id": "survivor",
+      "name": "Survivor",
+      "type": "Passive",
+      "effect": "+1d4 to wilderness actions"
+    },
+    {
+      "id": "craftsman",
+      "name": "Craftsman",
+      "type": "Passive",
+      "effect": "+1d4 to crafting actions"
+    },
+    {
+      "id": "noble",
+      "name": "Noble",
+      "type": "Passive",
+      "effect": "+1d4 to social actions, -1d4 to stealth"
+    },
+    {
+      "id": "hermit",
+      "name": "Hermit",
+      "type": "Passive",
+      "effect": "+1d4 to meditation, -1d4 to social"
+    },
+    {
+      "id": "merchant",
+      "name": "Merchant",
+      "type": "Passive",
+      "effect": "+1d4 to trade actions"
+    },
+    {
+      "id": "explorer",
+      "name": "Explorer",
+      "type": "Passive",
+      "effect": "+1d4 to exploration actions"
+    },
+    {
+      "id": "berserker",
+      "name": "Berserker",
+      "type": "Triggered",
+      "effect": "When damaged, +2d4 to next combat action"
+    },
+    {
+      "id": "wise",
+      "name": "Wise",
+      "type": "Passive",
+      "effect": "+1d4 to insight-based actions"
+    },
+    {
+      "id": "charismatic",
+      "name": "Charismatic",
+      "type": "Passive",
+      "effect": "+1d4 to persuasion and intimidation"
+    },
+    {
+      "id": "agile",
+      "name": "Agile",
+      "type": "Passive",
+      "effect": "+1d4 to agility-based actions"
+    },
+    {
+      "id": "strong",
+      "name": "Strong",
+      "type": "Passive",
+      "effect": "+1d4 to strength-based actions"
+    },
+    {
+      "id": "tough",
+      "name": "Tough",
+      "type": "Passive",
+      "effect": "+1d4 to fortitude-based actions"
+    },
+    {
+      "id": "cursed",
+      "name": "Cursed",
+      "type": "Passive",
+      "effect": "-1d4 to all actions, but +2d4 to spiritual actions"
+    },
+    {
+      "id": "blessed",
+      "name": "Blessed",
+      "type": "Passive",
+      "effect": "+1d4 to all actions, but -2d4 to stealth"
+    },
+    {
+      "id": "mystic",
+      "name": "Mystic",
+      "type": "Passive",
+      "effect": "+1d4 to spiritual and mystical actions"
+    },
+    {
+      "id": "tactician",
+      "name": "Tactician",
+      "type": "Passive",
+      "effect": "+1d4 to strategic actions"
+    },
+    {
+      "id": "wanderer",
+      "name": "Wanderer",
+      "type": "Passive",
+      "effect": "+1d4 to travel and exploration actions"
+    },
+    {
+      "id": "guardian",
+      "name": "Guardian",
+      "type": "Passive",
+      "effect": "+1d4 to defensive actions"
+    },
+    {
+      "id": "seeker",
+      "name": "Seeker",
+      "type": "Passive",
+      "effect": "+1d4 to information and discovery actions"
+    },
+    {
+      "id": "artisan",
+      "name": "Artisan",
+      "type": "Passive",
+      "effect": "+1d4 to crafting and creative actions"
+    },
+    {
+      "id": "sage",
+      "name": "Sage",
+      "type": "Passive",
+      "effect": "+1d4 to knowledge and wisdom actions"
+    }
   ],
   "lifepaths": [
     {
       "id": "wanderer_path",
       "name": "Wanderer",
       "steps": [
-        {"id": "origin_village", "prompt": "Where did you grow up?", "choices": [
-          {"id": "village", "name": "Village", "stats": {"strength": 1}, "traits": ["scarred"], "cards": ["take_it_in"]},
-          {"id": "monastery", "name": "Monastery", "stats": {"will": 1}, "traits": ["devout"], "cards": ["pray"]}
-        ]},
-        {"id": "formative_event", "prompt": "What shaped your youth?", "choices": [
-          {"id": "war", "name": "War", "stats": {"fortitude": 1}, "traits": ["warrior"], "cards": ["quick_attack"]},
-          {"id": "loss", "name": "Loss", "stats": {"insight": 1}, "traits": ["lucky"], "cards": ["take_it_in"]}
-        ]},
-        {"id": "mentor", "prompt": "Who mentored you?", "choices": [
-          {"id": "soldier", "name": "A Veteran Soldier", "stats": {"strength": 1}, "traits": ["warrior"], "cards": ["quick_attack"]},
-          {"id": "scribe", "name": "A Patient Scribe", "stats": {"insight": 1}, "traits": ["devout"], "cards": ["take_it_in"]}
-        ]},
-        {"id": "trial", "prompt": "What trial did you endure?", "choices": [
-          {"id": "hunger", "name": "A Season of Hunger", "stats": {"fortitude": 1}, "traits": ["scarred"]},
-          {"id": "exile", "name": "Exile from Home", "stats": {"charisma": 1}, "traits": ["outlaw"]}
-        ]},
-        {"id": "calling", "prompt": "What calling pulled you onward?", "choices": [
-          {"id": "wanderlust", "name": "Wanderlust", "stats": {"agility": 1}, "cards": ["travel"]},
-          {"id": "faith", "name": "A Whisper of Faith", "stats": {"will": 1}, "cards": ["pray"]}
-        ]},
-        {"id": "companion", "prompt": "Who travelled with you?", "choices": [
-          {"id": "hound", "name": "A Faithful Hound", "stats": {"insight": 1}},
-          {"id": "stranger", "name": "A Quiet Stranger", "stats": {"charisma": 1}}
-        ]},
-        {"id": "lesson", "prompt": "What lesson stuck with you?", "choices": [
-          {"id": "observe", "name": "Observe First", "stats": {"insight": 1}, "cards": ["take_it_in"]},
-          {"id": "act", "name": "Act Quickly", "stats": {"agility": 1}, "cards": ["quick_attack"]}
-        ]},
-        {"id": "debt", "prompt": "What debt do you owe?", "choices": [
-          {"id": "monastery_debt", "name": "The Monastery", "stats": {"will": 1}},
-          {"id": "bandits_debt", "name": "The Silver Hand", "stats": {"strength": 1}}
-        ]},
-        {"id": "oath", "prompt": "What oath did you swear?", "choices": [
-          {"id": "protect", "name": "Protect the Weak", "stats": {"fortitude": 1}},
-          {"id": "seek", "name": "Seek the Hidden", "stats": {"insight": 1}}
-        ]},
-        {"id": "arrival", "prompt": "Why did you come to Aelun?", "choices": [
-          {"id": "quest", "name": "A personal quest", "cards": ["travel"]},
-          {"id": "exile_reason", "name": "Driven by exile", "cards": ["take_it_in"]}
-        ]}
+        {
+          "id": "origin_village",
+          "prompt": "Where did you grow up?",
+          "choices": [
+            {
+              "id": "village",
+              "name": "Village",
+              "stats": {
+                "strength": 1
+              },
+              "traits": [
+                "scarred"
+              ],
+              "cards": [
+                "take_it_in"
+              ]
+            },
+            {
+              "id": "monastery",
+              "name": "Monastery",
+              "stats": {
+                "will": 1
+              },
+              "traits": [
+                "devout"
+              ],
+              "cards": [
+                "pray"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "formative_event",
+          "prompt": "What shaped your youth?",
+          "choices": [
+            {
+              "id": "war",
+              "name": "War",
+              "stats": {
+                "fortitude": 1
+              },
+              "traits": [
+                "warrior"
+              ],
+              "cards": [
+                "quick_attack"
+              ]
+            },
+            {
+              "id": "loss",
+              "name": "Loss",
+              "stats": {
+                "insight": 1
+              },
+              "traits": [
+                "lucky"
+              ],
+              "cards": [
+                "take_it_in"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mentor",
+          "prompt": "Who mentored you?",
+          "choices": [
+            {
+              "id": "soldier",
+              "name": "A Veteran Soldier",
+              "stats": {
+                "strength": 1
+              },
+              "traits": [
+                "warrior"
+              ],
+              "cards": [
+                "quick_attack"
+              ]
+            },
+            {
+              "id": "scribe",
+              "name": "A Patient Scribe",
+              "stats": {
+                "insight": 1
+              },
+              "traits": [
+                "devout"
+              ],
+              "cards": [
+                "take_it_in"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "trial",
+          "prompt": "What trial did you endure?",
+          "choices": [
+            {
+              "id": "hunger",
+              "name": "A Season of Hunger",
+              "stats": {
+                "fortitude": 1
+              },
+              "traits": [
+                "scarred"
+              ]
+            },
+            {
+              "id": "exile",
+              "name": "Exile from Home",
+              "stats": {
+                "charisma": 1
+              },
+              "traits": [
+                "outlaw"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "calling",
+          "prompt": "What calling pulled you onward?",
+          "choices": [
+            {
+              "id": "wanderlust",
+              "name": "Wanderlust",
+              "stats": {
+                "agility": 1
+              },
+              "cards": [
+                "travel"
+              ]
+            },
+            {
+              "id": "faith",
+              "name": "A Whisper of Faith",
+              "stats": {
+                "will": 1
+              },
+              "cards": [
+                "pray"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "companion",
+          "prompt": "Who travelled with you?",
+          "choices": [
+            {
+              "id": "hound",
+              "name": "A Faithful Hound",
+              "stats": {
+                "insight": 1
+              }
+            },
+            {
+              "id": "stranger",
+              "name": "A Quiet Stranger",
+              "stats": {
+                "charisma": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "lesson",
+          "prompt": "What lesson stuck with you?",
+          "choices": [
+            {
+              "id": "observe",
+              "name": "Observe First",
+              "stats": {
+                "insight": 1
+              },
+              "cards": [
+                "take_it_in"
+              ]
+            },
+            {
+              "id": "act",
+              "name": "Act Quickly",
+              "stats": {
+                "agility": 1
+              },
+              "cards": [
+                "quick_attack"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "debt",
+          "prompt": "What debt do you owe?",
+          "choices": [
+            {
+              "id": "monastery_debt",
+              "name": "The Monastery",
+              "stats": {
+                "will": 1
+              }
+            },
+            {
+              "id": "bandits_debt",
+              "name": "The Silver Hand",
+              "stats": {
+                "strength": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "oath",
+          "prompt": "What oath did you swear?",
+          "choices": [
+            {
+              "id": "protect",
+              "name": "Protect the Weak",
+              "stats": {
+                "fortitude": 1
+              }
+            },
+            {
+              "id": "seek",
+              "name": "Seek the Hidden",
+              "stats": {
+                "insight": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "arrival",
+          "prompt": "Why did you come to Aelun?",
+          "choices": [
+            {
+              "id": "quest",
+              "name": "A personal quest",
+              "cards": [
+                "travel"
+              ]
+            },
+            {
+              "id": "exile_reason",
+              "name": "Driven by exile",
+              "cards": [
+                "take_it_in"
+              ]
+            }
+          ]
+        }
       ]
     }
   ]

@@ -11,6 +11,7 @@ export interface DicePoolContext {
   character: Character;
   actionCard: ActionCard;
   duplicateCards?: number; // Number of duplicate cards played for advantage
+  targetId?: string; // Target for targeted actions
 }
 
 /**
@@ -191,7 +192,7 @@ function addAffinityBonuses(_bonusDice: Die[], _character: Character): void {
 /**
  * Get difficulty class for an action
  */
-export function getDifficultyClass(actionCard: ActionCard, predicateTags: string[]): number {
+export function getDifficultyClass(actionCard: ActionCard, predicateTags: string[], targetId?: string): number {
   // Base DC
   let dc = 10;
   
@@ -203,6 +204,21 @@ export function getDifficultyClass(actionCard: ActionCard, predicateTags: string
   // Adjust based on scene danger
   if (predicateTags.includes('Dangerous')) {
     dc += 2;
+  }
+  
+  // Adjust based on target difficulty
+  if (targetId) {
+    if (targetId === 'unknown_power') {
+      dc += 4; // Unknown powers are very difficult
+    } else if (targetId === 'personal_deity') {
+      dc += 2; // Personal deity is moderately difficult
+    } else if (targetId === 'local_spirit') {
+      dc += 1; // Local spirits are slightly easier
+    } else if (targetId === 'noble') {
+      dc += 3; // Nobles are hard to persuade/intimidate
+    } else if (targetId === 'bandit_leader') {
+      dc += 2; // Bandits are dangerous to intimidate
+    }
   }
   
   // Adjust based on timescale

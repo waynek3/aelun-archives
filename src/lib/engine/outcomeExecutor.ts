@@ -13,13 +13,14 @@ import { modifyAffinity } from './affinityManager';
  */
 export function executeOutcomeEffects(
   character: Character,
-  effects: OutcomeEffect[]
+  effects: OutcomeEffect[],
+  stateFlags?: Record<string, any>
 ): { updatedCharacter: Character; notifications: string[]; isDead: boolean } {
   const notifications: string[] = [];
   let updatedCharacter = { ...character };
 
   for (const effect of effects) {
-    const result = applyEffect(updatedCharacter, effect);
+    const result = applyEffect(updatedCharacter, effect, stateFlags);
     updatedCharacter = result.character;
     if (result.notification) {
       notifications.push(result.notification);
@@ -37,13 +38,14 @@ export function executeOutcomeEffects(
  */
 function applyEffect(
   character: Character,
-  effect: OutcomeEffect
+  effect: OutcomeEffect,
+  stateFlags?: Record<string, any>
 ): { character: Character; notification?: string } {
   switch (effect.type) {
     case 'damage':
-      return applyDamage(character, effect);
+      return applyDamage(character, effect, stateFlags);
     case 'heal':
-      return applyHeal(character, effect);
+      return applyHeal(character, effect, stateFlags);
     case 'gain':
       return applyGain(character, effect);
     case 'lose':
@@ -65,8 +67,22 @@ function applyEffect(
 /**
  * Apply damage to character
  */
-function applyDamage(character: Character, effect: OutcomeEffect): { character: Character; notification?: string } {
-  const damage = effect.value || 0;
+function applyDamage(character: Character, effect: OutcomeEffect, stateFlags?: Record<string, any>): { character: Character; notification?: string } {
+  let damage = effect.value || 0;
+  
+  // Apply state flag modifiers
+  if (stateFlags) {
+    if (stateFlags.cursed === true) {
+      damage = Math.ceil(damage * 1.5); // Cursed locations deal 50% more damage
+    }
+    if (stateFlags.dangerous === true) {
+      damage = Math.ceil(damage * 1.2); // Dangerous locations deal 20% more damage
+    }
+    if (stateFlags.sacred === true) {
+      damage = Math.max(0, damage - 1); // Sacred locations reduce damage by 1
+    }
+  }
+  
   const newHP = Math.max(0, (character.currentHP || 0) - damage);
   
   return {
@@ -81,8 +97,22 @@ function applyDamage(character: Character, effect: OutcomeEffect): { character: 
 /**
  * Apply healing to character
  */
-function applyHeal(character: Character, effect: OutcomeEffect): { character: Character; notification?: string } {
-  const healing = effect.value || 0;
+function applyHeal(character: Character, effect: OutcomeEffect, stateFlags?: Record<string, any>): { character: Character; notification?: string } {
+  let healing = effect.value || 0;
+  
+  // Apply state flag modifiers
+  if (stateFlags) {
+    if (stateFlags.healing === true) {
+      healing = Math.ceil(healing * 1.5); // Healing locations provide 50% more healing
+    }
+    if (stateFlags.sacred === true) {
+      healing = Math.ceil(healing * 1.2); // Sacred locations provide 20% more healing
+    }
+    if (stateFlags.cursed === true) {
+      healing = Math.max(0, healing - 1); // Cursed locations reduce healing by 1
+    }
+  }
+  
   const maxHP = character.maxHP || 10;
   const newHP = Math.min(maxHP, (character.currentHP || 0) + healing);
   

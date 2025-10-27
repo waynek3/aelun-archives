@@ -6,6 +6,7 @@
 import type { ActionCard, PredicateCard, OutcomeRule } from '@/types/cards';
 import type { Character } from '@/types/character';
 import type { DiceResult } from './diceSystem';
+import { getDifficultyClass } from './dicePoolBuilder';
 
 export interface Outcome {
   text: string;
@@ -36,8 +37,9 @@ export async function resolveAction(params: {
   predicateCard: PredicateCard;
   character: Character;
   diceResult: DiceResult;
+  targetId?: string;
 }): Promise<Outcome> {
-  const { actionCard, predicateCard, character, diceResult } = params;
+  const { actionCard, predicateCard, character, diceResult, targetId } = params;
 
   // Get outcome rules for this action
   const outcomeRules = predicateCard.outcomeLogic[actionCard.id];
@@ -54,7 +56,7 @@ export async function resolveAction(params: {
   }
 
   // Execute the outcome
-  return executeOutcome(matchingRule, actionCard, predicateCard, character, diceResult);
+  return executeOutcome(matchingRule, actionCard, predicateCard, character, diceResult, targetId);
 }
 
 /**
@@ -113,19 +115,26 @@ function executeOutcome(
   actionCard: ActionCard,
   predicateCard: PredicateCard,
   _character: Character,
-  diceResult: DiceResult
+  diceResult: DiceResult,
+  targetId?: string
 ): Outcome {
+  // Calculate success based on DC and roll result
+  const dc = getDifficultyClass(actionCard, predicateCard.sceneTags || [], targetId);
+  const success = diceResult.total >= dc;
+  const criticalSuccess = diceResult.criticalSuccess || diceResult.total >= dc + 10;
+  const criticalFailure = diceResult.criticalFailure || diceResult.total <= dc - 10;
+  
   const outcome: Outcome = {
     text: '',
     effects: [],
     stateChanges: {},
-    success: diceResult.total >= 10, // Basic success threshold
-    criticalSuccess: diceResult.criticalSuccess,
-    criticalFailure: diceResult.criticalFailure
+    success,
+    criticalSuccess,
+    criticalFailure
   };
 
   // Generate narrative text
-  outcome.text = generateNarrativeText(actionCard, predicateCard, diceResult, rule);
+  outcome.text = generateNarrativeText(actionCard, predicateCard, diceResult, rule, targetId);
 
   // Execute the specific outcome type
   switch (rule.outcome) {
@@ -171,22 +180,96 @@ function generateNarrativeText(
   actionCard: ActionCard,
   predicateCard: PredicateCard,
   diceResult: DiceResult,
-  _rule: OutcomeRule
+  _rule: OutcomeRule,
+  targetId?: string
 ): string {
   const actionName = actionCard.name.toLowerCase();
   const locationName = predicateCard.name;
+  const dc = getDifficultyClass(actionCard, predicateCard.sceneTags || [], targetId);
   
-  if (diceResult.criticalSuccess) {
-    return `Your ${actionName} in ${locationName} exceeds all expectations!`;
-  } else if (diceResult.criticalFailure) {
-    return `Your ${actionName} in ${locationName} goes terribly wrong.`;
-  } else if (diceResult.total >= 15) {
-    return `Your ${actionName} in ${locationName} succeeds admirably.`;
-  } else if (diceResult.total >= 10) {
-    return `Your ${actionName} in ${locationName} succeeds.`;
-  } else {
-    return `Your ${actionName} in ${locationName} fails.`;
+  // Add target information to narrative
+  let targetText = '';
+  if (targetId) {
+    const targetName = targetId.replace(/_/g, ' ').toLowerCase();
+    if (actionCard.id === 'pray') {
+      targetText = ` to ${targetName}`;
+    } else if (actionCard.id === 'travel') {
+      targetText = ` to ${targetName}`;
+    } else if (actionCard.id === 'bargain' || actionCard.id === 'intimidate' || actionCard.id === 'persuade' || 
+               actionCard.id === 'steal' || actionCard.id === 'perform' || actionCard.id === 'lead') {
+      targetText = ` with ${targetName}`;
+    }
   }
+  
+  // Generate more sophisticated narrative based on roll vs DC
+  const roll = diceResult.total;
+  const margin = roll - dc;
+  
+  if (diceResult.criticalSuccess || margin >= 10) {
+    return generateCriticalSuccessText(actionName, targetText, locationName, actionCard, targetId);
+  } else if (diceResult.criticalFailure || margin <= -10) {
+    return generateCriticalFailureText(actionName, targetText, locationName, actionCard, targetId);
+  } else if (margin >= 5) {
+    return generateGreatSuccessText(actionName, targetText, locationName, actionCard, targetId);
+  } else if (margin >= 0) {
+    return generateSuccessText(actionName, targetText, locationName, actionCard, targetId);
+  } else if (margin >= -5) {
+    return generatePartialFailureText(actionName, targetText, locationName, actionCard, targetId);
+  } else {
+    return generateFailureText(actionName, targetText, locationName, actionCard, targetId);
+  }
+}
+
+function generateCriticalSuccessText(actionName: string, targetText: string, locationName: string, actionCard: ActionCard, _targetId?: string): string {
+  const narratives: Record<string, string> = {
+    pray: `Your prayer${targetText} resonates with divine power! The very air shimmers with sacred energy.`,
+    travel: `Your journey${targetText} is swift and effortless, as if the path itself guides your steps.`,
+    quick_attack: `Your strike${targetText} is a masterpiece of combat - precise, powerful, and devastating.`,
+    take_it_in: `Your awareness${targetText} expands beyond the physical, revealing hidden truths and secrets.`,
+    work: `Your labor${targetText} is a symphony of efficiency and skill, producing exceptional results.`,
+    bargain: `Your negotiation${targetText} is legendary - you secure terms that would make merchants weep with joy.`,
+    intimidate: `Your presence${targetText} is overwhelming, reducing your target to a quivering mess.`,
+    persuade: `Your words${targetText} are pure poetry, moving hearts and changing minds with ease.`,
+    steal: `Your theft${targetText} is a masterpiece of stealth - you take what you need without a trace.`,
+    perform: `Your performance${targetText} is transcendent, moving your audience to tears and cheers.`,
+    lead: `Your leadership${targetText} is inspiring - your followers would follow you into hell itself.`
+  };
+  
+  return narratives[actionCard.id] || `Your ${actionName}${targetText} in ${locationName} achieves legendary success!`;
+}
+
+function generateCriticalFailureText(actionName: string, targetText: string, locationName: string, actionCard: ActionCard, _targetId?: string): string {
+  const narratives: Record<string, string> = {
+    pray: `Your prayer${targetText} backfires catastrophically, drawing the attention of malevolent forces.`,
+    travel: `Your journey${targetText} goes horribly wrong - you become hopelessly lost and disoriented.`,
+    quick_attack: `Your attack${targetText} is a complete disaster, leaving you vulnerable and off-balance.`,
+    take_it_in: `Your observation${targetText} reveals something so terrible it shakes your very soul.`,
+    work: `Your labor${targetText} is a complete failure, wasting time and resources.`,
+    bargain: `Your negotiation${targetText} is a disaster - you've made a terrible deal that will haunt you.`,
+    intimidate: `Your attempt${targetText} to intimidate backfires spectacularly, making you look foolish.`,
+    persuade: `Your words${targetText} have the opposite effect, alienating everyone around you.`,
+    steal: `Your theft${targetText} is a complete disaster - you're caught red-handed and humiliated.`,
+    perform: `Your performance${targetText} is a catastrophe - the audience boos and throws things at you.`,
+    lead: `Your leadership${targetText} is a disaster - your followers abandon you in disgust.`
+  };
+  
+  return narratives[actionCard.id] || `Your ${actionName}${targetText} in ${locationName} fails catastrophically!`;
+}
+
+function generateGreatSuccessText(actionName: string, targetText: string, locationName: string, _actionCard: ActionCard, _targetId?: string): string {
+  return `Your ${actionName}${targetText} in ${locationName} succeeds brilliantly, exceeding all expectations.`;
+}
+
+function generateSuccessText(actionName: string, targetText: string, locationName: string, _actionCard: ActionCard, _targetId?: string): string {
+  return `Your ${actionName}${targetText} in ${locationName} succeeds.`;
+}
+
+function generatePartialFailureText(actionName: string, targetText: string, locationName: string, _actionCard: ActionCard, _targetId?: string): string {
+  return `Your ${actionName}${targetText} in ${locationName} partially succeeds, but not without complications.`;
+}
+
+function generateFailureText(actionName: string, targetText: string, locationName: string, _actionCard: ActionCard, _targetId?: string): string {
+  return `Your ${actionName}${targetText} in ${locationName} fails.`;
 }
 
 // Outcome execution functions

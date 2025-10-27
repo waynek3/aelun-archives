@@ -16,6 +16,7 @@ import { trackFailure } from '@/lib/engine/cardEvolution'
 import OutcomeScreen from './OutcomeScreen'
 import DicePoolScreen from './DicePoolScreen'
 import DeathScreen from './DeathScreen'
+import TargetSelectionScreen from './TargetSelectionScreen'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 import type { DiceResult } from '@/lib/engine/diceSystem'
 import type { Outcome } from '@/lib/engine/predicateEngine'
@@ -28,6 +29,9 @@ export default function GameLoopScreen() {
   const [predicateMap, setPredicateMap] = useState<Record<string, PredicateCard>>({})
   const [actions, setActions] = useState<ActionCard[]>([])
   const [selectedAction, setSelectedAction] = useState<ActionCard | null>(null)
+  const [selectedTarget, setSelectedTarget] = useState<string | null>(null)
+  const [selectedDuplicates, setSelectedDuplicates] = useState(0)
+  const [showTargetSelection, setShowTargetSelection] = useState(false)
   const [outcome, setOutcome] = useState<Outcome | null>(null)
   const [isDead, setIsDead] = useState(false)
   const [causeOfDeath, setCauseOfDeath] = useState('')
@@ -79,19 +83,38 @@ export default function GameLoopScreen() {
     })
   }, [currentPredicate, actions])
 
-  function handleSelectAction(cardId: string) {
+  function handleSelectAction(cardId: string, duplicates: number = 0) {
     const action = actions.find(a => a.id === cardId)
     if (action) {
       setSelectedAction(action)
+      setSelectedDuplicates(duplicates)
       
       // Discover the action card when first used
       discoverContent('cards', cardId).catch(error => {
         console.error('Failed to discover action card:', error)
       })
       
-      // For targeted actions, we'd show target selection
-      // For now, all actions go to dice pool
+      // Check if this is a targeted action
+      if (action.actionType === 'Targeted') {
+        setShowTargetSelection(true)
+        setSelectedTarget(null)
+      } else {
+        // Untargeted action goes directly to dice pool
+        setSelectedTarget(null)
+        setShowTargetSelection(false)
+      }
     }
+  }
+
+  function handleTargetSelected(targetId: string) {
+    setSelectedTarget(targetId)
+    setShowTargetSelection(false)
+  }
+
+  function handleTargetCancel() {
+    setSelectedAction(null)
+    setSelectedTarget(null)
+    setShowTargetSelection(false)
   }
 
   async function handleDiceResult(result: DiceResult) {
@@ -103,11 +126,12 @@ export default function GameLoopScreen() {
         actionCard: selectedAction,
         predicateCard: currentPredicate,
         character,
-        diceResult: result
+        diceResult: result,
+        targetId: selectedTarget || undefined
       });
       
       // Apply effects to character
-      const { updatedCharacter, notifications, isDead } = executeOutcomeEffects(character, actionOutcome.effects);
+      const { updatedCharacter, notifications, isDead } = executeOutcomeEffects(character, actionOutcome.effects, currentPredicate.stateFlags);
       
       // Update character in store
       useGameStore.getState().setCharacter(updatedCharacter);
@@ -233,13 +257,26 @@ export default function GameLoopScreen() {
     )
   }
 
-  // Show dice pool screen if action is selected
-  if (selectedAction && currentPredicate) {
+  // Show target selection screen if action is targeted
+  if (showTargetSelection && selectedAction) {
+    return (
+      <TargetSelectionScreen
+        actionCard={selectedAction}
+        onTargetSelected={handleTargetSelected}
+        onCancel={handleTargetCancel}
+      />
+    )
+  }
+
+  // Show dice pool screen if action is selected and target is chosen (or untargeted)
+  if (selectedAction && currentPredicate && (selectedTarget || selectedAction.actionType === 'Untargeted')) {
     return (
       <DicePoolScreen
         actionCard={selectedAction}
         predicateCard={currentPredicate}
         onResult={handleDiceResult}
+        targetId={selectedTarget || undefined}
+        duplicateCards={selectedDuplicates}
       />
     )
   }
