@@ -3,11 +3,22 @@ import { Button } from '@/components/ui/Button'
 import { Panel } from '@/components/ui/Panel'
 import { useUIStore } from '@/stores/uiStore'
 import { lifepathService } from '@/lib/engine/lifepath'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 
 export default function LifepathScreen() {
+  // DEBUG: Track render count
+  const renderCount = useRef(0)
+  renderCount.current++
+  
   const setScreen = useUIStore((s) => s.setScreen)
   const setPendingLifepath = useUIStore((s) => s.setPendingLifepath)
+  
+  useEffect(() => {
+    console.log('[DEBUG LifepathScreen] Render #', renderCount.current)
+    if (renderCount.current > 50) {
+      console.error('[DEBUG LifepathScreen] INFINITE LOOP DETECTED!')
+    }
+  })
 
   const lifepaths = useMemo(() => lifepathService.listLifepaths(), [])
   const [selectedLifepathId, setSelectedLifepathId] = useState(lifepaths[0]?.id || '')
