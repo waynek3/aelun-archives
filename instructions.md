@@ -1078,7 +1078,7 @@ Update this section as you complete work:
 - [x] Sprint 3: State & Persistence
 - [x] Sprint 4: Main Menu & Components
 - [x] Sprint 5: Lifepath (Part 1)
-- [ ] Sprint 6: Lifepath (Part 2)
+- [x] Sprint 6: Lifepath (Part 2)
 - [ ] Sprint 7: Game Loop & Actions
 - [ ] Sprint 8: Dice System
 - [ ] Sprint 9: Predicate Engine

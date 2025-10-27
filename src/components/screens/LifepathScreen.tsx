@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react'
 
 export default function LifepathScreen() {
   const setScreen = useUIStore((s) => s.setScreen)
+  const setPendingLifepath = useUIStore((s) => s.setPendingLifepath)
 
   const lifepaths = useMemo(() => lifepathService.listLifepaths(), [])
   const [selectedLifepathId, setSelectedLifepathId] = useState(lifepaths[0]?.id || '')
@@ -38,8 +39,10 @@ export default function LifepathScreen() {
 
   function handleContinue() {
     if (!progress) return
-    // For Part 1, we stop at completion and return to menu or later part will save and proceed
-    setScreen('MainMenu')
+    if (isComplete) {
+      setPendingLifepath(progress)
+      setScreen('CharacterSummary')
+    }
   }
 
   return (
