@@ -21,10 +21,7 @@ export const useGameStore = create<GameStore>((set) => ({
   dicePool: { advantageDice: 1, bonusDice: [] },
   recentOutcome: null,
 
-  setCharacter: (c) => {
-    console.log('[DEBUG gameStore] setCharacter called:', !!c, c?.name)
-    set({ character: c })
-  },
+  setCharacter: (c) => set({ character: c }),
   setPredicate: (p) => set({ currentPredicate: p }),
   setTurnPhase: (phase) => set({ turnPhase: phase }),
   setAvailableActions: (a) => set({ availableActions: a }),
