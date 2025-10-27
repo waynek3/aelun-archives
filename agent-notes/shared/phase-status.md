@@ -1,1 +1,3 @@
 Sprint 6 (Lifepath Part 2) implemented: CharacterSummaryScreen added, name input, save to IndexedDB, set active character, navigate to GameLoop, cancel confirmation. Updated UI store to track pending lifepath and routing; GameLoop reads character state. Lint clean; tests not run (vitest missing in environment).
+
+Sprint 7 (Game Loop & Actions) implemented: Added `lib/engine/actionFilter.ts` for tag/timescale filtering; `lib/utils/content.ts` to load actions/predicates from IndexedDB; created `components/game/ScenePanel.tsx`, `ActionWheel.tsx`, and `StatusBar.tsx`; integrated into `GameLoopScreen` with loading state and clickable action buttons (no resolution yet). Lint clean.

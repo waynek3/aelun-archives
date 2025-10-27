@@ -1079,7 +1079,7 @@ Update this section as you complete work:
 - [x] Sprint 4: Main Menu & Components
 - [x] Sprint 5: Lifepath (Part 1)
 - [x] Sprint 6: Lifepath (Part 2)
-- [ ] Sprint 7: Game Loop & Actions
+- [x] Sprint 7: Game Loop & Actions
 - [ ] Sprint 8: Dice System
 - [ ] Sprint 9: Predicate Engine
 - [ ] Sprint 10: Turn Loop
@@ -1122,6 +1122,13 @@ Document implementation notes, decisions, or deviations from spec here:
   - Built interactive `LifepathScreen` with step counter, choices, progress, and preview
   - Added unit test `tests/unit/lifepath.test.ts`; all tests passing
   - Lint and build clean
+
+- Sprint 7 complete:
+  - Implemented `filterActionsByContext` in `lib/engine/actionFilter.ts`
+  - Added content accessor `lib/utils/content.ts` to load actions/predicates from IndexedDB
+  - Created `ScenePanel`, `ActionWheel`, and `StatusBar` components under `components/game/`
+  - Updated `GameLoopScreen` to load content, filter actions by scene tags + timescale, and render UI per UI spec
+  - No action resolution yet (clicks logged only), as per Sprint 7 scope
 
 ---
 
