@@ -2,7 +2,7 @@
 **Step-by-Step Guide for AI Coding Agents**
 
 **Document Version:** Final v1.0  
-**Last Updated:** October 26, 2025  
+**Last Updated:** October 27, 2025  
 **Target:** AI Coding Agents (Claude Code, Copilot, etc.)
 
 ---
@@ -1073,9 +1073,9 @@ Update this section as you complete work:
 
 ### Sprint Completion Status
 
-- [ ] Sprint 1: Project Setup
-- [ ] Sprint 2: Types & Data
-- [ ] Sprint 3: State & Persistence
+- [x] Sprint 1: Project Setup
+- [x] Sprint 2: Types & Data
+- [x] Sprint 3: State & Persistence
 - [ ] Sprint 4: Main Menu & Components
 - [ ] Sprint 5: Lifepath (Part 1)
 - [ ] Sprint 6: Lifepath (Part 2)
@@ -1098,7 +1098,16 @@ Document any blockers here:
 ### Notes
 
 Document implementation notes, decisions, or deviations from spec here:
-- None currently
+- Phase 1 complete (Sprints 1–3):
+  - Created project structure per architecture (components, stores, lib, types, data)
+  - Implemented core TypeScript types (`cards`, `character`, `game`, `meta`)
+  - Added constants and initial `game-content.json` (5 actions, 3 predicates, 5 traits, 1 lifepath)
+  - Implemented validation utils with unit test
+  - Implemented IndexedDB wrapper, migrations, and initial content seeding
+  - Implemented save manager (save/load/list/delete/export)
+  - Added Zustand stores (game, meta, ui, settings)
+  - Wired seeding into app startup
+  - Lint, build, and tests passing
 
 ---
 
