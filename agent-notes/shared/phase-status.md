@@ -1,0 +1,1 @@
+Sprint 6 (Lifepath Part 2) implemented: CharacterSummaryScreen added, name input, save to IndexedDB, set active character, navigate to GameLoop, cancel confirmation. Updated UI store to track pending lifepath and routing; GameLoop reads character state. Lint clean; tests not run (vitest missing in environment).

@@ -1,0 +1,115 @@
+import { ScreenContainer } from '@/components/ui/Layout'
+import { Panel } from '@/components/ui/Panel'
+import { Button } from '@/components/ui/Button'
+import { useUIStore } from '@/stores/uiStore'
+import { useGameStore } from '@/stores/gameStore'
+import { lifepathService } from '@/lib/engine/lifepath'
+import { saveCharacter } from '@/lib/persistence/saveManager'
+import { useState, useMemo } from 'react'
+
+export default function CharacterSummaryScreen() {
+  const { pendingLifepath, setScreen, setPendingLifepath, openModal, closeModal } = useUIStore((s) => ({
+    pendingLifepath: s.pendingLifepath,
+    setScreen: s.setScreen,
+    setPendingLifepath: s.setPendingLifepath,
+    openModal: s.openModal,
+    closeModal: s.closeModal,
+  }))
+  const setCharacter = useGameStore((s) => s.setCharacter)
+
+  const [name, setName] = useState('')
+
+  const isComplete = useMemo(() => !!pendingLifepath && lifepathService.isComplete(pendingLifepath), [pendingLifepath])
+
+  if (!pendingLifepath || !isComplete) {
+    // Safety: if reached without completed lifepath, return to lifepath
+    setScreen('Lifepath')
+    return null
+  }
+
+  const previewCharacter = useMemo(() => lifepathService.buildCharacter(pendingLifepath!, name || 'Unnamed Adventurer'), [pendingLifepath, name])
+
+  async function handleConfirm() {
+    const finalName = (name || '').trim() || 'Unnamed Adventurer'
+    const character = lifepathService.buildCharacter(pendingLifepath!, finalName)
+    await saveCharacter(character)
+    setCharacter(character)
+    setPendingLifepath(null)
+    setScreen('GameLoop')
+  }
+
+  function handleCancel() {
+    openModal(
+      <div>
+        <p>Are you sure you want to abandon character creation? Progress will be lost.</p>
+        <div className="mt-4 flex gap-2 justify-end">
+          <Button variant="secondary" onClick={closeModal}>CANCEL</Button>
+          <Button
+            onClick={() => {
+              setPendingLifepath(null)
+              closeModal()
+              setScreen('MainMenu')
+            }}
+          >
+            ► ABANDON
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <ScreenContainer>
+      <div className="py-8 space-y-4">
+        <h2 className="text-2xl text-green-500 font-bold uppercase">Character Summary</h2>
+        <div className="text-xs text-cyan-400">Review your character and confirm</div>
+
+        <Panel className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-cyan-400 uppercase text-xs mb-1" htmlFor="name">Name</label>
+              <input
+                id="name"
+                aria-label="Character name"
+                className="w-full bg-transparent border border-cyan-400/40 focus:border-yellow-300 outline-none px-3 py-2 rounded-sm"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter a name"
+              />
+
+              <div className="mt-4">
+                <div className="uppercase text-cyan-400 mb-1">Stats</div>
+                <div>Strength: {previewCharacter.stats.strength}</div>
+                <div>Agility: {previewCharacter.stats.agility}</div>
+                <div>Insight: {previewCharacter.stats.insight}</div>
+                <div>Charisma: {previewCharacter.stats.charisma}</div>
+                <div>Fortitude: {previewCharacter.stats.fortitude}</div>
+                <div>Will: {previewCharacter.stats.will}</div>
+              </div>
+            </div>
+
+            <div>
+              <div className="uppercase text-cyan-400 mb-1">Traits</div>
+              <ul className="list-disc list-inside text-sm">
+                {previewCharacter.traits.map((t) => (
+                  <li key={t.id}>{t.name}</li>
+                ))}
+              </ul>
+
+              <div className="mt-4 uppercase text-cyan-400 mb-1">Starting Deck</div>
+              <div className="text-sm">{previewCharacter.actionDeck.length} cards</div>
+
+              <div className="mt-4 uppercase text-cyan-400 mb-1">Starting Location</div>
+              <div className="text-sm">{previewCharacter.worldState.location}</div>
+            </div>
+          </div>
+        </Panel>
+
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={handleCancel}>◄ CANCEL</Button>
+          <Button onClick={handleConfirm} disabled={(name || '').trim().length === 0}>► BEGIN ADVENTURE</Button>
+        </div>
+      </div>
+    </ScreenContainer>
+  )
+}
