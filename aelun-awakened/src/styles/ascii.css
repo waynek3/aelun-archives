@@ -1,0 +1,199 @@
+/* ASCII Art and Box Drawing Character Support */
+
+.ascii-title {
+  font-family: var(--font-mono);
+  font-weight: bold;
+  text-align: center;
+  white-space: pre;
+  line-height: 1;
+}
+
+.ascii-border {
+  font-family: var(--font-mono);
+  white-space: pre;
+  line-height: 1;
+}
+
+/* Box Drawing Characters */
+.border-double {
+  border-style: double;
+  border-width: var(--border-width-double);
+}
+
+.border-single {
+  border-style: solid;
+  border-width: var(--border-width-single);
+}
+
+.border-heavy {
+  border-style: solid;
+  border-width: var(--border-width-heavy);
+}
+
+/* ASCII Art Components */
+.ascii-button {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-mono);
+  white-space: pre;
+  line-height: 1;
+}
+
+.ascii-button::before,
+.ascii-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1ch;
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+
+.ascii-button::before {
+  left: -1ch;
+  content: var(--char-double-tl) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-tr);
+}
+
+.ascii-button::after {
+  right: -1ch;
+  content: var(--char-double-bl) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-br);
+}
+
+.ascii-button-secondary::before {
+  content: var(--char-single-tl) var(--char-single-h) var(--char-single-h) var(--char-single-h) var(--char-single-tr);
+}
+
+.ascii-button-secondary::after {
+  content: var(--char-single-bl) var(--char-single-h) var(--char-single-h) var(--char-single-h) var(--char-single-br);
+}
+
+/* Dice Display */
+.dice-face {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  line-height: 1;
+  display: inline-block;
+  width: 2ch;
+  text-align: center;
+}
+
+.dice-rolling .dice-face {
+  animation: dice-roll 0.1s infinite;
+}
+
+/* Progress Bars */
+.progress-bar-ascii {
+  font-family: var(--font-mono);
+  white-space: pre;
+  line-height: 1;
+}
+
+.progress-bar-ascii::before {
+  content: '[';
+}
+
+.progress-bar-ascii::after {
+  content: ']';
+}
+
+/* Stat Bars */
+.stat-bar-ascii {
+  font-family: var(--font-mono);
+  white-space: pre;
+  line-height: 1;
+}
+
+.stat-bar-ascii::before {
+  content: 'HP: ';
+}
+
+.stat-bar-ascii::after {
+  content: ' [70/100]';
+}
+
+/* Tags */
+.tag-ascii {
+  font-family: var(--font-mono);
+  color: var(--color-info);
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+}
+
+.tag-ascii::before {
+  content: '[';
+}
+
+.tag-ascii::after {
+  content: ']';
+}
+
+/* Modal Borders */
+.modal-border {
+  position: relative;
+  font-family: var(--font-mono);
+  white-space: pre;
+  line-height: 1;
+}
+
+.modal-border::before {
+  content: var(--char-double-tl) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-tr);
+  position: absolute;
+  top: -1ch;
+  left: -1ch;
+  right: -1ch;
+}
+
+.modal-border::after {
+  content: var(--char-double-bl) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-h) var(--char-double-br);
+  position: absolute;
+  bottom: -1ch;
+  left: -1ch;
+  right: -1ch;
+}
+
+/* Death Screen */
+.death-border {
+  position: relative;
+  font-family: var(--font-mono);
+  white-space: pre;
+  line-height: 1;
+  color: var(--color-danger);
+}
+
+.death-border::before {
+  content: var(--char-heavy-tl) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-tr);
+  position: absolute;
+  top: -1ch;
+  left: -1ch;
+  right: -1ch;
+}
+
+.death-border::after {
+  content: var(--char-heavy-bl) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-h) var(--char-heavy-br);
+  position: absolute;
+  bottom: -1ch;
+  left: -1ch;
+  right: -1ch;
+}
+
+/* Responsive ASCII */
+@media (max-width: 600px) {
+  .ascii-title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .dice-face {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .ascii-title {
+    font-size: var(--font-size-base);
+  }
+  
+  .dice-face {
+    font-size: 1rem;
+  }
+}
