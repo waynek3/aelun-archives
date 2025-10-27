@@ -7,12 +7,19 @@ import CharacterSummaryScreen from '@/components/screens/CharacterSummaryScreen'
 import CompendiumScreen from '@/components/screens/CompendiumScreen'
 import GraveyardScreen from '@/components/screens/GraveyardScreen'
 import PauseMenuScreen from '@/components/screens/PauseMenuScreen'
+// DeathScreen is handled within GameLoopScreen
 import { Modal } from '@/components/ui/Modal'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { NotificationToast } from '@/components/ui/NotificationToast'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 
 function App() {
   const screen = useUIStore((s) => s.screen)
   const modal = useUIStore((s) => s.modal)
   const closeModal = useUIStore((s) => s.closeModal)
+  
+  // Enable keyboard shortcuts
+  useKeyboardShortcuts()
 
   const Screen = (() => {
     switch (screen) {
@@ -39,12 +46,13 @@ function App() {
   })()
 
   return (
-    <>
+    <ErrorBoundary>
       {Screen}
       <Modal open={modal.open} onClose={closeModal} title="Confirm">
         {modal.content}
       </Modal>
-    </>
+      <NotificationToast />
+    </ErrorBoundary>
   )
 }
 

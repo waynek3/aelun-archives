@@ -24,6 +24,7 @@ interface UIStore {
   notify: (message: string) => void
   clearNotifications: () => void
   setPendingLifepath: (lp: LifepathProgressState | null) => void
+  showNotification: (message: string, duration?: number) => void
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -37,4 +38,10 @@ export const useUIStore = create<UIStore>((set) => ({
   notify: (message) => set((st) => ({ notifications: [...st.notifications, message] })),
   clearNotifications: () => set({ notifications: [] }),
   setPendingLifepath: (lp) => set({ pendingLifepath: lp }),
+  showNotification: (message, duration = 3000) => {
+    set((st) => ({ notifications: [...st.notifications, message] }))
+    setTimeout(() => {
+      set((st) => ({ notifications: st.notifications.slice(1) }))
+    }, duration)
+  },
 }))
