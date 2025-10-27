@@ -1076,7 +1076,7 @@ Update this section as you complete work:
 - [x] Sprint 1: Project Setup
 - [x] Sprint 2: Types & Data
 - [x] Sprint 3: State & Persistence
-- [ ] Sprint 4: Main Menu & Components
+- [x] Sprint 4: Main Menu & Components
 - [ ] Sprint 5: Lifepath (Part 1)
 - [ ] Sprint 6: Lifepath (Part 2)
 - [ ] Sprint 7: Game Loop & Actions
@@ -1108,6 +1108,14 @@ Document implementation notes, decisions, or deviations from spec here:
   - Added Zustand stores (game, meta, ui, settings)
   - Wired seeding into app startup
   - Lint, build, and tests passing
+- Sprint 4 complete:
+  - Added reusable UI components: `Button`, `Panel`, `Modal`, `StatBar`, `Card`, `Layout`
+  - Implemented `MainMenuScreen` with navigation
+  - Added placeholder screens: `LifepathScreen`, `GameLoopScreen`, `CompendiumScreen`, `GraveyardScreen`, `PauseMenuScreen`
+  - Implemented screen routing via `uiStore` in `App.tsx`
+  - Ensured styles align with DOS aesthetic; hover/focus states per UI spec
+  - Installed `clsx` for class composition
+  - Build and unit tests passing; no linter errors
 
 ---
 
