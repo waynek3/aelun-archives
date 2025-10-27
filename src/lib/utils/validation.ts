@@ -47,7 +47,7 @@ export interface GameContentFile {
   actionCards: ActionCard[];
   predicateCards: PredicateCard[];
   traits: Trait[];
-  lifepaths: unknown[]; // typed in lifepath impl phase
+  lifepaths: unknown[]; // kept unknown for now; validated in lifepath loader
 }
 
 export function validateGameContent(json: unknown): asserts json is GameContentFile {

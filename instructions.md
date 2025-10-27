@@ -1077,7 +1077,7 @@ Update this section as you complete work:
 - [x] Sprint 2: Types & Data
 - [x] Sprint 3: State & Persistence
 - [x] Sprint 4: Main Menu & Components
-- [ ] Sprint 5: Lifepath (Part 1)
+- [x] Sprint 5: Lifepath (Part 1)
 - [ ] Sprint 6: Lifepath (Part 2)
 - [ ] Sprint 7: Game Loop & Actions
 - [ ] Sprint 8: Dice System
@@ -1116,6 +1116,12 @@ Document implementation notes, decisions, or deviations from spec here:
   - Ensured styles align with DOS aesthetic; hover/focus states per UI spec
   - Installed `clsx` for class composition
   - Build and unit tests passing; no linter errors
+- Sprint 5 complete:
+  - Implemented lifepath engine (`lib/engine/lifepath.ts`) and types (`types/lifepath.ts`)
+  - Expanded `game-content.json` with a full 10-step `wanderer_path` lifepath
+  - Built interactive `LifepathScreen` with step counter, choices, progress, and preview
+  - Added unit test `tests/unit/lifepath.test.ts`; all tests passing
+  - Lint and build clean
 
 ---
 

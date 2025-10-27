@@ -526,7 +526,7 @@ interface ButtonProps {
 
 **Implementation Priority:**
 1. Main Menu
-2. Lifepath Screen
+2. Lifepath Screen ✓ (Sprint 5 Part 1 implemented: structure, choices, progress, preview)
 3. Game Loop Primary
 4. Dice Pool & Roll
 5. Outcome Resolution
