@@ -8,14 +8,15 @@ import { ActionWheel } from '@/components/game/ActionWheel'
 import { StatusBar } from '@/components/game/StatusBar'
 import { getPredicateCards, getActionsArray } from '@/lib/utils/content'
 import { filterActionsByContext } from '@/lib/engine/actionFilter'
+import type { ActionCard, PredicateCard } from '@/types/cards'
 
 export default function GameLoopScreen() {
   const setScreen = useUIStore((s) => s.setScreen)
   const character = useGameStore((s) => s.character)
   const [loading, setLoading] = useState(true)
 
-  const [predicateMap, setPredicateMap] = useState<Record<string, any>>({})
-  const [actions, setActions] = useState<any[]>([])
+  const [predicateMap, setPredicateMap] = useState<Record<string, PredicateCard>>({})
+  const [actions, setActions] = useState<ActionCard[]>([])
 
   useEffect(() => {
     let mounted = true
@@ -39,13 +40,6 @@ export default function GameLoopScreen() {
       mounted = false
     }
   }, [])
-
-  // Redirect to main menu if no character
-  useEffect(() => {
-    if (!loading && !character) {
-      setScreen('MainMenu')
-    }
-  }, [loading, character, setScreen])
 
   const currentPredicate = useMemo(() => {
     if (!character) return null
@@ -83,7 +77,10 @@ export default function GameLoopScreen() {
     return (
       <ScreenContainer>
         <div className="py-6 space-y-4">
-          <div className="panel p-4 text-sm text-cyan-400">No character found. Returning to main menu...</div>
+          <div className="panel p-4 text-sm text-cyan-400 mb-4">
+            No character found. Please start a new adventure.
+          </div>
+          <Button onClick={() => setScreen('MainMenu')}>◄ RETURN TO MAIN MENU</Button>
         </div>
       </ScreenContainer>
     )

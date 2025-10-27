@@ -20,14 +20,24 @@ export default function CharacterSummaryScreen() {
   const [name, setName] = useState('')
 
   const isComplete = useMemo(() => !!pendingLifepath && lifepathService.isComplete(pendingLifepath), [pendingLifepath])
+  const previewCharacter = useMemo(() => {
+    if (!pendingLifepath) return null
+    return lifepathService.buildCharacter(pendingLifepath, name || 'Unnamed Adventurer')
+  }, [pendingLifepath, name])
 
-  if (!pendingLifepath || !isComplete) {
+  if (!pendingLifepath || !isComplete || !previewCharacter) {
     // Safety: if reached without completed lifepath, return to lifepath
-    setScreen('Lifepath')
-    return null
+    return (
+      <ScreenContainer>
+        <div className="py-6 space-y-4">
+          <div className="panel p-4 text-sm text-cyan-400 mb-4">
+            Invalid character state. Returning to character creation...
+          </div>
+          <Button onClick={() => setScreen('Lifepath')}>◄ BACK TO LIFEPATH</Button>
+        </div>
+      </ScreenContainer>
+    )
   }
-
-  const previewCharacter = useMemo(() => lifepathService.buildCharacter(pendingLifepath!, name || 'Unnamed Adventurer'), [pendingLifepath, name])
 
   async function handleConfirm() {
     const finalName = (name || '').trim() || 'Unnamed Adventurer'
