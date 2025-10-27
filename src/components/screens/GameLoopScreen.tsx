@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { useUIStore } from '@/stores/uiStore'
 import { useGameStore } from '@/stores/gameStore'
 import { ScenePanel } from '@/components/game/ScenePanel'
@@ -10,8 +11,11 @@ import { getPredicateCards, getActionsArray } from '@/lib/utils/content'
 import { filterActionsByContext } from '@/lib/engine/actionFilter'
 import { gameEngine } from '@/lib/utils/workerClient'
 import { executeOutcomeEffects } from '@/lib/engine/outcomeExecutor'
+import { discoverContent } from '@/lib/engine/discoveryManager'
+import { trackFailure } from '@/lib/engine/cardEvolution'
 import OutcomeScreen from './OutcomeScreen'
 import DicePoolScreen from './DicePoolScreen'
+import DeathScreen from './DeathScreen'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 import type { DiceResult } from '@/lib/engine/diceSystem'
 import type { Outcome } from '@/lib/engine/predicateEngine'
@@ -25,6 +29,8 @@ export default function GameLoopScreen() {
   const [actions, setActions] = useState<ActionCard[]>([])
   const [selectedAction, setSelectedAction] = useState<ActionCard | null>(null)
   const [outcome, setOutcome] = useState<Outcome | null>(null)
+  const [isDead, setIsDead] = useState(false)
+  const [causeOfDeath, setCauseOfDeath] = useState('')
 
   useEffect(() => {
     let mounted = true
@@ -55,6 +61,15 @@ export default function GameLoopScreen() {
     return predicateMap[id] ?? null
   }, [predicateMap, character])
 
+  // Discover location when it changes
+  useEffect(() => {
+    if (currentPredicate) {
+      discoverContent('predicates', currentPredicate.id).catch(error => {
+        console.error('Failed to discover location:', error)
+      })
+    }
+  }, [currentPredicate])
+
   const availableActions = useMemo(() => {
     if (!currentPredicate) return []
     return filterActionsByContext({
@@ -68,6 +83,12 @@ export default function GameLoopScreen() {
     const action = actions.find(a => a.id === cardId)
     if (action) {
       setSelectedAction(action)
+      
+      // Discover the action card when first used
+      discoverContent('cards', cardId).catch(error => {
+        console.error('Failed to discover action card:', error)
+      })
+      
       // For targeted actions, we'd show target selection
       // For now, all actions go to dice pool
     }
@@ -86,7 +107,7 @@ export default function GameLoopScreen() {
       });
       
       // Apply effects to character
-      const { updatedCharacter, notifications } = executeOutcomeEffects(character, actionOutcome.effects);
+      const { updatedCharacter, notifications, isDead } = executeOutcomeEffects(character, actionOutcome.effects);
       
       // Update character in store
       useGameStore.getState().setCharacter(updatedCharacter);
@@ -95,6 +116,27 @@ export default function GameLoopScreen() {
       notifications.forEach(notification => {
         useUIStore.getState().notify(notification);
       });
+      
+      // Check for death
+      if (isDead) {
+        setIsDead(true);
+        setCauseOfDeath(determineCauseOfDeath(selectedAction, currentPredicate, result));
+        return;
+      }
+      
+      // Track failure if action failed
+      if (!actionOutcome.success) {
+        trackFailure(selectedAction.id).then(unlockResult => {
+          if (unlockResult?.unlocked) {
+            useUIStore.getState().showNotification(
+              `Card evolution unlocked! Choose from: ${unlockResult.pool.join(', ')}`,
+              5000
+            );
+          }
+        }).catch(error => {
+          console.error('Failed to track failure:', error);
+        });
+      }
       
       // Set outcome for display
       setOutcome(actionOutcome);
@@ -111,10 +153,34 @@ export default function GameLoopScreen() {
     }
   }
 
-  function handleContinueFromOutcome() {
+  function determineCauseOfDeath(action: ActionCard, predicate: PredicateCard, result: DiceResult): string {
+    // Simple cause of death determination based on context
+    if (action.tags.includes('Combat')) {
+      return 'Killed in combat';
+    }
+    if (predicate.sceneTags.includes('Dangerous')) {
+      return 'Succumbed to danger';
+    }
+    if (result.total < 5) {
+      return 'Failed catastrophically';
+    }
+    return 'Met an untimely end';
+  }
+
+  async function handleContinueFromOutcome() {
     // Reset state and return to game loop
     setSelectedAction(null);
     setOutcome(null);
+    
+    // Advance turn after outcome resolution
+    await useGameStore.getState().advanceTurn();
+  }
+
+  function handleDeathContinue() {
+    // Reset death state and return to main menu
+    setIsDead(false);
+    setCauseOfDeath('');
+    setScreen('MainMenu');
   }
 
   // function handleBackToGame() {
@@ -126,8 +192,8 @@ export default function GameLoopScreen() {
   if (loading) {
     return (
       <ScreenContainer>
-        <div className="py-6 space-y-4">
-          <div className="panel p-4 text-sm text-cyan-400">Loading...</div>
+        <div className="py-12 flex items-center justify-center">
+          <LoadingSpinner message="Loading adventure..." size="lg" />
         </div>
       </ScreenContainer>
     )
@@ -143,6 +209,17 @@ export default function GameLoopScreen() {
           <Button onClick={() => setScreen('MainMenu')}>◄ RETURN TO MAIN MENU</Button>
         </div>
       </ScreenContainer>
+    )
+  }
+
+  // Show death screen if character is dead
+  if (isDead && character) {
+    return (
+      <DeathScreen
+        character={character}
+        causeOfDeath={causeOfDeath}
+        onContinue={handleDeathContinue}
+      />
     )
   }
 

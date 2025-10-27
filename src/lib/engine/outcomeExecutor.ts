@@ -5,6 +5,8 @@
 
 import type { Character } from '@/types/character';
 import type { OutcomeEffect } from './predicateEngine';
+import { discoverContent } from './discoveryManager';
+import { modifyAffinity } from './affinityManager';
 
 /**
  * Apply outcome effects to character and game state
@@ -12,7 +14,7 @@ import type { OutcomeEffect } from './predicateEngine';
 export function executeOutcomeEffects(
   character: Character,
   effects: OutcomeEffect[]
-): { updatedCharacter: Character; notifications: string[] } {
+): { updatedCharacter: Character; notifications: string[]; isDead: boolean } {
   const notifications: string[] = [];
   let updatedCharacter = { ...character };
 
@@ -24,7 +26,10 @@ export function executeOutcomeEffects(
     }
   }
 
-  return { updatedCharacter, notifications };
+  // Check for death after all effects are applied
+  const isDead = (updatedCharacter.currentHP || 0) <= 0;
+
+  return { updatedCharacter, notifications, isDead };
 }
 
 /**
@@ -144,18 +149,10 @@ function applyAffinity(character: Character, effect: OutcomeEffect): { character
   const entity = effect.entity || 'unknown';
   const change = effect.value || 0;
   
-  const affinities = character.affinities || {};
-  const currentAffinity = affinities[entity] || 0;
-  const newAffinity = Math.max(-10, Math.min(10, currentAffinity + change));
+  const updatedCharacter = modifyAffinity(character, entity, change);
   
   return {
-    character: {
-      ...character,
-      affinities: {
-        ...affinities,
-        [entity]: newAffinity
-      }
-    },
+    character: updatedCharacter,
     notification: change > 0 
       ? `${entity} likes you more (+${change})`
       : change < 0 
@@ -171,7 +168,12 @@ function applyUnlock(character: Character, effect: OutcomeEffect): { character: 
   const category = effect.category || 'unknown';
   const id = effect.id || 'unknown';
   
-  // For now, just track in world state
+  // Discover content in compendium
+  discoverContent(category as any, id).catch(error => {
+    console.error('Failed to discover content:', error);
+  });
+  
+  // Also track in world state for character-specific tracking
   const worldState = character.worldState || {};
   const discovered = worldState.discovered || {};
   const categoryDiscovered = discovered[category] || [];

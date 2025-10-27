@@ -96,26 +96,44 @@ export default function OutcomeScreen({ outcome, onContinue }: OutcomeScreenProp
 /**
  * Format an effect for display
  */
-function formatEffect(effect: any): string {
+function formatEffect(effect: {
+  type: string;
+  value?: number;
+  resource?: string;
+  entity?: string;
+  id?: string;
+  flag?: string;
+  flagValue?: any;
+  location?: string;
+}): string {
   switch (effect.type) {
-    case 'damage':
+    case 'damage': {
       return `Deal ${effect.value} damage`;
-    case 'heal':
+    }
+    case 'heal': {
       return `Heal ${effect.value} health`;
-    case 'gain':
+    }
+    case 'gain': {
       return `Gain ${effect.value} ${effect.resource}`;
-    case 'lose':
+    }
+    case 'lose': {
       return `Lose ${effect.value} ${effect.resource}`;
-    case 'affinity':
-      const change = effect.value > 0 ? `+${effect.value}` : effect.value.toString();
+    }
+    case 'affinity': {
+      const change = effect.value && effect.value > 0 ? `+${effect.value}` : effect.value?.toString() || '0';
       return `${effect.entity} affinity ${change}`;
-    case 'unlock':
+    }
+    case 'unlock': {
       return `Discover ${effect.id}`;
-    case 'flag':
+    }
+    case 'flag': {
       return `Set ${effect.flag} = ${effect.flagValue}`;
-    case 'transition':
+    }
+    case 'transition': {
       return `Travel to ${effect.location}`;
-    default:
+    }
+    default: {
       return `Unknown effect: ${effect.type}`;
+    }
   }
 }
