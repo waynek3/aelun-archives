@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 import { useUIStore } from '@/stores/uiStore'
@@ -9,6 +9,7 @@ import { StatusBar } from '@/components/game/StatusBar'
 import { getPredicateCards, getActionsArray } from '@/lib/utils/content'
 import { filterActionsByContext } from '@/lib/engine/actionFilter'
 import type { ActionCard, PredicateCard } from '@/types/cards'
+import type { DiceResult } from '@/lib/engine/diceSystem'
 
 export default function GameLoopScreen() {
   // DEBUG: Track render count
@@ -28,6 +29,8 @@ export default function GameLoopScreen() {
 
   const [predicateMap, setPredicateMap] = useState<Record<string, PredicateCard>>({})
   const [actions, setActions] = useState<ActionCard[]>([])
+  const [selectedAction, setSelectedAction] = useState<ActionCard | null>(null)
+  const [, setDiceResult] = useState<DiceResult | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -68,10 +71,24 @@ export default function GameLoopScreen() {
   }, [currentPredicate, actions])
 
   function handleSelectAction(cardId: string) {
-    // For Sprint 7: click handling only, no resolution yet
-    // In a later sprint, this will navigate to DicePool or Target selection
-    console.log('Selected action', cardId)
+    const action = actions.find(a => a.id === cardId)
+    if (action) {
+      setSelectedAction(action)
+      // For Sprint 8: Navigate to dice pool screen
+      // In Sprint 9: This will handle targeted vs untargeted actions differently
+    }
   }
+
+  function handleDiceResult(result: DiceResult) {
+    setDiceResult(result)
+    // For Sprint 9: This will trigger outcome resolution
+    console.log('Dice result:', result)
+  }
+
+  // function handleBackToGame() {
+  //   setSelectedAction(null)
+  //   setDiceResult(null)
+  // }
 
   // Show loading or redirect if no character
   if (loading) {
@@ -94,6 +111,21 @@ export default function GameLoopScreen() {
           <Button onClick={() => setScreen('MainMenu')}>◄ RETURN TO MAIN MENU</Button>
         </div>
       </ScreenContainer>
+    )
+  }
+
+  // Show dice pool screen if action is selected
+  if (selectedAction && currentPredicate) {
+    // Dynamic import for dice pool screen
+    const DicePoolScreen = React.lazy(() => import('./DicePoolScreen'))
+    return (
+      <React.Suspense fallback={<div className="panel p-4 text-sm text-cyan-400">Loading dice pool...</div>}>
+        <DicePoolScreen
+          actionCard={selectedAction}
+          predicateCard={currentPredicate}
+          onResult={handleDiceResult}
+        />
+      </React.Suspense>
     )
   }
 
