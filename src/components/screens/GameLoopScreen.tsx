@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 import { useUIStore } from '@/stores/uiStore'
@@ -10,6 +10,8 @@ import { getPredicateCards, getActionsArray } from '@/lib/utils/content'
 import { filterActionsByContext } from '@/lib/engine/actionFilter'
 import { gameEngine } from '@/lib/utils/workerClient'
 import { executeOutcomeEffects } from '@/lib/engine/outcomeExecutor'
+import OutcomeScreen from './OutcomeScreen'
+import DicePoolScreen from './DicePoolScreen'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 import type { DiceResult } from '@/lib/engine/diceSystem'
 import type { Outcome } from '@/lib/engine/predicateEngine'
@@ -146,28 +148,22 @@ export default function GameLoopScreen() {
 
   // Show outcome screen if we have an outcome
   if (outcome) {
-    const OutcomeScreen = React.lazy(() => import('./OutcomeScreen'))
     return (
-      <React.Suspense fallback={<div className="panel p-4 text-sm text-cyan-400">Loading outcome...</div>}>
-        <OutcomeScreen
-          outcome={outcome}
-          onContinue={handleContinueFromOutcome}
-        />
-      </React.Suspense>
+      <OutcomeScreen
+        outcome={outcome}
+        onContinue={handleContinueFromOutcome}
+      />
     )
   }
 
   // Show dice pool screen if action is selected
   if (selectedAction && currentPredicate) {
-    const DicePoolScreen = React.lazy(() => import('./DicePoolScreen'))
     return (
-      <React.Suspense fallback={<div className="panel p-4 text-sm text-cyan-400">Loading dice pool...</div>}>
-        <DicePoolScreen
-          actionCard={selectedAction}
-          predicateCard={currentPredicate}
-          onResult={handleDiceResult}
-        />
-      </React.Suspense>
+      <DicePoolScreen
+        actionCard={selectedAction}
+        predicateCard={currentPredicate}
+        onResult={handleDiceResult}
+      />
     )
   }
 
