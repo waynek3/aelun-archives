@@ -1,9 +1,21 @@
 import { useUIStore } from '@/stores/uiStore'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
+import { useEffect, useRef } from 'react'
 
 export default function MainMenuScreen() {
   const setScreen = useUIStore((s) => s.setScreen)
+  
+  // DEBUG: Track render count
+  const renderCount = useRef(0)
+  renderCount.current++
+  
+  useEffect(() => {
+    console.log('[DEBUG MainMenuScreen] Render #', renderCount.current)
+    if (renderCount.current > 50) {
+      console.error('[DEBUG MainMenuScreen] INFINITE LOOP DETECTED!')
+    }
+  })
 
   return (
     <ScreenContainer>

@@ -5,17 +5,27 @@ import { useUIStore } from '@/stores/uiStore'
 import { useGameStore } from '@/stores/gameStore'
 import { lifepathService } from '@/lib/engine/lifepath'
 import { saveCharacter } from '@/lib/persistence/saveManager'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 
 export default function CharacterSummaryScreen() {
-  const { pendingLifepath, setScreen, setPendingLifepath, openModal, closeModal } = useUIStore((s) => ({
-    pendingLifepath: s.pendingLifepath,
-    setScreen: s.setScreen,
-    setPendingLifepath: s.setPendingLifepath,
-    openModal: s.openModal,
-    closeModal: s.closeModal,
-  }))
+  // DEBUG: Track render count
+  const renderCount = useRef(0)
+  renderCount.current++
+  
+  // FIX: Use separate selectors to avoid creating new objects
+  const pendingLifepath = useUIStore((s) => s.pendingLifepath)
+  const setScreen = useUIStore((s) => s.setScreen)
+  const setPendingLifepath = useUIStore((s) => s.setPendingLifepath)
+  const openModal = useUIStore((s) => s.openModal)
+  const closeModal = useUIStore((s) => s.closeModal)
   const setCharacter = useGameStore((s) => s.setCharacter)
+  
+  useEffect(() => {
+    console.log('[DEBUG CharacterSummaryScreen] Render #', renderCount.current, 'Has pendingLifepath:', !!pendingLifepath)
+    if (renderCount.current > 50) {
+      console.error('[DEBUG CharacterSummaryScreen] INFINITE LOOP DETECTED!')
+    }
+  })
 
   const [name, setName] = useState('')
 

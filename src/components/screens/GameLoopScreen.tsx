@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 import { useUIStore } from '@/stores/uiStore'
@@ -11,9 +11,20 @@ import { filterActionsByContext } from '@/lib/engine/actionFilter'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 
 export default function GameLoopScreen() {
+  // DEBUG: Track render count
+  const renderCount = useRef(0)
+  renderCount.current++
+  
   const setScreen = useUIStore((s) => s.setScreen)
   const character = useGameStore((s) => s.character)
   const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    console.log('[DEBUG GameLoopScreen] Render #', renderCount.current, 'Loading:', loading, 'Has character:', !!character)
+    if (renderCount.current > 50) {
+      console.error('[DEBUG GameLoopScreen] INFINITE LOOP DETECTED!')
+    }
+  })
 
   const [predicateMap, setPredicateMap] = useState<Record<string, PredicateCard>>({})
   const [actions, setActions] = useState<ActionCard[]>([])
