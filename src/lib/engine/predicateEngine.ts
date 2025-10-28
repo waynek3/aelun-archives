@@ -47,7 +47,7 @@ export async function resolveAction(params: {
   }
 
   // Find matching rule based on roll result
-  const matchingRule = findMatchingRule(outcomeRules, diceResult.total, character);
+  const matchingRule = findMatchingRule(outcomeRules, diceResult.total);
   
   if (!matchingRule) {
     return createFailureOutcome(actionCard, predicateCard, diceResult);
@@ -62,11 +62,10 @@ export async function resolveAction(params: {
  */
 function findMatchingRule(
   rules: OutcomeRule[],
-  rollTotal: number,
-  character: Character
+  rollTotal: number
 ): OutcomeRule | null {
   for (const rule of rules) {
-    if (evaluateCondition(rule.condition, rollTotal, character)) {
+    if (evaluateCondition(rule.condition, rollTotal)) {
       return rule;
     }
   }
@@ -78,8 +77,7 @@ function findMatchingRule(
  */
 function evaluateCondition(
   condition: string,
-  roll: number,
-  _character: Character
+  roll: number
 ): boolean {
   // Simple condition parser for MVP
   // Supports: "roll >= 10", "roll > 15", "roll < 5", "roll == 20"
@@ -170,8 +168,7 @@ function executeOutcome(
 function generateNarrativeText(
   actionCard: ActionCard,
   predicateCard: PredicateCard,
-  diceResult: DiceResult,
-  _rule: OutcomeRule
+  diceResult: DiceResult
 ): string {
   const actionName = actionCard.name.toLowerCase();
   const locationName = predicateCard.name;

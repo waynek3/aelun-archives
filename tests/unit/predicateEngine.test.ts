@@ -49,7 +49,7 @@ describe('predicateEngine.resolveAction', () => {
     const outcome: Outcome = await resolveAction({
       actionCard: mockAction,
       predicateCard: mockPredicate,
-      character: mockCharacter as any,
+      character: mockCharacter,
       diceResult: { advantageRolls: [15], keptRoll: 15, bonusRolls: [], total: 15, criticalSuccess: false, criticalFailure: false }
     })
     expect(outcome.success).toBe(true)
@@ -60,7 +60,7 @@ describe('predicateEngine.resolveAction', () => {
     const outcome: Outcome = await resolveAction({
       actionCard: { ...mockAction, id: 'unknown_action' },
       predicateCard: mockPredicate,
-      character: mockCharacter as any,
+      character: mockCharacter,
       diceResult: { advantageRolls: [5], keptRoll: 5, bonusRolls: [], total: 5, criticalSuccess: false, criticalFailure: false }
     })
     expect(outcome.success).toBe(false)
