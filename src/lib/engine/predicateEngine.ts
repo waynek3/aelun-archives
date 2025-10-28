@@ -17,7 +17,7 @@ export interface Outcome {
 }
 
 export interface OutcomeEffect {
-  type: 'damage' | 'heal' | 'gain' | 'lose' | 'affinity' | 'unlock' | 'flag' | 'transition';
+  type: 'damage' | 'heal' | 'gain' | 'lose' | 'affinity' | 'unlock' | 'flag' | 'transition' | 'discover' | 'learn' | 'transform' | 'curse' | 'bless' | 'bond' | 'rivalry' | 'quest' | 'memory' | 'insight' | 'corruption' | 'purification';
   value?: number;
   resource?: string;
   entity?: string;
@@ -26,6 +26,9 @@ export interface OutcomeEffect {
   location?: string;
   flag?: string;
   flagValue?: any;
+  text?: string;
+  duration?: number;
+  permanent?: boolean;
 }
 
 /**
@@ -79,10 +82,10 @@ function findMatchingRule(
 function evaluateCondition(
   condition: string,
   roll: number,
-  _character: Character
+  character: Character
 ): boolean {
-  // Simple condition parser for MVP
-  // Supports: "roll >= 10", "roll > 15", "roll < 5", "roll == 20"
+  // Advanced condition parser supporting multiple types of checks
+  // Supports: "roll >= 10", "stat.strength >= 3", "affinity.monastery > 0", "has_trait.warrior", "state.danger"
   
   const operators = {
     '>=': (a: number, b: number) => a >= b,
@@ -93,12 +96,55 @@ function evaluateCondition(
     '!=': (a: number, b: number) => a !== b,
   };
 
-  // Parse condition: "roll >= 10"
-  const match = condition.match(/roll\s*(>=|>|<=|<|==|!=)\s*(\d+)/);
-  if (match) {
-    const [, operator, value] = match;
+  // Parse roll conditions: "roll >= 10"
+  const rollMatch = condition.match(/roll\s*(>=|>|<=|<|==|!=)\s*(\d+)/);
+  if (rollMatch) {
+    const [, operator, value] = rollMatch;
     const numValue = parseInt(value);
     return operators[operator as keyof typeof operators](roll, numValue);
+  }
+
+  // Parse stat conditions: "stat.strength >= 3"
+  const statMatch = condition.match(/stat\.(\w+)\s*(>=|>|<=|<|==|!=)\s*(\d+)/);
+  if (statMatch) {
+    const [, statName, operator, value] = statMatch;
+    const statValue = character.stats[statName as keyof typeof character.stats] || 0;
+    const numValue = parseInt(value);
+    return operators[operator as keyof typeof operators](statValue, numValue);
+  }
+
+  // Parse affinity conditions: "affinity.monastery > 0"
+  const affinityMatch = condition.match(/affinity\.(\w+)\s*(>=|>|<=|<|==|!=)\s*(\d+)/);
+  if (affinityMatch) {
+    const [, entityName, operator, value] = affinityMatch;
+    const affinityValue = character.affinities[entityName] || 0;
+    const numValue = parseInt(value);
+    return operators[operator as keyof typeof operators](affinityValue, numValue);
+  }
+
+  // Parse trait conditions: "has_trait.warrior"
+  const traitMatch = condition.match(/has_trait\.(\w+)/);
+  if (traitMatch) {
+    const [, traitName] = traitMatch;
+    return character.traits.includes(traitName);
+  }
+
+  // Parse state flag conditions: "state.danger"
+  const stateMatch = condition.match(/state\.(\w+)/);
+  if (stateMatch) {
+    const [, flagName] = stateMatch;
+    return character.stateFlags[flagName] === true;
+  }
+
+  // Parse complex conditions with AND/OR: "roll >= 10 AND stat.strength >= 3"
+  if (condition.includes(' AND ')) {
+    const parts = condition.split(' AND ');
+    return parts.every(part => evaluateCondition(part.trim(), roll, character));
+  }
+
+  if (condition.includes(' OR ')) {
+    const parts = condition.split(' OR ');
+    return parts.some(part => evaluateCondition(part.trim(), roll, character));
   }
 
   // Default to false for unknown conditions
@@ -156,6 +202,42 @@ function executeOutcome(
     case 'no_effect':
       executeNoEffect(outcome, rule.parameters);
       break;
+    case 'discover':
+      executeDiscover(outcome, rule.parameters);
+      break;
+    case 'learn':
+      executeLearn(outcome, rule.parameters);
+      break;
+    case 'transform':
+      executeTransform(outcome, rule.parameters);
+      break;
+    case 'curse':
+      executeCurse(outcome, rule.parameters);
+      break;
+    case 'bless':
+      executeBless(outcome, rule.parameters);
+      break;
+    case 'bond':
+      executeBond(outcome, rule.parameters);
+      break;
+    case 'rivalry':
+      executeRivalry(outcome, rule.parameters);
+      break;
+    case 'quest':
+      executeQuest(outcome, rule.parameters);
+      break;
+    case 'memory':
+      executeMemory(outcome, rule.parameters);
+      break;
+    case 'insight':
+      executeInsight(outcome, rule.parameters);
+      break;
+    case 'corruption':
+      executeCorruption(outcome, rule.parameters);
+      break;
+    case 'purification':
+      executePurification(outcome, rule.parameters);
+      break;
     default:
       console.warn(`Unknown outcome type: ${rule.outcome}`);
       executeNoEffect(outcome, rule.parameters);
@@ -171,11 +253,19 @@ function generateNarrativeText(
   actionCard: ActionCard,
   predicateCard: PredicateCard,
   diceResult: DiceResult,
-  _rule: OutcomeRule
+  rule: OutcomeRule
 ): string {
   const actionName = actionCard.name.toLowerCase();
   const locationName = predicateCard.name;
+  const sceneTags = predicateCard.sceneTags;
   
+  // Get contextual narrative based on action and location
+  const narrative = getContextualNarrative(actionCard, predicateCard, diceResult, rule);
+  if (narrative) {
+    return narrative;
+  }
+  
+  // Fallback to basic narrative
   if (diceResult.criticalSuccess) {
     return `Your ${actionName} in ${locationName} exceeds all expectations!`;
   } else if (diceResult.criticalFailure) {
@@ -187,6 +277,141 @@ function generateNarrativeText(
   } else {
     return `Your ${actionName} in ${locationName} fails.`;
   }
+}
+
+/**
+ * Get contextual narrative based on action, location, and outcome
+ */
+function getContextualNarrative(
+  actionCard: ActionCard,
+  predicateCard: PredicateCard,
+  diceResult: DiceResult,
+  rule: OutcomeRule
+): string | null {
+  const actionId = actionCard.id;
+  const locationId = predicateCard.id;
+  const sceneTags = predicateCard.sceneTags;
+  const outcome = rule.outcome;
+  
+  // Define narrative templates for different combinations
+  const narrativeTemplates = {
+    // Combat actions
+    'quick_attack': {
+      'gnarled_woods': {
+        'deal_damage': {
+          critical: "Your blade finds its mark through the twisted branches!",
+          success: "You strike true against the lurking threat.",
+          failure: "Your attack misses in the confusing shadows."
+        }
+      },
+      'bandit_camp': {
+        'deal_damage': {
+          critical: "Your strike catches the bandit completely off-guard!",
+          success: "You land a solid blow on your opponent.",
+          failure: "The bandit easily dodges your clumsy attack."
+        }
+      }
+    },
+    
+    // Spiritual actions
+    'pray': {
+      'monastery': {
+        'change_affinity': {
+          critical: "The divine presence fills you with overwhelming peace.",
+          success: "Your prayer resonates with the sacred stones.",
+          failure: "Your words echo hollowly in the empty chapel."
+        }
+      },
+      'cursed_forest': {
+        'change_affinity': {
+          critical: "Your faith burns bright against the darkness!",
+          success: "The twisted spirits acknowledge your devotion.",
+          failure: "The malevolent forces mock your feeble prayers."
+        }
+      }
+    },
+    
+    // Exploration actions
+    'take_it_in': {
+      'ancient_ruins': {
+        'discover': {
+          critical: "Ancient wisdom flows through you like a river!",
+          success: "You notice details others would miss.",
+          failure: "The ruins reveal nothing to your untrained eye."
+        }
+      },
+      'healing_spring': {
+        'restore': {
+          critical: "The magical waters restore you completely!",
+          success: "The spring's power flows through you.",
+          failure: "The water seems ordinary and powerless."
+        }
+      }
+    },
+    
+    // Social actions
+    'bargain': {
+      'trading_post': {
+        'gain_resource': {
+          critical: "Your negotiation skills are legendary!",
+          success: "You strike a fair deal.",
+          failure: "The merchant sees through your tactics."
+        }
+      },
+      'tavern': {
+        'gain_resource': {
+          critical: "Your charm wins over everyone in the room!",
+          success: "You find a sympathetic ear.",
+          failure: "The locals are not impressed by your approach."
+        }
+      }
+    }
+  };
+  
+  // Try to find a specific narrative
+  const actionNarratives = narrativeTemplates[actionId as keyof typeof narrativeTemplates];
+  if (actionNarratives) {
+    const locationNarratives = actionNarratives[locationId as keyof typeof actionNarratives];
+    if (locationNarratives) {
+      const outcomeNarratives = locationNarratives[outcome as keyof typeof locationNarratives];
+      if (outcomeNarratives) {
+        if (diceResult.criticalSuccess && outcomeNarratives.critical) {
+          return outcomeNarratives.critical;
+        } else if (diceResult.total >= 10 && outcomeNarratives.success) {
+          return outcomeNarratives.success;
+        } else if (outcomeNarratives.failure) {
+          return outcomeNarratives.failure;
+        }
+      }
+    }
+  }
+  
+  // Try scene tag-based narratives
+  if (sceneTags.includes('Dangerous')) {
+    if (diceResult.criticalSuccess) {
+      return `Against all odds, your ${actionCard.name.toLowerCase()} triumphs in this perilous place!`;
+    } else if (diceResult.criticalFailure) {
+      return `The danger of ${locationName} overwhelms your ${actionCard.name.toLowerCase()}.`;
+    }
+  }
+  
+  if (sceneTags.includes('Sacred')) {
+    if (diceResult.criticalSuccess) {
+      return `The divine power of ${locationName} amplifies your ${actionCard.name.toLowerCase()}!`;
+    } else if (diceResult.criticalFailure) {
+      return `You have offended the sacred nature of ${locationName}.`;
+    }
+  }
+  
+  if (sceneTags.includes('Mysterious')) {
+    if (diceResult.criticalSuccess) {
+      return `The mysteries of ${locationName} unfold before your ${actionCard.name.toLowerCase()}!`;
+    } else if (diceResult.criticalFailure) {
+      return `The enigma of ${locationName} remains impenetrable.`;
+    }
+  }
+  
+  return null; // Use fallback narrative
 }
 
 // Outcome execution functions
@@ -266,6 +491,164 @@ function executeMinorSetback(outcome: Outcome, params: any): void {
 
 function executeNoEffect(outcome: Outcome, _params: any): void {
   outcome.text += ` Nothing significant happens.`;
+}
+
+// New advanced outcome execution functions
+function executeDiscover(outcome: Outcome, params: any): void {
+  const what = params.what || 'something interesting';
+  const category = params.category || 'lore';
+  const id = params.id || 'discovery';
+  
+  outcome.effects.push({
+    type: 'discover',
+    category,
+    id,
+    text: params.text || `You discover ${what}!`
+  });
+  outcome.text += ` You discover ${what}!`;
+}
+
+function executeLearn(outcome: Outcome, params: any): void {
+  const skill = params.skill || 'insight';
+  const amount = params.amount || 1;
+  
+  outcome.effects.push({
+    type: 'learn',
+    resource: skill,
+    value: amount,
+    text: params.text || `You gain knowledge about ${skill}.`
+  });
+  outcome.text += ` You learn something new about ${skill}.`;
+}
+
+function executeTransform(outcome: Outcome, params: any): void {
+  const stat = params.stat || 'will';
+  const change = params.change || 1;
+  
+  outcome.effects.push({
+    type: 'transform',
+    resource: stat,
+    value: change,
+    permanent: true,
+    text: params.text || `Your ${stat} is permanently changed.`
+  });
+  outcome.text += ` You feel fundamentally changed.`;
+}
+
+function executeCurse(outcome: Outcome, params: any): void {
+  const curse = params.curse || 'misfortune';
+  const duration = params.duration || -1; // -1 = permanent
+  
+  outcome.effects.push({
+    type: 'curse',
+    flag: curse,
+    duration,
+    text: params.text || `You are cursed with ${curse}!`
+  });
+  outcome.text += ` A dark curse settles upon you.`;
+}
+
+function executeBless(outcome: Outcome, params: any): void {
+  const blessing = params.blessing || 'fortune';
+  const duration = params.duration || -1; // -1 = permanent
+  
+  outcome.effects.push({
+    type: 'bless',
+    flag: blessing,
+    duration,
+    text: params.text || `You are blessed with ${blessing}!`
+  });
+  outcome.text += ` Divine favor shines upon you.`;
+}
+
+function executeBond(outcome: Outcome, params: any): void {
+  const entity = params.entity || 'unknown';
+  const strength = params.strength || 2;
+  
+  outcome.effects.push({
+    type: 'bond',
+    entity,
+    value: strength,
+    text: params.text || `You form a deep bond with ${entity}.`
+  });
+  outcome.text += ` You feel a deep connection to ${entity}.`;
+}
+
+function executeRivalry(outcome: Outcome, params: any): void {
+  const entity = params.entity || 'unknown';
+  const intensity = params.intensity || 2;
+  
+  outcome.effects.push({
+    type: 'rivalry',
+    entity,
+    value: -intensity,
+    text: params.text || `You develop a rivalry with ${entity}.`
+  });
+  outcome.text += ` You feel hostility toward ${entity}.`;
+}
+
+function executeQuest(outcome: Outcome, params: any): void {
+  const quest = params.quest || 'mystery';
+  const description = params.description || 'A new quest begins.';
+  
+  outcome.effects.push({
+    type: 'quest',
+    id: quest,
+    text: description
+  });
+  outcome.text += ` A new quest presents itself.`;
+}
+
+function executeMemory(outcome: Outcome, params: any): void {
+  const memory = params.memory || 'forgotten_past';
+  const clarity = params.clarity || 1;
+  
+  outcome.effects.push({
+    type: 'memory',
+    id: memory,
+    value: clarity,
+    text: params.text || `A memory surfaces from your past.`
+  });
+  outcome.text += ` A forgotten memory returns to you.`;
+}
+
+function executeInsight(outcome: Outcome, params: any): void {
+  const insight = params.insight || 'wisdom';
+  const depth = params.depth || 1;
+  
+  outcome.effects.push({
+    type: 'insight',
+    resource: insight,
+    value: depth,
+    text: params.text || `You gain deep insight into ${insight}.`
+  });
+  outcome.text += ` A profound insight dawns upon you.`;
+}
+
+function executeCorruption(outcome: Outcome, params: any): void {
+  const source = params.source || 'dark_power';
+  const amount = params.amount || 1;
+  
+  outcome.effects.push({
+    type: 'corruption',
+    resource: source,
+    value: amount,
+    text: params.text || `Dark corruption seeps into your soul.`
+  });
+  outcome.text += ` You feel darkness creeping into your being.`;
+}
+
+function executePurification(outcome: Outcome, params: any): void {
+  const source = params.source || 'divine_light';
+  const amount = params.amount || 1;
+  
+  outcome.effects.push({
+    type: 'purification',
+    resource: source,
+    value: amount,
+    text: params.text || `Divine light purifies your soul.`
+  });
+  outcome.text += ` You feel cleansed and renewed.`;
 }
 
 /**
