@@ -126,14 +126,14 @@ function evaluateCondition(
   const traitMatch = condition.match(/has_trait\.(\w+)/);
   if (traitMatch) {
     const [, traitName] = traitMatch;
-    return character.traits.includes(traitName);
+    return character.traits.some(trait => trait.id === traitName);
   }
 
   // Parse state flag conditions: "state.danger"
   const stateMatch = condition.match(/state\.(\w+)/);
   if (stateMatch) {
     const [, flagName] = stateMatch;
-    return character.stateFlags[flagName] === true;
+    return character.worldState.flags[flagName] === true;
   }
 
   // Parse complex conditions with AND/OR: "roll >= 10 AND stat.strength >= 3"
@@ -257,7 +257,6 @@ function generateNarrativeText(
 ): string {
   const actionName = actionCard.name.toLowerCase();
   const locationName = predicateCard.name;
-  const sceneTags = predicateCard.sceneTags;
   
   // Get contextual narrative based on action and location
   const narrative = getContextualNarrative(actionCard, predicateCard, diceResult, rule);
@@ -290,6 +289,7 @@ function getContextualNarrative(
 ): string | null {
   const actionId = actionCard.id;
   const locationId = predicateCard.id;
+  const locationName = predicateCard.name;
   const sceneTags = predicateCard.sceneTags;
   const outcome = rule.outcome;
   
@@ -373,7 +373,7 @@ function getContextualNarrative(
   if (actionNarratives) {
     const locationNarratives = actionNarratives[locationId as keyof typeof actionNarratives];
     if (locationNarratives) {
-      const outcomeNarratives = locationNarratives[outcome as keyof typeof locationNarratives];
+      const outcomeNarratives = locationNarratives[outcome as keyof typeof locationNarratives] as any;
       if (outcomeNarratives) {
         if (diceResult.criticalSuccess && outcomeNarratives.critical) {
           return outcomeNarratives.critical;
