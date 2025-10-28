@@ -417,8 +417,18 @@ function getContextualNarrative(
 }
 
 // Outcome execution functions
+function getStringParam(params: Record<string, unknown>, key: string, fallback: string): string {
+  const value = params[key];
+  return typeof value === 'string' ? value : fallback;
+}
+
+function getNumberParam(params: Record<string, unknown>, key: string, fallback: number): number {
+  const value = params[key];
+  return typeof value === 'number' ? value : fallback;
+}
 function executeDealDamage(outcome: Outcome, params: Record<string, unknown>): void {
-  const damage = rollDamage(params.dice || '1d4');
+  const dice = getStringParam(params, 'dice', '1d4');
+  const damage = rollDamage(dice);
   outcome.effects.push({
     type: 'damage',
     value: damage
@@ -427,7 +437,8 @@ function executeDealDamage(outcome: Outcome, params: Record<string, unknown>): v
 }
 
 function executeReceiveDamage(outcome: Outcome, params: Record<string, unknown>): void {
-  const damage = rollDamage(params.dice || '1d4');
+  const dice = getStringParam(params, 'dice', '1d4');
+  const damage = rollDamage(dice);
   outcome.effects.push({
     type: 'damage',
     value: -damage // Negative damage = healing
@@ -436,8 +447,8 @@ function executeReceiveDamage(outcome: Outcome, params: Record<string, unknown>)
 }
 
 function executeGainResource(outcome: Outcome, params: Record<string, unknown>): void {
-  const resource = params.resource || 'goods';
-  const amount = params.amount || 1;
+  const resource = getStringParam(params, 'resource', 'goods');
+  const amount = getNumberParam(params, 'amount', 1);
   outcome.effects.push({
     type: 'gain',
     resource,
@@ -447,7 +458,7 @@ function executeGainResource(outcome: Outcome, params: Record<string, unknown>):
 }
 
 function executeRestore(outcome: Outcome, params: Record<string, unknown>): void {
-  const hp = params.hp || 1;
+  const hp = getNumberParam(params, 'hp', 1);
   outcome.effects.push({
     type: 'heal',
     value: hp
@@ -456,8 +467,8 @@ function executeRestore(outcome: Outcome, params: Record<string, unknown>): void
 }
 
 function executeChangeAffinity(outcome: Outcome, params: Record<string, unknown>): void {
-  const entity = params.entity || 'unknown';
-  const change = params.change || 1;
+  const entity = getStringParam(params, 'entity', 'unknown');
+  const change = getNumberParam(params, 'change', 1);
   outcome.effects.push({
     type: 'affinity',
     entity,
@@ -467,7 +478,7 @@ function executeChangeAffinity(outcome: Outcome, params: Record<string, unknown>
 }
 
 function executeDiscoverLocation(outcome: Outcome, params: Record<string, unknown>): void {
-  const location = params.location || 'unknown';
+  const location = getStringParam(params, 'location', 'unknown');
   outcome.effects.push({
     type: 'unlock',
     category: 'location',
@@ -477,8 +488,8 @@ function executeDiscoverLocation(outcome: Outcome, params: Record<string, unknow
 }
 
 function executeAngerEntity(outcome: Outcome, params: Record<string, unknown>): void {
-  const entity = params.entity || 'unknown';
-  const change = params.change || -1;
+  const entity = getStringParam(params, 'entity', 'unknown');
+  const change = getNumberParam(params, 'change', -1);
   outcome.effects.push({
     type: 'affinity',
     entity,
@@ -488,7 +499,8 @@ function executeAngerEntity(outcome: Outcome, params: Record<string, unknown>): 
 }
 
 function executeMinorSetback(outcome: Outcome, params: Record<string, unknown>): void {
-  outcome.text += ` ${params.text || 'A minor setback occurs.'}`;
+  const text = getStringParam(params, 'text', 'A minor setback occurs.');
+  outcome.text += ` ${text}`;
 }
 
 function executeNoEffect(outcome: Outcome): void {
@@ -497,9 +509,9 @@ function executeNoEffect(outcome: Outcome): void {
 
 // New advanced outcome execution functions
 function executeDiscover(outcome: Outcome, params: Record<string, unknown>): void {
-  const what = params.what || 'something interesting';
-  const category = params.category || 'lore';
-  const id = params.id || 'discovery';
+  const what = getStringParam(params, 'what', 'something interesting');
+  const category = getStringParam(params, 'category', 'lore');
+  const id = getStringParam(params, 'id', 'discovery');
   
   outcome.effects.push({
     type: 'discover',
@@ -511,8 +523,8 @@ function executeDiscover(outcome: Outcome, params: Record<string, unknown>): voi
 }
 
 function executeLearn(outcome: Outcome, params: Record<string, unknown>): void {
-  const skill = params.skill || 'insight';
-  const amount = params.amount || 1;
+  const skill = getStringParam(params, 'skill', 'insight');
+  const amount = getNumberParam(params, 'amount', 1);
   
   outcome.effects.push({
     type: 'learn',
@@ -524,8 +536,8 @@ function executeLearn(outcome: Outcome, params: Record<string, unknown>): void {
 }
 
 function executeTransform(outcome: Outcome, params: Record<string, unknown>): void {
-  const stat = params.stat || 'will';
-  const change = params.change || 1;
+  const stat = getStringParam(params, 'stat', 'will');
+  const change = getNumberParam(params, 'change', 1);
   
   outcome.effects.push({
     type: 'transform',
@@ -538,8 +550,8 @@ function executeTransform(outcome: Outcome, params: Record<string, unknown>): vo
 }
 
 function executeCurse(outcome: Outcome, params: Record<string, unknown>): void {
-  const curse = params.curse || 'misfortune';
-  const duration = params.duration || -1; // -1 = permanent
+  const curse = getStringParam(params, 'curse', 'misfortune');
+  const duration = getNumberParam(params, 'duration', -1); // -1 = permanent
   
   outcome.effects.push({
     type: 'curse',
@@ -551,8 +563,8 @@ function executeCurse(outcome: Outcome, params: Record<string, unknown>): void {
 }
 
 function executeBless(outcome: Outcome, params: Record<string, unknown>): void {
-  const blessing = params.blessing || 'fortune';
-  const duration = params.duration || -1; // -1 = permanent
+  const blessing = getStringParam(params, 'blessing', 'fortune');
+  const duration = getNumberParam(params, 'duration', -1); // -1 = permanent
   
   outcome.effects.push({
     type: 'bless',
@@ -564,8 +576,8 @@ function executeBless(outcome: Outcome, params: Record<string, unknown>): void {
 }
 
 function executeBond(outcome: Outcome, params: Record<string, unknown>): void {
-  const entity = params.entity || 'unknown';
-  const strength = params.strength || 2;
+  const entity = getStringParam(params, 'entity', 'unknown');
+  const strength = getNumberParam(params, 'strength', 2);
   
   outcome.effects.push({
     type: 'bond',
@@ -577,8 +589,8 @@ function executeBond(outcome: Outcome, params: Record<string, unknown>): void {
 }
 
 function executeRivalry(outcome: Outcome, params: Record<string, unknown>): void {
-  const entity = params.entity || 'unknown';
-  const intensity = params.intensity || 2;
+  const entity = getStringParam(params, 'entity', 'unknown');
+  const intensity = getNumberParam(params, 'intensity', 2);
   
   outcome.effects.push({
     type: 'rivalry',
@@ -590,8 +602,8 @@ function executeRivalry(outcome: Outcome, params: Record<string, unknown>): void
 }
 
 function executeQuest(outcome: Outcome, params: Record<string, unknown>): void {
-  const quest = params.quest || 'mystery';
-  const description = params.description || 'A new quest begins.';
+  const quest = getStringParam(params, 'quest', 'mystery');
+  const description = getStringParam(params, 'description', 'A new quest begins.');
   
   outcome.effects.push({
     type: 'quest',
@@ -602,8 +614,8 @@ function executeQuest(outcome: Outcome, params: Record<string, unknown>): void {
 }
 
 function executeMemory(outcome: Outcome, params: Record<string, unknown>): void {
-  const memory = params.memory || 'forgotten_past';
-  const clarity = params.clarity || 1;
+  const memory = getStringParam(params, 'memory', 'forgotten_past');
+  const clarity = getNumberParam(params, 'clarity', 1);
   
   outcome.effects.push({
     type: 'memory',
@@ -615,8 +627,8 @@ function executeMemory(outcome: Outcome, params: Record<string, unknown>): void 
 }
 
 function executeInsight(outcome: Outcome, params: Record<string, unknown>): void {
-  const insight = params.insight || 'wisdom';
-  const depth = params.depth || 1;
+  const insight = getStringParam(params, 'insight', 'wisdom');
+  const depth = getNumberParam(params, 'depth', 1);
   
   outcome.effects.push({
     type: 'insight',
@@ -628,8 +640,8 @@ function executeInsight(outcome: Outcome, params: Record<string, unknown>): void
 }
 
 function executeCorruption(outcome: Outcome, params: Record<string, unknown>): void {
-  const source = params.source || 'dark_power';
-  const amount = params.amount || 1;
+  const source = getStringParam(params, 'source', 'dark_power');
+  const amount = getNumberParam(params, 'amount', 1);
   
   outcome.effects.push({
     type: 'corruption',
@@ -641,8 +653,8 @@ function executeCorruption(outcome: Outcome, params: Record<string, unknown>): v
 }
 
 function executePurification(outcome: Outcome, params: Record<string, unknown>): void {
-  const source = params.source || 'divine_light';
-  const amount = params.amount || 1;
+  const source = getStringParam(params, 'source', 'divine_light');
+  const amount = getNumberParam(params, 'amount', 1);
   
   outcome.effects.push({
     type: 'purification',
