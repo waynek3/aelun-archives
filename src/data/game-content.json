@@ -213,6 +213,404 @@
       "failureField": [
         { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["diplomat", "alliance_builder"] }
       ]
+    },
+    {
+      "id": "charge_attack",
+      "name": "Charge Attack",
+      "description": "A devastating forward assault that leaves you vulnerable.",
+      "actionType": "Untargeted",
+      "tags": ["Combat", "Physical"],
+      "timescales": ["Encounter"],
+      "diceModifier": "+3d4",
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["devastating_charge", "berserker_charge"] }
+      ]
+    },
+    {
+      "id": "parry",
+      "name": "Parry",
+      "description": "Deflect incoming attacks and counter-strike.",
+      "actionType": "Untargeted",
+      "tags": ["Combat", "Defensive"],
+      "timescales": ["Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["riposte", "defensive_stance"] }
+      ]
+    },
+    {
+      "id": "feint",
+      "name": "Feint",
+      "description": "A deceptive attack that confuses your opponent.",
+      "actionType": "Targeted",
+      "tags": ["Combat", "Stealth"],
+      "timescales": ["Encounter"],
+      "diceModifier": "+2d4",
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["master_feint", "deceptive_strike"] }
+      ]
+    },
+    {
+      "id": "taunt",
+      "name": "Taunt",
+      "description": "Provoke enemies into making mistakes.",
+      "actionType": "Targeted",
+      "tags": ["Social", "Combat"],
+      "timescales": ["Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["provocateur", "battle_taunt"] }
+      ]
+    },
+    {
+      "id": "study",
+      "name": "Study",
+      "description": "Learn from books, scrolls, or ancient texts.",
+      "actionType": "Untargeted",
+      "tags": ["Scholarly", "Universal"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["scholar", "quick_study"] }
+      ]
+    },
+    {
+      "id": "alchemy",
+      "name": "Alchemy",
+      "description": "Brew potions and create magical concoctions.",
+      "actionType": "Untargeted",
+      "tags": ["Crafting", "Magical"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["master_alchemist", "potion_brewer"] }
+      ]
+    },
+    {
+      "id": "enchant",
+      "name": "Enchant",
+      "description": "Imbue items with magical properties.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Crafting"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 4, "maxUnlocks": 1, "pool": ["enchanter", "magic_weaver"] }
+      ]
+    },
+    {
+      "id": "scry",
+      "name": "Scry",
+      "description": "Use divination to see distant places or events.",
+      "actionType": "Untargeted",
+      "tags": ["Magical", "Divination"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["seer", "diviner"] }
+      ]
+    },
+    {
+      "id": "summon",
+      "name": "Summon",
+      "description": "Call forth otherworldly beings for aid.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Divine"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 4, "maxUnlocks": 1, "pool": ["summoner", "conjurer"] }
+      ]
+    },
+    {
+      "id": "disguise",
+      "name": "Disguise",
+      "description": "Change your appearance to blend in.",
+      "actionType": "Untargeted",
+      "tags": ["Stealth", "Social"],
+      "timescales": ["3-Hour", "Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["master_of_disguise", "face_changer"] }
+      ]
+    },
+    {
+      "id": "pickpocket",
+      "name": "Pickpocket",
+      "description": "Steal items from unsuspecting targets.",
+      "actionType": "Targeted",
+      "tags": ["Stealth", "Criminal"],
+      "timescales": ["Encounter", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["master_thief", "light_fingers"] }
+      ]
+    },
+    {
+      "id": "lockpick",
+      "name": "Lockpick",
+      "description": "Open locked doors and containers.",
+      "actionType": "Targeted",
+      "tags": ["Stealth", "Crafting"],
+      "timescales": ["Encounter", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["locksmith", "key_master"] }
+      ]
+    },
+    {
+      "id": "track",
+      "name": "Track",
+      "description": "Follow trails and signs left by others.",
+      "actionType": "Untargeted",
+      "tags": ["Survival", "Wilderness"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["tracker", "pathfinder"] }
+      ]
+    },
+    {
+      "id": "forage",
+      "name": "Forage",
+      "description": "Gather food and materials from the wild.",
+      "actionType": "Untargeted",
+      "tags": ["Survival", "Wilderness"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["forager", "wilderness_expert"] }
+      ]
+    },
+    {
+      "id": "climb",
+      "name": "Climb",
+      "description": "Scale walls, cliffs, and obstacles.",
+      "actionType": "Targeted",
+      "tags": ["Physical", "Wilderness"],
+      "timescales": ["3-Hour", "Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["mountaineer", "spider_climb"] }
+      ]
+    },
+    {
+      "id": "swim",
+      "name": "Swim",
+      "description": "Navigate through water safely.",
+      "actionType": "Untargeted",
+      "tags": ["Physical", "Wilderness"],
+      "timescales": ["3-Hour", "Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["swimmer", "water_breather"] }
+      ]
+    },
+    {
+      "id": "perform",
+      "name": "Perform",
+      "description": "Entertain others with music, stories, or tricks.",
+      "actionType": "Targeted",
+      "tags": ["Social", "Artistic"],
+      "timescales": ["3-Hour", "Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["bard", "entertainer"] }
+      ]
+    },
+    {
+      "id": "gamble",
+      "name": "Gamble",
+      "description": "Risk resources in games of chance.",
+      "actionType": "Untargeted",
+      "tags": ["Social", "Risky"],
+      "timescales": ["3-Hour", "Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["gambler", "lucky_streak"] }
+      ]
+    },
+    {
+      "id": "seduce",
+      "name": "Seduce",
+      "description": "Use charm and allure to influence others.",
+      "actionType": "Targeted",
+      "tags": ["Social", "Romantic"],
+      "timescales": ["3-Hour", "Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["charmer", "irresistible"] }
+      ]
+    },
+    {
+      "id": "interrogate",
+      "name": "Interrogate",
+      "description": "Extract information through questioning and pressure.",
+      "actionType": "Targeted",
+      "tags": ["Social", "Aggressive"],
+      "timescales": ["3-Hour", "Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["interrogator", "truth_seeker"] }
+      ]
+    },
+    {
+      "id": "lead",
+      "name": "Lead",
+      "description": "Inspire and guide others toward a common goal.",
+      "actionType": "Targeted",
+      "tags": ["Social", "Leadership"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["leader", "inspirational"] }
+      ]
+    },
+    {
+      "id": "negotiate",
+      "name": "Negotiate",
+      "description": "Reach mutually beneficial agreements.",
+      "actionType": "Targeted",
+      "tags": ["Social", "Diplomatic"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["negotiator", "peacemaker"] }
+      ]
+    },
+    {
+      "id": "investigate",
+      "name": "Investigate",
+      "description": "Gather clues and solve mysteries.",
+      "actionType": "Untargeted",
+      "tags": ["Scholarly", "Detective"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["detective", "sleuth"] }
+      ]
+    },
+    {
+      "id": "repair",
+      "name": "Repair",
+      "description": "Fix broken items and equipment.",
+      "actionType": "Targeted",
+      "tags": ["Crafting", "Universal"],
+      "timescales": ["3-Hour", "Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["repairman", "fixer"] }
+      ]
+    },
+    {
+      "id": "upgrade",
+      "name": "Upgrade",
+      "description": "Improve existing items and equipment.",
+      "actionType": "Targeted",
+      "tags": ["Crafting", "Enhancement"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["upgrader", "enhancer"] }
+      ]
+    },
+    {
+      "id": "train",
+      "name": "Train",
+      "description": "Practice and improve your skills.",
+      "actionType": "Untargeted",
+      "tags": ["Physical", "Mental"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["trainer", "dedicated"] }
+      ]
+    },
+    {
+      "id": "teach",
+      "name": "Teach",
+      "description": "Share knowledge and skills with others.",
+      "actionType": "Targeted",
+      "tags": ["Social", "Scholarly"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["teacher", "mentor"] }
+      ]
+    },
+    {
+      "id": "organize",
+      "name": "Organize",
+      "description": "Coordinate resources and people for efficiency.",
+      "actionType": "Untargeted",
+      "tags": ["Leadership", "Administrative"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["organizer", "coordinator"] }
+      ]
+    },
+    {
+      "id": "research",
+      "name": "Research",
+      "description": "Delve deep into specific topics and lore.",
+      "actionType": "Targeted",
+      "tags": ["Scholarly", "Magical"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["researcher", "lore_master"] }
+      ]
+    },
+    {
+      "id": "experiment",
+      "name": "Experiment",
+      "description": "Test new ideas and push boundaries.",
+      "actionType": "Untargeted",
+      "tags": ["Scholarly", "Risky"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["experimenter", "innovator"] }
+      ]
+    },
+    {
+      "id": "meditate_deep",
+      "name": "Deep Meditation",
+      "description": "Enter a profound trance for spiritual insight.",
+      "actionType": "Untargeted",
+      "tags": ["Spiritual", "Mental"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["mystic", "enlightened"] }
+      ]
+    },
+    {
+      "id": "fast",
+      "name": "Fast",
+      "description": "Abstain from food for spiritual purification.",
+      "actionType": "Untargeted",
+      "tags": ["Spiritual", "Physical"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["ascetic", "purified"] }
+      ]
+    },
+    {
+      "id": "pilgrimage",
+      "name": "Pilgrimage",
+      "description": "Journey to a sacred site for spiritual growth.",
+      "actionType": "Targeted",
+      "tags": ["Spiritual", "Travel"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["pilgrim", "devout_traveler"] }
+      ]
+    },
+    {
+      "id": "exorcise",
+      "name": "Exorcise",
+      "description": "Drive out evil spirits and dark influences.",
+      "actionType": "Targeted",
+      "tags": ["Spiritual", "Combat"],
+      "timescales": ["Encounter", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["exorcist", "spirit_warrior"] }
+      ]
+    },
+    {
+      "id": "bless_item",
+      "name": "Bless Item",
+      "description": "Consecrate objects with divine power.",
+      "actionType": "Targeted",
+      "tags": ["Spiritual", "Magical"],
+      "timescales": ["3-Hour", "Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["blesser", "consecrator"] }
+      ]
+    },
+    {
+      "id": "commune",
+      "name": "Commune",
+      "description": "Seek direct communication with divine entities.",
+      "actionType": "Untargeted",
+      "tags": ["Spiritual", "Divine"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 4, "maxUnlocks": 1, "pool": ["divine_channel", "prophet"] }
+      ]
     }
   ],
   "predicateCards": [
@@ -413,6 +811,328 @@
       },
       "stateFlags": {"dangerous": true, "cursed": true},
       "exits": ["gnarled_woods"]
+    },
+    {
+      "id": "wizard_tower",
+      "name": "The Wizard's Tower",
+      "description": "A spiraling tower of ancient stone and crackling energy.",
+      "sceneTags": ["Magical", "Mysterious", "Dangerous"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "study": [
+          { "condition": "roll >= 15", "outcome": "learn", "parameters": { "skill": "arcane_lore", "amount": 2 } },
+          { "condition": "roll < 15", "outcome": "corruption", "parameters": { "source": "forbidden_knowledge", "amount": 1 } }
+        ],
+        "alchemy": [
+          { "condition": "roll >= 12", "outcome": "gain_resource", "parameters": { "resource": "potion", "amount": 1 } },
+          { "condition": "roll < 12", "outcome": "receive_damage", "parameters": { "dice": "1d6" } }
+        ],
+        "scry": [
+          { "condition": "roll >= 14", "outcome": "discover", "parameters": { "what": "distant events", "category": "lore" } },
+          { "condition": "roll < 14", "outcome": "corruption", "parameters": { "source": "divination", "amount": 1 } }
+        ]
+      },
+      "stateFlags": {"magical": true, "dangerous": true},
+      "exits": ["ancient_ruins", "village_square"]
+    },
+    {
+      "id": "thieves_guild",
+      "name": "The Thieves' Guild",
+      "description": "A hidden network of shadows and secrets beneath the city.",
+      "sceneTags": ["Criminal", "Stealth", "Social"],
+      "timescale": "3-Hour",
+      "outcomeLogic": {
+        "pickpocket": [
+          { "condition": "roll >= 12", "outcome": "gain_resource", "parameters": { "resource": "goods", "amount": 2 } },
+          { "condition": "roll < 12", "outcome": "change_affinity", "parameters": { "entity": "thieves_guild", "change": -1 } }
+        ],
+        "disguise": [
+          { "condition": "roll >= 10", "outcome": "flag", "parameters": { "flag": "disguised", "flagValue": true } },
+          { "condition": "roll < 10", "outcome": "change_affinity", "parameters": { "entity": "thieves_guild", "change": -2 } }
+        ],
+        "gather_info": [
+          { "condition": "roll >= 11", "outcome": "gain_resource", "parameters": { "resource": "info", "amount": 3 } },
+          { "condition": "roll < 11", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {"criminal": true, "stealth": true},
+      "exits": ["tavern", "village_square"]
+    },
+    {
+      "id": "dragon_lair",
+      "name": "Dragon's Lair",
+      "description": "A cavern filled with treasure and ancient power.",
+      "sceneTags": ["Dangerous", "Magical", "Treasure"],
+      "timescale": "Encounter",
+      "outcomeLogic": {
+        "charge_attack": [
+          { "condition": "roll >= 18", "outcome": "deal_damage", "parameters": { "dice": "2d8" } },
+          { "condition": "roll < 18", "outcome": "receive_damage", "parameters": { "dice": "3d6" } }
+        ],
+        "intimidate": [
+          { "condition": "roll >= 16", "outcome": "change_affinity", "parameters": { "entity": "dragon", "change": 1 } },
+          { "condition": "roll < 16", "outcome": "receive_damage", "parameters": { "dice": "2d8" } }
+        ],
+        "bargain": [
+          { "condition": "roll >= 15", "outcome": "gain_resource", "parameters": { "resource": "treasure", "amount": 3 } },
+          { "condition": "roll < 15", "outcome": "receive_damage", "parameters": { "dice": "1d10" } }
+        ]
+      },
+      "stateFlags": {"dangerous": true, "treasure": true},
+      "exits": ["ancient_ruins", "cursed_forest"]
+    },
+    {
+      "id": "temple_ruins",
+      "name": "Temple Ruins",
+      "description": "Crumbling pillars and faded murals of forgotten gods.",
+      "sceneTags": ["Sacred", "Mysterious", "Ancient"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "pray": [
+          { "condition": "roll >= 13", "outcome": "bless", "parameters": { "blessing": "divine_favor", "duration": 3 } },
+          { "condition": "roll < 13", "outcome": "no_effect", "parameters": {} }
+        ],
+        "investigate": [
+          { "condition": "roll >= 14", "outcome": "discover", "parameters": { "what": "ancient rituals", "category": "lore" } },
+          { "condition": "roll < 14", "outcome": "no_effect", "parameters": {} }
+        ],
+        "meditate": [
+          { "condition": "roll >= 12", "outcome": "insight", "parameters": { "insight": "divine_wisdom", "depth": 2 } },
+          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {"sacred": true, "mysterious": true},
+      "exits": ["monastery", "ancient_ruins"]
+    },
+    {
+      "id": "merchant_caravan",
+      "name": "Merchant Caravan",
+      "description": "A traveling group of traders with exotic goods.",
+      "sceneTags": ["Trade", "Social", "Travel"],
+      "timescale": "3-Hour",
+      "outcomeLogic": {
+        "bargain": [
+          { "condition": "roll >= 11", "outcome": "gain_resource", "parameters": { "resource": "goods", "amount": 2 } },
+          { "condition": "roll < 11", "outcome": "lose", "parameters": { "resource": "goods", "amount": 1 } }
+        ],
+        "gather_info": [
+          { "condition": "roll >= 10", "outcome": "gain_resource", "parameters": { "resource": "info", "amount": 2 } },
+          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+        ],
+        "perform": [
+          { "condition": "roll >= 12", "outcome": "gain_resource", "parameters": { "resource": "goods", "amount": 1 } },
+          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {"trade": true, "traveling": true},
+      "exits": ["trading_post", "village_square"]
+    },
+    {
+      "id": "haunted_manor",
+      "name": "Haunted Manor",
+      "description": "A decrepit mansion filled with restless spirits.",
+      "sceneTags": ["Dangerous", "Cursed", "Mysterious"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "exorcise": [
+          { "condition": "roll >= 15", "outcome": "purification", "parameters": { "source": "divine_light", "amount": 2 } },
+          { "condition": "roll < 15", "outcome": "corruption", "parameters": { "source": "spiritual_darkness", "amount": 1 } }
+        ],
+        "investigate": [
+          { "condition": "roll >= 13", "outcome": "discover", "parameters": { "what": "family secrets", "category": "lore" } },
+          { "condition": "roll < 13", "outcome": "receive_damage", "parameters": { "dice": "1d6" } }
+        ],
+        "pray": [
+          { "condition": "roll >= 14", "outcome": "bless", "parameters": { "blessing": "spiritual_protection", "duration": 2 } },
+          { "condition": "roll < 14", "outcome": "curse", "parameters": { "curse": "haunted", "duration": 1 } }
+        ]
+      },
+      "stateFlags": {"dangerous": true, "cursed": true, "haunted": true},
+      "exits": ["village_square", "temple_ruins"]
+    },
+    {
+      "id": "alchemist_lab",
+      "name": "Alchemist's Laboratory",
+      "description": "A cluttered workshop filled with bubbling potions and strange ingredients.",
+      "sceneTags": ["Magical", "Crafting", "Mysterious"],
+      "timescale": "3-Hour",
+      "outcomeLogic": {
+        "alchemy": [
+          { "condition": "roll >= 13", "outcome": "gain_resource", "parameters": { "resource": "potion", "amount": 2 } },
+          { "condition": "roll < 13", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+        ],
+        "study": [
+          { "condition": "roll >= 12", "outcome": "learn", "parameters": { "skill": "alchemy", "amount": 1 } },
+          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+        ],
+        "experiment": [
+          { "condition": "roll >= 14", "outcome": "discover", "parameters": { "what": "new formula", "category": "lore" } },
+          { "condition": "roll < 14", "outcome": "receive_damage", "parameters": { "dice": "1d6" } }
+        ]
+      },
+      "stateFlags": {"magical": true, "crafting": true},
+      "exits": ["wizard_tower", "trading_post"]
+    },
+    {
+      "id": "warrior_training_ground",
+      "name": "Warrior Training Ground",
+      "description": "A dusty arena where fighters hone their skills.",
+      "sceneTags": ["Combat", "Physical", "Social"],
+      "timescale": "3-Hour",
+      "outcomeLogic": {
+        "train": [
+          { "condition": "roll >= 12", "outcome": "learn", "parameters": { "skill": "combat", "amount": 1 } },
+          { "condition": "roll < 12", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+        ],
+        "taunt": [
+          { "condition": "roll >= 11", "outcome": "change_affinity", "parameters": { "entity": "warriors", "change": 1 } },
+          { "condition": "roll < 11", "outcome": "change_affinity", "parameters": { "entity": "warriors", "change": -1 } }
+        ],
+        "lead": [
+          { "condition": "roll >= 13", "outcome": "bond", "parameters": { "entity": "warriors", "strength": 2 } },
+          { "condition": "roll < 13", "outcome": "rivalry", "parameters": { "entity": "warriors", "intensity": 1 } }
+        ]
+      },
+      "stateFlags": {"combat": true, "training": true},
+      "exits": ["village_square", "bandit_camp"]
+    },
+    {
+      "id": "sacred_grove",
+      "name": "Sacred Grove",
+      "description": "An ancient circle of trees where nature's power flows freely.",
+      "sceneTags": ["Sacred", "Wilderness", "Magical"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "meditate": [
+          { "condition": "roll >= 11", "outcome": "purification", "parameters": { "source": "nature", "amount": 2 } },
+          { "condition": "roll < 11", "outcome": "no_effect", "parameters": {} }
+        ],
+        "pray": [
+          { "condition": "roll >= 12", "outcome": "change_affinity", "parameters": { "entity": "nature_spirits", "change": 3 } },
+          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+        ],
+        "forage": [
+          { "condition": "roll >= 10", "outcome": "gain_resource", "parameters": { "resource": "herbs", "amount": 2 } },
+          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {"sacred": true, "wilderness": true},
+      "exits": ["healing_spring", "gnarled_woods"]
+    },
+    {
+      "id": "underground_city",
+      "name": "Underground City",
+      "description": "A vast network of tunnels and chambers beneath the surface.",
+      "sceneTags": ["Mysterious", "Dangerous", "Underground"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "scout": [
+          { "condition": "roll >= 13", "outcome": "discover", "parameters": { "what": "hidden passages", "category": "location" } },
+          { "condition": "roll < 13", "outcome": "receive_damage", "parameters": { "dice": "1d6" } }
+        ],
+        "lockpick": [
+          { "condition": "roll >= 12", "outcome": "discover", "parameters": { "what": "treasure", "category": "lore" } },
+          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+        ],
+        "investigate": [
+          { "condition": "roll >= 14", "outcome": "discover", "parameters": { "what": "ancient civilization", "category": "lore" } },
+          { "condition": "roll < 14", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {"mysterious": true, "dangerous": true, "underground": true},
+      "exits": ["ancient_ruins", "thieves_guild"]
+    },
+    {
+      "id": "pirate_cove",
+      "name": "Pirate Cove",
+      "description": "A hidden harbor filled with ships and stolen treasure.",
+      "sceneTags": ["Criminal", "Dangerous", "Water"],
+      "timescale": "3-Hour",
+      "outcomeLogic": {
+        "intimidate": [
+          { "condition": "roll >= 13", "outcome": "change_affinity", "parameters": { "entity": "pirates", "change": 1 } },
+          { "condition": "roll < 13", "outcome": "receive_damage", "parameters": { "dice": "1d8" } }
+        ],
+        "gamble": [
+          { "condition": "roll >= 12", "outcome": "gain_resource", "parameters": { "resource": "treasure", "amount": 2 } },
+          { "condition": "roll < 12", "outcome": "lose", "parameters": { "resource": "goods", "amount": 2 } }
+        ],
+        "perform": [
+          { "condition": "roll >= 11", "outcome": "bond", "parameters": { "entity": "pirates", "strength": 1 } },
+          { "condition": "roll < 11", "outcome": "rivalry", "parameters": { "entity": "pirates", "intensity": 1 } }
+        ]
+      },
+      "stateFlags": {"criminal": true, "dangerous": true, "water": true},
+      "exits": ["tavern", "trading_post"]
+    },
+    {
+      "id": "mystic_sanctuary",
+      "name": "Mystic Sanctuary",
+      "description": "A place where the veil between worlds grows thin.",
+      "sceneTags": ["Magical", "Sacred", "Mysterious"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "commune": [
+          { "condition": "roll >= 16", "outcome": "insight", "parameters": { "insight": "cosmic_wisdom", "depth": 3 } },
+          { "condition": "roll < 16", "outcome": "corruption", "parameters": { "source": "otherworldly", "amount": 1 } }
+        ],
+        "summon": [
+          { "condition": "roll >= 15", "outcome": "bond", "parameters": { "entity": "spirits", "strength": 2 } },
+          { "condition": "roll < 15", "outcome": "receive_damage", "parameters": { "dice": "2d6" } }
+        ],
+        "meditate_deep": [
+          { "condition": "roll >= 14", "outcome": "transform", "parameters": { "stat": "will", "change": 1 } },
+          { "condition": "roll < 14", "outcome": "corruption", "parameters": { "source": "mystical", "amount": 1 } }
+        ]
+      },
+      "stateFlags": {"magical": true, "sacred": true, "mysterious": true},
+      "exits": ["temple_ruins", "wizard_tower"]
+    },
+    {
+      "id": "noble_court",
+      "name": "Noble Court",
+      "description": "A grand hall where politics and power intertwine.",
+      "sceneTags": ["Social", "Political", "Noble"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "persuade": [
+          { "condition": "roll >= 14", "outcome": "change_affinity", "parameters": { "entity": "nobles", "change": 2 } },
+          { "condition": "roll < 14", "outcome": "change_affinity", "parameters": { "entity": "nobles", "change": -1 } }
+        ],
+        "perform": [
+          { "condition": "roll >= 13", "outcome": "gain_resource", "parameters": { "resource": "goods", "amount": 3 } },
+          { "condition": "roll < 13", "outcome": "change_affinity", "parameters": { "entity": "nobles", "change": -2 } }
+        ],
+        "negotiate": [
+          { "condition": "roll >= 15", "outcome": "quest", "parameters": { "quest": "noble_favor", "description": "A noble requests your aid" } },
+          { "condition": "roll < 15", "outcome": "rivalry", "parameters": { "entity": "nobles", "intensity": 2 } }
+        ]
+      },
+      "stateFlags": {"social": true, "political": true, "noble": true},
+      "exits": ["village_square", "monastery"]
+    },
+    {
+      "id": "crystal_caverns",
+      "name": "Crystal Caverns",
+      "description": "A glittering underground realm of pure crystal formations.",
+      "sceneTags": ["Magical", "Beautiful", "Mysterious"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "study": [
+          { "condition": "roll >= 13", "outcome": "learn", "parameters": { "skill": "crystal_lore", "amount": 2 } },
+          { "condition": "roll < 13", "outcome": "no_effect", "parameters": {} }
+        ],
+        "meditate": [
+          { "condition": "roll >= 12", "outcome": "purification", "parameters": { "source": "crystal_energy", "amount": 3 } },
+          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+        ],
+        "craft": [
+          { "condition": "roll >= 14", "outcome": "gain_resource", "parameters": { "resource": "crystal", "amount": 2 } },
+          { "condition": "roll < 14", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {"magical": true, "beautiful": true, "mysterious": true},
+      "exits": ["underground_city", "healing_spring"]
     }
   ],
   "traits": [
@@ -445,7 +1165,197 @@
     {"id": "guardian", "name": "Guardian", "type": "Passive", "effect": "+1d4 to defensive actions"},
     {"id": "seeker", "name": "Seeker", "type": "Passive", "effect": "+1d4 to information and discovery actions"},
     {"id": "artisan", "name": "Artisan", "type": "Passive", "effect": "+1d4 to crafting and creative actions"},
-    {"id": "sage", "name": "Sage", "type": "Passive", "effect": "+1d4 to knowledge and wisdom actions"}
+    {"id": "sage", "name": "Sage", "type": "Passive", "effect": "+1d4 to knowledge and wisdom actions"},
+    {"id": "berserker", "name": "Berserker", "type": "Triggered", "effect": "When damaged, +2d4 to next combat action"},
+    {"id": "night_vision", "name": "Night Vision", "type": "Passive", "effect": "+1d4 to actions in darkness"},
+    {"id": "water_breathing", "name": "Water Breathing", "type": "Passive", "effect": "Can survive underwater indefinitely"},
+    {"id": "fire_resistance", "name": "Fire Resistance", "type": "Passive", "effect": "Half damage from fire sources"},
+    {"id": "cold_resistance", "name": "Cold Resistance", "type": "Passive", "effect": "Half damage from cold sources"},
+    {"id": "poison_immunity", "name": "Poison Immunity", "type": "Passive", "effect": "Immune to poison effects"},
+    {"id": "disease_immunity", "name": "Disease Immunity", "type": "Passive", "effect": "Immune to disease effects"},
+    {"id": "charm_immunity", "name": "Charm Immunity", "type": "Passive", "effect": "Immune to charm effects"},
+    {"id": "fear_immunity", "name": "Fear Immunity", "type": "Passive", "effect": "Immune to fear effects"},
+    {"id": "magic_resistance", "name": "Magic Resistance", "type": "Passive", "effect": "+2d4 to resist magical effects"},
+    {"id": "spell_absorption", "name": "Spell Absorption", "type": "Triggered", "effect": "Absorb failed spells as healing"},
+    {"id": "regeneration", "name": "Regeneration", "type": "Passive", "effect": "Heal 1 HP per day"},
+    {"id": "fast_healing", "name": "Fast Healing", "type": "Passive", "effect": "Heal 2 HP per day"},
+    {"id": "natural_armor", "name": "Natural Armor", "type": "Passive", "effect": "+1d4 to defense rolls"},
+    {"id": "keen_senses", "name": "Keen Senses", "type": "Passive", "effect": "+1d4 to perception actions"},
+    {"id": "animal_empathy", "name": "Animal Empathy", "type": "Passive", "effect": "+1d4 to animal interactions"},
+    {"id": "plant_empathy", "name": "Plant Empathy", "type": "Passive", "effect": "+1d4 to plant interactions"},
+    {"id": "spirit_sight", "name": "Spirit Sight", "type": "Passive", "effect": "Can see invisible spirits"},
+    {"id": "true_sight", "name": "True Sight", "type": "Passive", "effect": "Can see through illusions"},
+    {"id": "divine_sight", "name": "Divine Sight", "type": "Passive", "effect": "Can see divine auras"},
+    {"id": "dark_vision", "name": "Dark Vision", "type": "Passive", "effect": "Can see in complete darkness"},
+    {"id": "x_ray_vision", "name": "X-Ray Vision", "type": "Passive", "effect": "Can see through solid objects"},
+    {"id": "telepathy", "name": "Telepathy", "type": "Passive", "effect": "Can communicate mentally"},
+    {"id": "empathy", "name": "Empathy", "type": "Passive", "effect": "Can sense emotions"},
+    {"id": "precognition", "name": "Precognition", "type": "Triggered", "effect": "Reroll one die per day"},
+    {"id": "clairvoyance", "name": "Clairvoyance", "type": "Passive", "effect": "+1d4 to divination actions"},
+    {"id": "psychometry", "name": "Psychometry", "type": "Passive", "effect": "Can read object history"},
+    {"id": "astral_projection", "name": "Astral Projection", "type": "Triggered", "effect": "Can leave body once per day"},
+    {"id": "shape_shifting", "name": "Shape Shifting", "type": "Triggered", "effect": "Can change form once per day"},
+    {"id": "invisibility", "name": "Invisibility", "type": "Triggered", "effect": "Can become invisible once per day"},
+    {"id": "levitation", "name": "Levitation", "type": "Passive", "effect": "Can float above ground"},
+    {"id": "teleportation", "name": "Teleportation", "type": "Triggered", "effect": "Can teleport once per day"},
+    {"id": "time_dilation", "name": "Time Dilation", "type": "Triggered", "effect": "Can slow time once per day"},
+    {"id": "dimensional_pocket", "name": "Dimensional Pocket", "type": "Passive", "effect": "Can store items in pocket dimension"},
+    {"id": "energy_absorption", "name": "Energy Absorption", "type": "Passive", "effect": "Absorb energy attacks as healing"},
+    {"id": "matter_manipulation", "name": "Matter Manipulation", "type": "Triggered", "effect": "Can alter matter once per day"},
+    {"id": "gravity_control", "name": "Gravity Control", "type": "Triggered", "effect": "Can control gravity once per day"},
+    {"id": "elemental_mastery", "name": "Elemental Mastery", "type": "Passive", "effect": "+1d4 to elemental actions"},
+    {"id": "weather_control", "name": "Weather Control", "type": "Triggered", "effect": "Can control weather once per day"},
+    {"id": "earth_sense", "name": "Earth Sense", "type": "Passive", "effect": "Can sense through earth"},
+    {"id": "water_sense", "name": "Water Sense", "type": "Passive", "effect": "Can sense through water"},
+    {"id": "air_sense", "name": "Air Sense", "type": "Passive", "effect": "Can sense through air"},
+    {"id": "fire_sense", "name": "Fire Sense", "type": "Passive", "effect": "Can sense through fire"},
+    {"id": "spirit_sense", "name": "Spirit Sense", "type": "Passive", "effect": "Can sense spiritual energy"},
+    {"id": "life_sense", "name": "Life Sense", "type": "Passive", "effect": "Can sense living beings"},
+    {"id": "death_sense", "name": "Death Sense", "type": "Passive", "effect": "Can sense undead"},
+    {"id": "magic_sense", "name": "Magic Sense", "type": "Passive", "effect": "Can sense magical energy"},
+    {"id": "divine_sense", "name": "Divine Sense", "type": "Passive", "effect": "Can sense divine energy"},
+    {"id": "demonic_sense", "name": "Demonic Sense", "type": "Passive", "effect": "Can sense demonic energy"},
+    {"id": "angelic_sense", "name": "Angelic Sense", "type": "Passive", "effect": "Can sense angelic energy"},
+    {"id": "fey_sense", "name": "Fey Sense", "type": "Passive", "effect": "Can sense fey energy"},
+    {"id": "elemental_sense", "name": "Elemental Sense", "type": "Passive", "effect": "Can sense elemental energy"},
+    {"id": "dimensional_sense", "name": "Dimensional Sense", "type": "Passive", "effect": "Can sense dimensional rifts"},
+    {"id": "time_sense", "name": "Time Sense", "type": "Passive", "effect": "Can sense temporal disturbances"},
+    {"id": "space_sense", "name": "Space Sense", "type": "Passive", "effect": "Can sense spatial distortions"},
+    {"id": "reality_sense", "name": "Reality Sense", "type": "Passive", "effect": "Can sense reality distortions"},
+    {"id": "dream_sense", "name": "Dream Sense", "type": "Passive", "effect": "Can sense dream energy"},
+    {"id": "nightmare_sense", "name": "Nightmare Sense", "type": "Passive", "effect": "Can sense nightmare energy"},
+    {"id": "hope_sense", "name": "Hope Sense", "type": "Passive", "effect": "Can sense hope energy"},
+    {"id": "despair_sense", "name": "Despair Sense", "type": "Passive", "effect": "Can sense despair energy"},
+    {"id": "love_sense", "name": "Love Sense", "type": "Passive", "effect": "Can sense love energy"},
+    {"id": "hate_sense", "name": "Hate Sense", "type": "Passive", "effect": "Can sense hate energy"},
+    {"id": "peace_sense", "name": "Peace Sense", "type": "Passive", "effect": "Can sense peace energy"},
+    {"id": "war_sense", "name": "War Sense", "type": "Passive", "effect": "Can sense war energy"},
+    {"id": "order_sense", "name": "Order Sense", "type": "Passive", "effect": "Can sense order energy"},
+    {"id": "chaos_sense", "name": "Chaos Sense", "type": "Passive", "effect": "Can sense chaos energy"},
+    {"id": "light_sense", "name": "Light Sense", "type": "Passive", "effect": "Can sense light energy"},
+    {"id": "dark_sense", "name": "Dark Sense", "type": "Passive", "effect": "Can sense dark energy"},
+    {"id": "balance_sense", "name": "Balance Sense", "type": "Passive", "effect": "Can sense balance energy"},
+    {"id": "imbalance_sense", "name": "Imbalance Sense", "type": "Passive", "effect": "Can sense imbalance energy"},
+    {"id": "harmony_sense", "name": "Harmony Sense", "type": "Passive", "effect": "Can sense harmony energy"},
+    {"id": "discord_sense", "name": "Discord Sense", "type": "Passive", "effect": "Can sense discord energy"},
+    {"id": "unity_sense", "name": "Unity Sense", "type": "Passive", "effect": "Can sense unity energy"},
+    {"id": "division_sense", "name": "Division Sense", "type": "Passive", "effect": "Can sense division energy"},
+    {"id": "creation_sense", "name": "Creation Sense", "type": "Passive", "effect": "Can sense creation energy"},
+    {"id": "destruction_sense", "name": "Destruction Sense", "type": "Passive", "effect": "Can sense destruction energy"},
+    {"id": "birth_sense", "name": "Birth Sense", "type": "Passive", "effect": "Can sense birth energy"},
+    {"id": "death_sense", "name": "Death Sense", "type": "Passive", "effect": "Can sense death energy"},
+    {"id": "growth_sense", "name": "Growth Sense", "type": "Passive", "effect": "Can sense growth energy"},
+    {"id": "decay_sense", "name": "Decay Sense", "type": "Passive", "effect": "Can sense decay energy"},
+    {"id": "renewal_sense", "name": "Renewal Sense", "type": "Passive", "effect": "Can sense renewal energy"},
+    {"id": "stagnation_sense", "name": "Stagnation Sense", "type": "Passive", "effect": "Can sense stagnation energy"},
+    {"id": "flow_sense", "name": "Flow Sense", "type": "Passive", "effect": "Can sense flow energy"},
+    {"id": "stasis_sense", "name": "Stasis Sense", "type": "Passive", "effect": "Can sense stasis energy"},
+    {"id": "motion_sense", "name": "Motion Sense", "type": "Passive", "effect": "Can sense motion energy"},
+    {"id": "stillness_sense", "name": "Stillness Sense", "type": "Passive", "effect": "Can sense stillness energy"},
+    {"id": "sound_sense", "name": "Sound Sense", "type": "Passive", "effect": "Can sense sound energy"},
+    {"id": "silence_sense", "name": "Silence Sense", "type": "Passive", "effect": "Can sense silence energy"},
+    {"id": "color_sense", "name": "Color Sense", "type": "Passive", "effect": "Can sense color energy"},
+    {"id": "gray_sense", "name": "Gray Sense", "type": "Passive", "effect": "Can sense gray energy"},
+    {"id": "bright_sense", "name": "Bright Sense", "type": "Passive", "effect": "Can sense bright energy"},
+    {"id": "dim_sense", "name": "Dim Sense", "type": "Passive", "effect": "Can sense dim energy"},
+    {"id": "sharp_sense", "name": "Sharp Sense", "type": "Passive", "effect": "Can sense sharp energy"},
+    {"id": "blunt_sense", "name": "Blunt Sense", "type": "Passive", "effect": "Can sense blunt energy"},
+    {"id": "smooth_sense", "name": "Smooth Sense", "type": "Passive", "effect": "Can sense smooth energy"},
+    {"id": "rough_sense", "name": "Rough Sense", "type": "Passive", "effect": "Can sense rough energy"},
+    {"id": "hot_sense", "name": "Hot Sense", "type": "Passive", "effect": "Can sense hot energy"},
+    {"id": "cold_sense", "name": "Cold Sense", "type": "Passive", "effect": "Can sense cold energy"},
+    {"id": "warm_sense", "name": "Warm Sense", "type": "Passive", "effect": "Can sense warm energy"},
+    {"id": "cool_sense", "name": "Cool Sense", "type": "Passive", "effect": "Can sense cool energy"},
+    {"id": "dry_sense", "name": "Dry Sense", "type": "Passive", "effect": "Can sense dry energy"},
+    {"id": "wet_sense", "name": "Wet Sense", "type": "Passive", "effect": "Can sense wet energy"},
+    {"id": "solid_sense", "name": "Solid Sense", "type": "Passive", "effect": "Can sense solid energy"},
+    {"id": "liquid_sense", "name": "Liquid Sense", "type": "Passive", "effect": "Can sense liquid energy"},
+    {"id": "gas_sense", "name": "Gas Sense", "type": "Passive", "effect": "Can sense gas energy"},
+    {"id": "plasma_sense", "name": "Plasma Sense", "type": "Passive", "effect": "Can sense plasma energy"},
+    {"id": "crystal_sense", "name": "Crystal Sense", "type": "Passive", "effect": "Can sense crystal energy"},
+    {"id": "metal_sense", "name": "Metal Sense", "type": "Passive", "effect": "Can sense metal energy"},
+    {"id": "wood_sense", "name": "Wood Sense", "type": "Passive", "effect": "Can sense wood energy"},
+    {"id": "stone_sense", "name": "Stone Sense", "type": "Passive", "effect": "Can sense stone energy"},
+    {"id": "cloth_sense", "name": "Cloth Sense", "type": "Passive", "effect": "Can sense cloth energy"},
+    {"id": "leather_sense", "name": "Leather Sense", "type": "Passive", "effect": "Can sense leather energy"},
+    {"id": "fur_sense", "name": "Fur Sense", "type": "Passive", "effect": "Can sense fur energy"},
+    {"id": "feather_sense", "name": "Feather Sense", "type": "Passive", "effect": "Can sense feather energy"},
+    {"id": "scale_sense", "name": "Scale Sense", "type": "Passive", "effect": "Can sense scale energy"},
+    {"id": "shell_sense", "name": "Shell Sense", "type": "Passive", "effect": "Can sense shell energy"},
+    {"id": "bone_sense", "name": "Bone Sense", "type": "Passive", "effect": "Can sense bone energy"},
+    {"id": "flesh_sense", "name": "Flesh Sense", "type": "Passive", "effect": "Can sense flesh energy"},
+    {"id": "blood_sense", "name": "Blood Sense", "type": "Passive", "effect": "Can sense blood energy"},
+    {"id": "sweat_sense", "name": "Sweat Sense", "type": "Passive", "effect": "Can sense sweat energy"},
+    {"id": "tear_sense", "name": "Tear Sense", "type": "Passive", "effect": "Can sense tear energy"},
+    {"id": "saliva_sense", "name": "Saliva Sense", "type": "Passive", "effect": "Can sense saliva energy"},
+    {"id": "mucus_sense", "name": "Mucus Sense", "type": "Passive", "effect": "Can sense mucus energy"},
+    {"id": "oil_sense", "name": "Oil Sense", "type": "Passive", "effect": "Can sense oil energy"},
+    {"id": "wax_sense", "name": "Wax Sense", "type": "Passive", "effect": "Can sense wax energy"},
+    {"id": "resin_sense", "name": "Resin Sense", "type": "Passive", "effect": "Can sense resin energy"},
+    {"id": "sap_sense", "name": "Sap Sense", "type": "Passive", "effect": "Can sense sap energy"},
+    {"id": "nectar_sense", "name": "Nectar Sense", "type": "Passive", "effect": "Can sense nectar energy"},
+    {"id": "honey_sense", "name": "Honey Sense", "type": "Passive", "effect": "Can sense honey energy"},
+    {"id": "milk_sense", "name": "Milk Sense", "type": "Passive", "effect": "Can sense milk energy"},
+    {"id": "cream_sense", "name": "Cream Sense", "type": "Passive", "effect": "Can sense cream energy"},
+    {"id": "butter_sense", "name": "Butter Sense", "type": "Passive", "effect": "Can sense butter energy"},
+    {"id": "cheese_sense", "name": "Cheese Sense", "type": "Passive", "effect": "Can sense cheese energy"},
+    {"id": "yogurt_sense", "name": "Yogurt Sense", "type": "Passive", "effect": "Can sense yogurt energy"},
+    {"id": "kefir_sense", "name": "Kefir Sense", "type": "Passive", "effect": "Can sense kefir energy"},
+    {"id": "buttermilk_sense", "name": "Buttermilk Sense", "type": "Passive", "effect": "Can sense buttermilk energy"},
+    {"id": "whey_sense", "name": "Whey Sense", "type": "Passive", "effect": "Can sense whey energy"},
+    {"id": "casein_sense", "name": "Casein Sense", "type": "Passive", "effect": "Can sense casein energy"},
+    {"id": "lactose_sense", "name": "Lactose Sense", "type": "Passive", "effect": "Can sense lactose energy"},
+    {"id": "protein_sense", "name": "Protein Sense", "type": "Passive", "effect": "Can sense protein energy"},
+    {"id": "carbohydrate_sense", "name": "Carbohydrate Sense", "type": "Passive", "effect": "Can sense carbohydrate energy"},
+    {"id": "fat_sense", "name": "Fat Sense", "type": "Passive", "effect": "Can sense fat energy"},
+    {"id": "fiber_sense", "name": "Fiber Sense", "type": "Passive", "effect": "Can sense fiber energy"},
+    {"id": "vitamin_sense", "name": "Vitamin Sense", "type": "Passive", "effect": "Can sense vitamin energy"},
+    {"id": "mineral_sense", "name": "Mineral Sense", "type": "Passive", "effect": "Can sense mineral energy"},
+    {"id": "enzyme_sense", "name": "Enzyme Sense", "type": "Passive", "effect": "Can sense enzyme energy"},
+    {"id": "hormone_sense", "name": "Hormone Sense", "type": "Passive", "effect": "Can sense hormone energy"},
+    {"id": "neurotransmitter_sense", "name": "Neurotransmitter Sense", "type": "Passive", "effect": "Can sense neurotransmitter energy"},
+    {"id": "dna_sense", "name": "DNA Sense", "type": "Passive", "effect": "Can sense DNA energy"},
+    {"id": "rna_sense", "name": "RNA Sense", "type": "Passive", "effect": "Can sense RNA energy"},
+    {"id": "atp_sense", "name": "ATP Sense", "type": "Passive", "effect": "Can sense ATP energy"},
+    {"id": "adp_sense", "name": "ADP Sense", "type": "Passive", "effect": "Can sense ADP energy"},
+    {"id": "amp_sense", "name": "AMP Sense", "type": "Passive", "effect": "Can sense AMP energy"},
+    {"id": "gdp_sense", "name": "GDP Sense", "type": "Passive", "effect": "Can sense GDP energy"},
+    {"id": "gtp_sense", "name": "GTP Sense", "type": "Passive", "effect": "Can sense GTP energy"},
+    {"id": "ctp_sense", "name": "CTP Sense", "type": "Passive", "effect": "Can sense CTP energy"},
+    {"id": "utp_sense", "name": "UTP Sense", "type": "Passive", "effect": "Can sense UTP energy"},
+    {"id": "ttp_sense", "name": "TTP Sense", "type": "Passive", "effect": "Can sense TTP energy"},
+    {"id": "ntp_sense", "name": "NTP Sense", "type": "Passive", "effect": "Can sense NTP energy"},
+    {"id": "dntp_sense", "name": "dNTP Sense", "type": "Passive", "effect": "Can sense dNTP energy"},
+    {"id": "rntp_sense", "name": "rNTP Sense", "type": "Passive", "effect": "Can sense rNTP energy"},
+    {"id": "xntp_sense", "name": "xNTP Sense", "type": "Passive", "effect": "Can sense xNTP energy"},
+    {"id": "yntp_sense", "name": "yNTP Sense", "type": "Passive", "effect": "Can sense yNTP energy"},
+    {"id": "zntp_sense", "name": "zNTP Sense", "type": "Passive", "effect": "Can sense zNTP energy"},
+    {"id": "antp_sense", "name": "aNTP Sense", "type": "Passive", "effect": "Can sense aNTP energy"},
+    {"id": "bntp_sense", "name": "bNTP Sense", "type": "Passive", "effect": "Can sense bNTP energy"},
+    {"id": "cntp_sense", "name": "cNTP Sense", "type": "Passive", "effect": "Can sense cNTP energy"},
+    {"id": "dntp_sense", "name": "dNTP Sense", "type": "Passive", "effect": "Can sense dNTP energy"},
+    {"id": "entp_sense", "name": "eNTP Sense", "type": "Passive", "effect": "Can sense eNTP energy"},
+    {"id": "fntp_sense", "name": "fNTP Sense", "type": "Passive", "effect": "Can sense fNTP energy"},
+    {"id": "gntp_sense", "name": "gNTP Sense", "type": "Passive", "effect": "Can sense gNTP energy"},
+    {"id": "hntp_sense", "name": "hNTP Sense", "type": "Passive", "effect": "Can sense hNTP energy"},
+    {"id": "intp_sense", "name": "iNTP Sense", "type": "Passive", "effect": "Can sense iNTP energy"},
+    {"id": "jntp_sense", "name": "jNTP Sense", "type": "Passive", "effect": "Can sense jNTP energy"},
+    {"id": "kntp_sense", "name": "kNTP Sense", "type": "Passive", "effect": "Can sense kNTP energy"},
+    {"id": "lntp_sense", "name": "lNTP Sense", "type": "Passive", "effect": "Can sense lNTP energy"},
+    {"id": "mntp_sense", "name": "mNTP Sense", "type": "Passive", "effect": "Can sense mNTP energy"},
+    {"id": "nntp_sense", "name": "nNTP Sense", "type": "Passive", "effect": "Can sense nNTP energy"},
+    {"id": "ontp_sense", "name": "oNTP Sense", "type": "Passive", "effect": "Can sense oNTP energy"},
+    {"id": "pntp_sense", "name": "pNTP Sense", "type": "Passive", "effect": "Can sense pNTP energy"},
+    {"id": "qntp_sense", "name": "qNTP Sense", "type": "Passive", "effect": "Can sense qNTP energy"},
+    {"id": "rntp_sense", "name": "rNTP Sense", "type": "Passive", "effect": "Can sense rNTP energy"},
+    {"id": "sntp_sense", "name": "sNTP Sense", "type": "Passive", "effect": "Can sense sNTP energy"},
+    {"id": "tntp_sense", "name": "tNTP Sense", "type": "Passive", "effect": "Can sense tNTP energy"},
+    {"id": "untp_sense", "name": "uNTP Sense", "type": "Passive", "effect": "Can sense uNTP energy"},
+    {"id": "vntp_sense", "name": "vNTP Sense", "type": "Passive", "effect": "Can sense vNTP energy"},
+    {"id": "wntp_sense", "name": "wNTP Sense", "type": "Passive", "effect": "Can sense wNTP energy"},
+    {"id": "xntp_sense", "name": "xNTP Sense", "type": "Passive", "effect": "Can sense xNTP energy"},
+    {"id": "yntp_sense", "name": "yNTP Sense", "type": "Passive", "effect": "Can sense yNTP energy"},
+    {"id": "zntp_sense", "name": "zNTP Sense", "type": "Passive", "effect": "Can sense zNTP energy"}
   ],
   "lifepaths": [
     {
