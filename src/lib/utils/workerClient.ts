@@ -64,7 +64,8 @@ class GameEngineClient {
     const requestId = crypto.randomUUID();
     
     return new Promise<TResponse>((resolve, reject) => {
-      this.pendingRequests.set(requestId, { resolve, reject });
+      // Cast resolve to unknown-resolving function for internal map
+      this.pendingRequests.set(requestId, { resolve: resolve as unknown as (value: unknown) => void, reject });
       
       this.worker!.postMessage({
         type,

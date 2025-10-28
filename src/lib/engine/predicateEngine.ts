@@ -130,35 +130,35 @@ function executeOutcome(
   // Execute the specific outcome type
   switch (rule.outcome) {
     case 'deal_damage':
-      executeDealDamage(outcome, rule.parameters);
+      executeDealDamage(outcome, rule.parameters as ParamsRecord);
       break;
     case 'receive_damage':
-      executeReceiveDamage(outcome, rule.parameters);
+      executeReceiveDamage(outcome, rule.parameters as ParamsRecord);
       break;
     case 'gain_resource':
-      executeGainResource(outcome, rule.parameters);
+      executeGainResource(outcome, rule.parameters as ParamsRecord);
       break;
     case 'restore':
-      executeRestore(outcome, rule.parameters);
+      executeRestore(outcome, rule.parameters as ParamsRecord);
       break;
     case 'change_affinity':
-      executeChangeAffinity(outcome, rule.parameters);
+      executeChangeAffinity(outcome, rule.parameters as ParamsRecord);
       break;
     case 'discover_location':
-      executeDiscoverLocation(outcome, rule.parameters);
+      executeDiscoverLocation(outcome, rule.parameters as ParamsRecord);
       break;
     case 'anger_entity':
-      executeAngerEntity(outcome, rule.parameters);
+      executeAngerEntity(outcome, rule.parameters as ParamsRecord);
       break;
     case 'minor_setback':
-      executeMinorSetback(outcome, rule.parameters);
+      executeMinorSetback(outcome, rule.parameters as ParamsRecord);
       break;
     case 'no_effect':
-      executeNoEffect(outcome, rule.parameters);
+      executeNoEffect(outcome);
       break;
     default:
       console.warn(`Unknown outcome type: ${rule.outcome}`);
-      executeNoEffect(outcome, rule.parameters);
+      executeNoEffect(outcome);
   }
 
   return outcome;
@@ -190,9 +190,11 @@ function generateNarrativeText(
 }
 
 // Outcome execution functions
-type DamageParams = { dice?: string };
-function executeDealDamage(outcome: Outcome, params: DamageParams): void {
-  const damage = rollDamage(params.dice || '1d4');
+type ParamsRecord = Record<string, unknown>;
+
+function executeDealDamage(outcome: Outcome, params: ParamsRecord): void {
+  const dice = typeof params['dice'] === 'string' ? (params['dice'] as string) : '1d4';
+  const damage = rollDamage(dice);
   outcome.effects.push({
     type: 'damage',
     value: damage
@@ -200,8 +202,9 @@ function executeDealDamage(outcome: Outcome, params: DamageParams): void {
   outcome.text += ` You deal ${damage} damage!`;
 }
 
-function executeReceiveDamage(outcome: Outcome, params: DamageParams): void {
-  const damage = rollDamage(params.dice || '1d4');
+function executeReceiveDamage(outcome: Outcome, params: ParamsRecord): void {
+  const dice = typeof params['dice'] === 'string' ? (params['dice'] as string) : '1d4';
+  const damage = rollDamage(dice);
   outcome.effects.push({
     type: 'damage',
     value: -damage // Negative damage = healing
@@ -209,10 +212,9 @@ function executeReceiveDamage(outcome: Outcome, params: DamageParams): void {
   outcome.text += ` You take ${damage} damage.`;
 }
 
-type GainResourceParams = { resource?: string; amount?: number };
-function executeGainResource(outcome: Outcome, params: GainResourceParams): void {
-  const resource = params.resource || 'goods';
-  const amount = params.amount || 1;
+function executeGainResource(outcome: Outcome, params: ParamsRecord): void {
+  const resource = typeof params['resource'] === 'string' ? (params['resource'] as string) : 'goods';
+  const amount = typeof params['amount'] === 'number' ? (params['amount'] as number) : 1;
   outcome.effects.push({
     type: 'gain',
     resource,
@@ -221,9 +223,8 @@ function executeGainResource(outcome: Outcome, params: GainResourceParams): void
   outcome.text += ` You gain ${amount} ${resource}.`;
 }
 
-type RestoreParams = { hp?: number };
-function executeRestore(outcome: Outcome, params: RestoreParams): void {
-  const hp = params.hp || 1;
+function executeRestore(outcome: Outcome, params: ParamsRecord): void {
+  const hp = typeof params['hp'] === 'number' ? (params['hp'] as number) : 1;
   outcome.effects.push({
     type: 'heal',
     value: hp
@@ -231,10 +232,9 @@ function executeRestore(outcome: Outcome, params: RestoreParams): void {
   outcome.text += ` You restore ${hp} health.`;
 }
 
-type ChangeAffinityParams = { entity?: string; change?: number };
-function executeChangeAffinity(outcome: Outcome, params: ChangeAffinityParams): void {
-  const entity = params.entity || 'unknown';
-  const change = params.change || 1;
+function executeChangeAffinity(outcome: Outcome, params: ParamsRecord): void {
+  const entity = typeof params['entity'] === 'string' ? (params['entity'] as string) : 'unknown';
+  const change = typeof params['change'] === 'number' ? (params['change'] as number) : 1;
   outcome.effects.push({
     type: 'affinity',
     entity,
@@ -243,9 +243,8 @@ function executeChangeAffinity(outcome: Outcome, params: ChangeAffinityParams): 
   outcome.text += ` Your relationship with ${entity} changes.`;
 }
 
-type DiscoverLocationParams = { location?: string };
-function executeDiscoverLocation(outcome: Outcome, params: DiscoverLocationParams): void {
-  const location = params.location || 'unknown';
+function executeDiscoverLocation(outcome: Outcome, params: ParamsRecord): void {
+  const location = typeof params['location'] === 'string' ? (params['location'] as string) : 'unknown';
   outcome.effects.push({
     type: 'unlock',
     category: 'location',
@@ -254,10 +253,9 @@ function executeDiscoverLocation(outcome: Outcome, params: DiscoverLocationParam
   outcome.text += ` You discover: ${location}!`;
 }
 
-type AngerEntityParams = { entity?: string; change?: number };
-function executeAngerEntity(outcome: Outcome, params: AngerEntityParams): void {
-  const entity = params.entity || 'unknown';
-  const change = params.change || -1;
+function executeAngerEntity(outcome: Outcome, params: ParamsRecord): void {
+  const entity = typeof params['entity'] === 'string' ? (params['entity'] as string) : 'unknown';
+  const change = typeof params['change'] === 'number' ? (params['change'] as number) : -1;
   outcome.effects.push({
     type: 'affinity',
     entity,
@@ -266,9 +264,9 @@ function executeAngerEntity(outcome: Outcome, params: AngerEntityParams): void {
   outcome.text += ` You anger ${entity}.`;
 }
 
-type MinorSetbackParams = { text?: string };
-function executeMinorSetback(outcome: Outcome, params: MinorSetbackParams): void {
-  outcome.text += ` ${params.text || 'A minor setback occurs.'}`;
+function executeMinorSetback(outcome: Outcome, params: ParamsRecord): void {
+  const text = typeof params['text'] === 'string' ? (params['text'] as string) : 'A minor setback occurs.';
+  outcome.text += ` ${text}`;
 }
 
 function executeNoEffect(outcome: Outcome): void {

@@ -213,6 +213,39 @@
       "failureField": [
         { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["diplomat", "alliance_builder"] }
       ]
+    },
+    {
+      "id": "forage",
+      "name": "Forage",
+      "description": "Search nearby for edible plants and materials.",
+      "actionType": "Untargeted",
+      "tags": ["Survival", "Wilderness"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["keen_forager", "trail_signs"] }
+      ]
+    },
+    {
+      "id": "rest",
+      "name": "Rest",
+      "description": "Take time to recover your strength.",
+      "actionType": "Untargeted",
+      "tags": ["Recovery", "Universal"],
+      "timescales": ["Day", "3-Hour", "20-Min"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["efficient_rest", "second_wind"] }
+      ]
+    },
+    {
+      "id": "sneak",
+      "name": "Sneak",
+      "description": "Move quietly to avoid attention.",
+      "actionType": "Untargeted",
+      "tags": ["Stealth", "Exploration"],
+      "timescales": ["3-Hour", "20-Min"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["soft_steps", "shadow_mind"] }
+      ]
     }
   ],
   "predicateCards": [
@@ -413,6 +446,44 @@
       },
       "stateFlags": {"dangerous": true, "cursed": true},
       "exits": ["gnarled_woods"]
+    },
+    {
+      "id": "hidden_glade",
+      "name": "Hidden Glade",
+      "description": "A tranquil clearing bathed in soft light.",
+      "sceneTags": ["Wilderness", "Peaceful"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "take_it_in": [
+          { "condition": "roll >= 8", "outcome": "restore", "parameters": { "hp": 1 } },
+          { "condition": "roll < 8", "outcome": "no_effect", "parameters": {} }
+        ],
+        "forage": [
+          { "condition": "roll >= 10", "outcome": "gain_resource", "parameters": { "resource": "goods", "amount": 1 } },
+          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {"safe": true},
+      "exits": ["gnarled_woods"]
+    },
+    {
+      "id": "old_road",
+      "name": "Old Road",
+      "description": "A cracked path winding between settlements.",
+      "sceneTags": ["Wilderness", "Travel"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "travel": [
+          { "condition": "roll >= 10", "outcome": "no_effect", "parameters": {} },
+          { "condition": "roll < 10", "outcome": "minor_setback", "parameters": { "text": "You lose time avoiding hazards." } }
+        ],
+        "sneak": [
+          { "condition": "roll >= 12", "outcome": "no_effect", "parameters": {} },
+          { "condition": "roll < 12", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+        ]
+      },
+      "stateFlags": {},
+      "exits": ["village_square", "gnarled_woods"]
     }
   ],
   "traits": [

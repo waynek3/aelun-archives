@@ -1,12 +1,14 @@
 import './index.css'
+import { lazy, Suspense } from 'react'
 import { useUIStore } from '@/stores/uiStore'
 import MainMenuScreen from '@/components/screens/MainMenuScreen'
 import LifepathScreen from '@/components/screens/LifepathScreen'
 import GameLoopScreen from '@/components/screens/GameLoopScreen'
 import CharacterSummaryScreen from '@/components/screens/CharacterSummaryScreen'
-import CompendiumScreen from '@/components/screens/CompendiumScreen'
-import GraveyardScreen from '@/components/screens/GraveyardScreen'
-import PauseMenuScreen from '@/components/screens/PauseMenuScreen'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+const CompendiumScreen = lazy(() => import('@/components/screens/CompendiumScreen'))
+const GraveyardScreen = lazy(() => import('@/components/screens/GraveyardScreen'))
+const PauseMenuScreen = lazy(() => import('@/components/screens/PauseMenuScreen'))
 // DeathScreen is handled within GameLoopScreen
 import { Modal } from '@/components/ui/Modal'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
@@ -47,7 +49,13 @@ function App() {
 
   return (
     <ErrorBoundary>
-      {Screen}
+      <Suspense fallback={
+        <div className="py-12 flex items-center justify-center">
+          <LoadingSpinner message="Loading..." />
+        </div>
+      }>
+        {Screen}
+      </Suspense>
       <Modal open={modal.open} onClose={closeModal} title="Confirm">
         {modal.content}
       </Modal>
