@@ -81,6 +81,7 @@ function evaluateCondition(
   roll: number,
   _character: Character
 ): boolean {
+  void _character;
   // Simple condition parser for MVP
   // Supports: "roll >= 10", "roll > 15", "roll < 5", "roll == 20"
   
@@ -115,6 +116,7 @@ function executeOutcome(
   _character: Character,
   diceResult: DiceResult
 ): Outcome {
+  void _character;
   const outcome: Outcome = {
     text: '',
     effects: [],
@@ -173,6 +175,7 @@ function generateNarrativeText(
   diceResult: DiceResult,
   _rule: OutcomeRule
 ): string {
+  void _rule;
   const actionName = actionCard.name.toLowerCase();
   const locationName = predicateCard.name;
   

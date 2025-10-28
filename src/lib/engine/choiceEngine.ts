@@ -104,6 +104,7 @@ function applyAffinityModifiers<T>(
  * Get location-based weight modifier
  */
 function getLocationModifier(_location: string): number {
+  void _location;
   // This would be expanded with actual location-based logic
   // For now, return neutral modifier
   return 1.0;
@@ -113,6 +114,7 @@ function getLocationModifier(_location: string): number {
  * Get time-based weight modifier
  */
 function getTimeModifier(_timeOfDay: string): number {
+  void _timeOfDay;
   // This would be expanded with actual time-based logic
   // For now, return neutral modifier
   return 1.0;
@@ -124,6 +126,7 @@ function getTimeModifier(_timeOfDay: string): number {
 function getRecentActionModifier(
   _recentActions: string[]
 ): number {
+  void _recentActions;
   // This would be expanded with actual action history logic
   // For now, return neutral modifier
   return 1.0;
