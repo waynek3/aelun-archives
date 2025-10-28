@@ -7,13 +7,13 @@ import { resolveAction } from '../engine/predicateEngine';
 
 interface WorkerCommand {
   type: string;
-  payload: any;
+  payload: unknown;
   requestId: string;
 }
 
 interface WorkerResponse {
   type: string;
-  payload: any;
+  payload: unknown;
   requestId: string;
   error?: string;
 }

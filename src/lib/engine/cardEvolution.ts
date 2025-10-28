@@ -4,7 +4,7 @@
  */
 
 import type { ActionCard } from '@/types/cards';
-import type { MetaProgression } from '@/types/meta';
+import type { MetaProgression, CardProgress as MetaCardProgress } from '@/types/meta';
 import { openDB, get, put } from '@/lib/persistence/indexedDB';
 import { DB_NAME, DB_VERSION, upgrade } from '@/lib/persistence/migrations';
 import { discoverContent } from './discoveryManager';
@@ -131,8 +131,8 @@ export async function selectUnlock(
 async function getCardProgress(cardId: string, meta: MetaProgression): Promise<CardProgress> {
   // For now, store progress in a simple way
   // In a real implementation, this would be in a separate store
-  const progressKey = `cardProgress_${cardId}`;
-  const stored = (meta as any)[progressKey];
+  // Use structured cardProgress map on MetaProgression
+  const stored: MetaCardProgress | undefined = meta.cardProgress?.[cardId];
   
   if (stored) {
     return stored;
@@ -159,8 +159,11 @@ async function saveCardProgress(
 ): Promise<void> {
   const db = await openDB({ name: DB_NAME, version: DB_VERSION, upgrade });
   
-  // Store progress in meta progression
-  (meta as any)[`cardProgress_${cardId}`] = progress;
+  // Store progress in structured map
+  if (!meta.cardProgress) {
+    meta.cardProgress = {};
+  }
+  meta.cardProgress[cardId] = progress;
   
   // Save back to database
   await put(db, 'metaProgression', meta, 'main');

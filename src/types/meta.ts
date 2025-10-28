@@ -31,4 +31,12 @@ export interface MetaProgression {
   graveyard: GraveyardEntry[];
   compendium: Compendium;
   statistics: GameStatistics;
+  // Per-card failure tracking for evolution system
+  cardProgress?: Record<string, CardProgress>;
+}
+
+export interface CardProgress {
+  cardId: string;
+  failureCount: number;
+  tiersUsed: boolean[];
 }

@@ -13,7 +13,7 @@ import type { Outcome } from '../engine/predicateEngine';
 class GameEngineClient {
   private worker: Worker | null = null;
   private pendingRequests: Map<string, {
-    resolve: (value: any) => void;
+    resolve: (value: unknown) => void;
     reject: (error: Error) => void;
   }> = new Map();
 
@@ -55,7 +55,7 @@ class GameEngineClient {
     }
   }
 
-  private async sendCommand(type: string, payload: any): Promise<any> {
+  private async sendCommand<TPayload, TResponse>(type: string, payload: TPayload): Promise<TResponse> {
     if (!this.worker) {
       // Fallback to main thread if worker not available
       throw new Error('Worker not available');
@@ -63,7 +63,7 @@ class GameEngineClient {
 
     const requestId = crypto.randomUUID();
     
-    return new Promise((resolve, reject) => {
+    return new Promise<TResponse>((resolve, reject) => {
       this.pendingRequests.set(requestId, { resolve, reject });
       
       this.worker!.postMessage({
@@ -84,7 +84,7 @@ class GameEngineClient {
     diceResult: DiceResult;
   }): Promise<Outcome> {
     try {
-      return await this.sendCommand('RESOLVE_ACTION', params);
+      return await this.sendCommand<typeof params, Outcome>('RESOLVE_ACTION', params);
     } catch (error) {
       console.warn('Worker failed, falling back to main thread:', error);
       // Fallback to main thread implementation

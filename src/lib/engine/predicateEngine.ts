@@ -10,7 +10,7 @@ import type { DiceResult } from './diceSystem';
 export interface Outcome {
   text: string;
   effects: OutcomeEffect[];
-  stateChanges: Record<string, any>;
+  stateChanges: Record<string, boolean | number | string>;
   success: boolean;
   criticalSuccess?: boolean;
   criticalFailure?: boolean;
@@ -25,7 +25,7 @@ export interface OutcomeEffect {
   id?: string;
   location?: string;
   flag?: string;
-  flagValue?: any;
+  flagValue?: boolean | number | string;
 }
 
 /**
@@ -190,7 +190,8 @@ function generateNarrativeText(
 }
 
 // Outcome execution functions
-function executeDealDamage(outcome: Outcome, params: any): void {
+type DamageParams = { dice?: string };
+function executeDealDamage(outcome: Outcome, params: DamageParams): void {
   const damage = rollDamage(params.dice || '1d4');
   outcome.effects.push({
     type: 'damage',
@@ -199,7 +200,7 @@ function executeDealDamage(outcome: Outcome, params: any): void {
   outcome.text += ` You deal ${damage} damage!`;
 }
 
-function executeReceiveDamage(outcome: Outcome, params: any): void {
+function executeReceiveDamage(outcome: Outcome, params: DamageParams): void {
   const damage = rollDamage(params.dice || '1d4');
   outcome.effects.push({
     type: 'damage',
@@ -208,7 +209,8 @@ function executeReceiveDamage(outcome: Outcome, params: any): void {
   outcome.text += ` You take ${damage} damage.`;
 }
 
-function executeGainResource(outcome: Outcome, params: any): void {
+type GainResourceParams = { resource?: string; amount?: number };
+function executeGainResource(outcome: Outcome, params: GainResourceParams): void {
   const resource = params.resource || 'goods';
   const amount = params.amount || 1;
   outcome.effects.push({
@@ -219,7 +221,8 @@ function executeGainResource(outcome: Outcome, params: any): void {
   outcome.text += ` You gain ${amount} ${resource}.`;
 }
 
-function executeRestore(outcome: Outcome, params: any): void {
+type RestoreParams = { hp?: number };
+function executeRestore(outcome: Outcome, params: RestoreParams): void {
   const hp = params.hp || 1;
   outcome.effects.push({
     type: 'heal',
@@ -228,7 +231,8 @@ function executeRestore(outcome: Outcome, params: any): void {
   outcome.text += ` You restore ${hp} health.`;
 }
 
-function executeChangeAffinity(outcome: Outcome, params: any): void {
+type ChangeAffinityParams = { entity?: string; change?: number };
+function executeChangeAffinity(outcome: Outcome, params: ChangeAffinityParams): void {
   const entity = params.entity || 'unknown';
   const change = params.change || 1;
   outcome.effects.push({
@@ -239,7 +243,8 @@ function executeChangeAffinity(outcome: Outcome, params: any): void {
   outcome.text += ` Your relationship with ${entity} changes.`;
 }
 
-function executeDiscoverLocation(outcome: Outcome, params: any): void {
+type DiscoverLocationParams = { location?: string };
+function executeDiscoverLocation(outcome: Outcome, params: DiscoverLocationParams): void {
   const location = params.location || 'unknown';
   outcome.effects.push({
     type: 'unlock',
@@ -249,7 +254,8 @@ function executeDiscoverLocation(outcome: Outcome, params: any): void {
   outcome.text += ` You discover: ${location}!`;
 }
 
-function executeAngerEntity(outcome: Outcome, params: any): void {
+type AngerEntityParams = { entity?: string; change?: number };
+function executeAngerEntity(outcome: Outcome, params: AngerEntityParams): void {
   const entity = params.entity || 'unknown';
   const change = params.change || -1;
   outcome.effects.push({
@@ -260,11 +266,12 @@ function executeAngerEntity(outcome: Outcome, params: any): void {
   outcome.text += ` You anger ${entity}.`;
 }
 
-function executeMinorSetback(outcome: Outcome, params: any): void {
+type MinorSetbackParams = { text?: string };
+function executeMinorSetback(outcome: Outcome, params: MinorSetbackParams): void {
   outcome.text += ` ${params.text || 'A minor setback occurs.'}`;
 }
 
-function executeNoEffect(outcome: Outcome, _params: any): void {
+function executeNoEffect(outcome: Outcome): void {
   outcome.text += ` Nothing significant happens.`;
 }
 
