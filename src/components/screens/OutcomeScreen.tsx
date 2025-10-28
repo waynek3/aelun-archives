@@ -103,7 +103,7 @@ function formatEffect(effect: {
   entity?: string;
   id?: string;
   flag?: string;
-  flagValue?: any;
+  flagValue?: boolean | number | string;
   location?: string;
 }): string {
   switch (effect.type) {

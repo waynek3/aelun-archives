@@ -83,17 +83,20 @@ function applyAffinityModifiers<T>(
   
   // Apply location-based modifications
   if (context.location) {
-    modifiedWeight *= getLocationModifier(option, context.location);
+    // Placeholder for location-based modifier
+    modifiedWeight *= getLocationModifier();
   }
   
   // Apply time-based modifications
   if (context.timeOfDay) {
-    modifiedWeight *= getTimeModifier(option, context.timeOfDay);
+    // Placeholder for time-based modifier
+    modifiedWeight *= getTimeModifier();
   }
   
   // Apply recent action modifications
   if (context.recentActions && context.recentActions.length > 0) {
-    modifiedWeight *= getRecentActionModifier(option, context.recentActions);
+    // Placeholder for recent action-based modifier
+    modifiedWeight *= getRecentActionModifier();
   }
   
   // Ensure weight doesn't go negative
@@ -103,7 +106,7 @@ function applyAffinityModifiers<T>(
 /**
  * Get location-based weight modifier
  */
-function getLocationModifier<T>(_option: WeightedOption<T>, _location: string): number {
+function getLocationModifier(): number {
   // This would be expanded with actual location-based logic
   // For now, return neutral modifier
   return 1.0;
@@ -112,7 +115,7 @@ function getLocationModifier<T>(_option: WeightedOption<T>, _location: string): 
 /**
  * Get time-based weight modifier
  */
-function getTimeModifier<T>(_option: WeightedOption<T>, _timeOfDay: string): number {
+function getTimeModifier(): number {
   // This would be expanded with actual time-based logic
   // For now, return neutral modifier
   return 1.0;
@@ -121,10 +124,7 @@ function getTimeModifier<T>(_option: WeightedOption<T>, _timeOfDay: string): num
 /**
  * Get recent action weight modifier
  */
-function getRecentActionModifier<T>(
-  _option: WeightedOption<T>,
-  _recentActions: string[]
-): number {
+function getRecentActionModifier(): number {
   // This would be expanded with actual action history logic
   // For now, return neutral modifier
   return 1.0;

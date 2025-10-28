@@ -1,9 +1,16 @@
 import { useUIStore } from '@/stores/uiStore'
+import { useEffect, useState } from 'react'
+import { getDiscoveryStats } from '@/lib/engine/discoveryManager'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 
 export default function MainMenuScreen() {
   const setScreen = useUIStore((s) => s.setScreen)
+  const [progress, setProgress] = useState<number>(0)
+
+  useEffect(() => {
+    getDiscoveryStats().then(s => setProgress(s.completionPercentage)).catch(() => setProgress(0))
+  }, [])
 
   return (
     <ScreenContainer>
@@ -30,7 +37,7 @@ export default function MainMenuScreen() {
         </div>
 
         <div className="mt-8 text-sm opacity-70">
-          <p>Progress: 0% Complete</p>
+          <p>Progress: {progress}% Complete</p>
           <p>Version: 1.0.0 | Offline Mode</p>
         </div>
       </div>

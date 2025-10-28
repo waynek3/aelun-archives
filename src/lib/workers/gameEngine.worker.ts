@@ -7,13 +7,13 @@ import { resolveAction } from '../engine/predicateEngine';
 
 interface WorkerCommand {
   type: string;
-  payload: any;
+  payload: unknown;
   requestId: string;
 }
 
 interface WorkerResponse {
   type: string;
-  payload: any;
+  payload: unknown;
   requestId: string;
   error?: string;
 }
@@ -27,7 +27,12 @@ self.onmessage = async (event: MessageEvent<WorkerCommand>) => {
     
     switch (type) {
       case 'RESOLVE_ACTION':
-        result = await resolveAction(payload);
+        result = await resolveAction(payload as {
+          actionCard: import('@/types/cards').ActionCard;
+          predicateCard: import('@/types/cards').PredicateCard;
+          character: import('@/types/character').Character;
+          diceResult: import('../engine/diceSystem').DiceResult;
+        });
         break;
         
       case 'ROLL_DICE_POOL':
