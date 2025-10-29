@@ -73,7 +73,7 @@ export function isTimescale(value: unknown): value is string {
   return typeof value === 'string';
 }
 
-export function isStateFlag(value: unknown): value is { flag: string; value: any } {
+export function isStateFlag(value: unknown): value is { flag: string; value: unknown } {
   if (!value || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
   return (
@@ -112,7 +112,7 @@ export function isLifepathStep(value: unknown): value is {
 
 export function isRequirement(value: unknown): value is { 
   type: string; 
-  value: any; 
+  value: unknown; 
   description: string 
 } {
   if (!value || typeof value !== 'object') return false;
@@ -126,7 +126,7 @@ export function isRequirement(value: unknown): value is {
 
 export function isReward(value: unknown): value is { 
   type: string; 
-  value: any; 
+  value: unknown; 
   description: string 
 } {
   if (!value || typeof value !== 'object') return false;
@@ -158,7 +158,7 @@ export function isChoice(value: unknown): value is {
 
 export function isConsequence(value: unknown): value is { 
   type: string; 
-  value: any; 
+  value: unknown; 
   description: string 
 } {
   if (!value || typeof value !== 'object') return false;

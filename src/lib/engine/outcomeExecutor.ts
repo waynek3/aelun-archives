@@ -169,7 +169,7 @@ function applyUnlock(character: Character, effect: OutcomeEffect): { character: 
   const id = effect.id || 'unknown';
   
   // Discover content in compendium
-  discoverContent(category as any, id).catch(error => {
+  discoverContent(category as 'cards' | 'predicates' | 'traits' | 'affinities' | 'lore', id).catch(error => {
     console.error('Failed to discover content:', error);
   });
   
