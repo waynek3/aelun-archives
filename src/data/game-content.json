@@ -611,6 +611,220 @@
       "failureField": [
         { "tier": 0, "requiresFailures": 4, "maxUnlocks": 1, "pool": ["divine_channel", "prophet"] }
       ]
+    },
+    {
+      "id": "shadow_step",
+      "name": "Shadow Step",
+      "description": "Move through shadows to appear elsewhere.",
+      "actionType": "Targeted",
+      "tags": ["Stealth", "Magical"],
+      "timescales": ["Encounter", "3-Hour"],
+      "diceModifier": "+2d4",
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["shadow_master", "teleport"] }
+      ]
+    },
+    {
+      "id": "wild_shape",
+      "name": "Wild Shape",
+      "description": "Transform into an animal form.",
+      "actionType": "Untargeted",
+      "tags": ["Magical", "Transformation"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["beast_form", "animal_empathy"] }
+      ]
+    },
+    {
+      "id": "mind_blast",
+      "name": "Mind Blast",
+      "description": "Attack with pure mental force.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Mental"],
+      "timescales": ["Encounter"],
+      "diceModifier": "+1d6",
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["psychic_storm", "mental_barrier"] }
+      ]
+    },
+    {
+      "id": "time_dilation",
+      "name": "Time Dilation",
+      "description": "Slow time around you for a brief moment.",
+      "actionType": "Untargeted",
+      "tags": ["Magical", "Temporal"],
+      "timescales": ["Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 4, "maxUnlocks": 1, "pool": ["time_master", "chrono_warrior"] }
+      ]
+    },
+    {
+      "id": "elemental_blast",
+      "name": "Elemental Blast",
+      "description": "Channel raw elemental energy into a devastating attack.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Elemental"],
+      "timescales": ["Encounter"],
+      "diceModifier": "+3d4",
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["elemental_master", "primal_force"] }
+      ]
+    },
+    {
+      "id": "healing_aura",
+      "name": "Healing Aura",
+      "description": "Radiate healing energy to all nearby allies.",
+      "actionType": "Untargeted",
+      "tags": ["Healing", "Magical"],
+      "timescales": ["Encounter", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["mass_heal", "divine_aura"] }
+      ]
+    },
+    {
+      "id": "detect_magic",
+      "name": "Detect Magic",
+      "description": "Sense magical auras and enchantments.",
+      "actionType": "Untargeted",
+      "tags": ["Magical", "Detection"],
+      "timescales": ["3-Hour", "20-Min"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 1, "maxUnlocks": 1, "pool": ["arcane_sight", "magic_sense"] }
+      ]
+    },
+    {
+      "id": "charm_person",
+      "name": "Charm Person",
+      "description": "Magically influence someone's thoughts and feelings.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Social"],
+      "timescales": ["Encounter", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 2, "maxUnlocks": 1, "pool": ["enchanter", "mind_controller"] }
+      ]
+    },
+    {
+      "id": "wall_of_force",
+      "name": "Wall of Force",
+      "description": "Create an invisible barrier of pure force.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Defensive"],
+      "timescales": ["Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["force_master", "barrier_warden"] }
+      ]
+    },
+    {
+      "id": "polymorph",
+      "name": "Polymorph",
+      "description": "Transform another creature into a different form.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Transformation"],
+      "timescales": ["Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 4, "maxUnlocks": 1, "pool": ["shapeshifter", "transmuter"] }
+      ]
+    },
+    {
+      "id": "disintegrate",
+      "name": "Disintegrate",
+      "description": "Reduce matter to dust with a ray of pure destruction.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Destructive"],
+      "timescales": ["Encounter"],
+      "diceModifier": "+2d6",
+      "failureField": [
+        { "tier": 0, "requiresFailures": 5, "maxUnlocks": 1, "pool": ["annihilator", "void_master"] }
+      ]
+    },
+    {
+      "id": "teleport",
+      "name": "Teleport",
+      "description": "Instantly transport yourself to a known location.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Transportation"],
+      "timescales": ["Day", "3-Hour"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 3, "maxUnlocks": 1, "pool": ["portal_master", "dimensional_traveler"] }
+      ]
+    },
+    {
+      "id": "wish",
+      "name": "Wish",
+      "description": "Alter reality itself with a single spoken desire.",
+      "actionType": "Untargeted",
+      "tags": ["Magical", "Reality"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 10, "maxUnlocks": 1, "pool": ["reality_weaver", "cosmic_power"] }
+      ]
+    },
+    {
+      "id": "resurrection",
+      "name": "Resurrection",
+      "description": "Bring the dead back to life through divine power.",
+      "actionType": "Targeted",
+      "tags": ["Divine", "Healing"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 8, "maxUnlocks": 1, "pool": ["life_giver", "death_defier"] }
+      ]
+    },
+    {
+      "id": "meteor_swarm",
+      "name": "Meteor Swarm",
+      "description": "Call down a devastating rain of meteors from the sky.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Destructive"],
+      "timescales": ["Encounter"],
+      "diceModifier": "+4d6",
+      "failureField": [
+        { "tier": 0, "requiresFailures": 6, "maxUnlocks": 1, "pool": ["cosmic_destroyer", "sky_faller"] }
+      ]
+    },
+    {
+      "id": "time_stop",
+      "name": "Time Stop",
+      "description": "Freeze time for everyone except yourself.",
+      "actionType": "Untargeted",
+      "tags": ["Magical", "Temporal"],
+      "timescales": ["Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 7, "maxUnlocks": 1, "pool": ["time_lord", "temporal_master"] }
+      ]
+    },
+    {
+      "id": "gate",
+      "name": "Gate",
+      "description": "Open a portal to another plane of existence.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Planar"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 9, "maxUnlocks": 1, "pool": ["planar_traveler", "dimension_walker"] }
+      ]
+    },
+    {
+      "id": "miracle",
+      "name": "Miracle",
+      "description": "Request divine intervention for any possible effect.",
+      "actionType": "Untargeted",
+      "tags": ["Divine", "Universal"],
+      "timescales": ["Day"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 12, "maxUnlocks": 1, "pool": ["divine_avatar", "god_touched"] }
+      ]
+    },
+    {
+      "id": "power_word_kill",
+      "name": "Power Word Kill",
+      "description": "Speak a word of such power that it can end life instantly.",
+      "actionType": "Targeted",
+      "tags": ["Magical", "Death"],
+      "timescales": ["Encounter"],
+      "failureField": [
+        { "tier": 0, "requiresFailures": 8, "maxUnlocks": 1, "pool": ["death_speaker", "word_master"] }
+      ]
     }
   ],
   "predicateCards": [
@@ -1133,6 +1347,213 @@
       },
       "stateFlags": {"magical": true, "beautiful": true, "mysterious": true},
       "exits": ["underground_city", "healing_spring"]
+    },
+    {
+      "id": "crystal_caverns_deep",
+      "name": "The Deep Crystal Caverns",
+      "description": "A vast underground network of glowing crystal formations.",
+      "sceneTags": ["Magical", "Beautiful", "Underground"],
+      "timescale": "3-Hour",
+      "outcomeLogic": {
+        "meditate": [
+          { "condition": "roll >= 12", "outcome": "purification", "parameters": { "source": "crystal_energy", "amount": 2 } },
+          { "condition": "roll < 12", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+        ],
+        "study": [
+          { "condition": "roll >= 13", "outcome": "learn", "parameters": { "skill": "crystal_lore", "amount": 2 } },
+          { "condition": "roll < 13", "outcome": "no_effect", "parameters": {} }
+        ],
+        "craft": [
+          { "condition": "roll >= 14", "outcome": "gain_resource", "parameters": { "resource": "crystal", "amount": 2 } },
+          { "condition": "roll < 14", "outcome": "receive_damage", "parameters": { "dice": "1d6" } }
+        ]
+      },
+      "stateFlags": {"magical": true, "beautiful": true},
+      "exits": ["homestead", "homestead", "homestead"]
+    },
+    {
+      "id": "storm_peak",
+      "name": "The Storm Peak",
+      "description": "A treacherous mountain peak where eternal storms rage.",
+      "sceneTags": ["Dangerous", "Weather", "High"],
+      "timescale": "3-Hour",
+      "outcomeLogic": {
+        "meditate": [
+          { "condition": "roll >= 14", "outcome": "change_affinity", "parameters": { "entity": "storm_spirits", "change": 2 } },
+          { "condition": "roll < 14", "outcome": "receive_damage", "parameters": { "dice": "1d8" } }
+        ],
+        "pray": [
+          { "condition": "roll >= 16", "outcome": "bless", "parameters": { "blessing": "storm_mastery", "duration": 3 } },
+          { "condition": "roll < 16", "outcome": "receive_damage", "parameters": { "dice": "2d6" } }
+        ],
+        "take_it_in": [
+          { "condition": "roll >= 12", "outcome": "learn", "parameters": { "skill": "weather_lore", "amount": 1 } },
+          { "condition": "roll < 12", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+        ]
+      },
+      "stateFlags": {"dangerous": true, "weather": true},
+      "exits": ["homestead", "crystal_caverns"]
+    },
+    {
+      "id": "ethereal_glade",
+      "name": "The Ethereal Glade",
+      "description": "A mystical forest clearing where the boundary between worlds is thin.",
+      "sceneTags": ["Magical", "Peaceful", "Nature"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "meditate": [
+          { "condition": "roll >= 12", "outcome": "heal", "parameters": { "value": 3 } },
+          { "condition": "roll < 12", "outcome": "no_effect", "parameters": {} }
+        ],
+        "pray": [
+          { "condition": "roll >= 14", "outcome": "change_affinity", "parameters": { "entity": "nature_spirits", "change": 3 } },
+          { "condition": "roll < 14", "outcome": "no_effect", "parameters": {} }
+        ],
+        "take_it_in": [
+          { "condition": "roll >= 10", "outcome": "insight", "parameters": { "insight": "ethereal_wisdom", "depth": 2 } },
+          { "condition": "roll < 10", "outcome": "no_effect", "parameters": {} }
+        ]
+      },
+      "stateFlags": {"magical": true, "peaceful": true},
+      "exits": ["homestead", "crystal_caverns", "storm_peak"]
+    },
+    {
+      "id": "shadow_realm",
+      "name": "The Shadow Realm",
+      "description": "A dark dimension where shadows take physical form.",
+      "sceneTags": ["Dark", "Magical", "Dangerous"],
+      "timescale": "Encounter",
+      "outcomeLogic": {
+        "meditate": [
+          { "condition": "roll >= 14", "outcome": "change_affinity", "parameters": { "entity": "shadow_spirits", "change": 2 } },
+          { "condition": "roll < 14", "outcome": "receive_damage", "parameters": { "dice": "1d6" } }
+        ],
+        "pray": [
+          { "condition": "roll >= 16", "outcome": "bless", "parameters": { "blessing": "shadow_mastery", "duration": 2 } },
+          { "condition": "roll < 16", "outcome": "receive_damage", "parameters": { "dice": "2d4" } }
+        ],
+        "take_it_in": [
+          { "condition": "roll >= 12", "outcome": "learn", "parameters": { "skill": "shadow_lore", "amount": 1 } },
+          { "condition": "roll < 12", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+        ]
+      },
+      "stateFlags": {"dark": true, "magical": true, "dangerous": true},
+      "exits": ["homestead", "ethereal_glade", "homestead"]
+    },
+    {
+      "id": "time_vortex",
+      "name": "The Time Vortex",
+      "description": "A swirling portal where past, present, and future collide.",
+      "sceneTags": ["Magical", "Temporal", "Dangerous"],
+      "timescale": "Encounter",
+      "outcomeLogic": {
+        "meditate": [
+          { "condition": "roll >= 15", "outcome": "insight", "parameters": { "insight": "temporal_wisdom", "depth": 3 } },
+          { "condition": "roll < 15", "outcome": "receive_damage", "parameters": { "dice": "2d6" } }
+        ],
+        "pray": [
+          { "condition": "roll >= 17", "outcome": "bless", "parameters": { "blessing": "temporal_mastery", "duration": 1 } },
+          { "condition": "roll < 17", "outcome": "receive_damage", "parameters": { "dice": "3d4" } }
+        ],
+        "take_it_in": [
+          { "condition": "roll >= 13", "outcome": "learn", "parameters": { "skill": "temporal_lore", "amount": 2 } },
+          { "condition": "roll < 13", "outcome": "receive_damage", "parameters": { "dice": "1d8" } }
+        ]
+      },
+      "stateFlags": {"magical": true, "temporal": true, "dangerous": true},
+      "exits": ["homestead", "shadow_realm", "ethereal_glade"]
+    },
+    {
+      "id": "elemental_forge",
+      "name": "The Elemental Forge",
+      "description": "A mystical forge where the elements are forged into powerful artifacts.",
+      "sceneTags": ["Magical", "Crafting", "Elemental"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "craft": [
+          { "condition": "roll >= 14", "outcome": "gain_resource", "parameters": { "resource": "elemental_artifact", "amount": 1 } },
+          { "condition": "roll < 14", "outcome": "receive_damage", "parameters": { "dice": "1d8" } }
+        ],
+        "study": [
+          { "condition": "roll >= 13", "outcome": "learn", "parameters": { "skill": "elemental_lore", "amount": 2 } },
+          { "condition": "roll < 13", "outcome": "receive_damage", "parameters": { "dice": "1d6" } }
+        ],
+        "meditate": [
+          { "condition": "roll >= 12", "outcome": "change_affinity", "parameters": { "entity": "elemental_spirits", "change": 2 } },
+          { "condition": "roll < 12", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+        ]
+      },
+      "stateFlags": {"magical": true, "crafting": true, "elemental": true},
+      "exits": ["homestead", "crystal_caverns", "time_vortex"]
+    },
+    {
+      "id": "dreamscape",
+      "name": "The Dreamscape",
+      "description": "A realm where dreams and nightmares take physical form.",
+      "sceneTags": ["Magical", "Mental", "Surreal"],
+      "timescale": "3-Hour",
+      "outcomeLogic": {
+        "meditate": [
+          { "condition": "roll >= 13", "outcome": "insight", "parameters": { "insight": "dream_wisdom", "depth": 2 } },
+          { "condition": "roll < 13", "outcome": "receive_damage", "parameters": { "dice": "1d6" } }
+        ],
+        "pray": [
+          { "condition": "roll >= 15", "outcome": "bless", "parameters": { "blessing": "dream_mastery", "duration": 2 } },
+          { "condition": "roll < 15", "outcome": "receive_damage", "parameters": { "dice": "2d4" } }
+        ],
+        "take_it_in": [
+          { "condition": "roll >= 11", "outcome": "learn", "parameters": { "skill": "dream_lore", "amount": 1 } },
+          { "condition": "roll < 11", "outcome": "receive_damage", "parameters": { "dice": "1d4" } }
+        ]
+      },
+      "stateFlags": {"magical": true, "mental": true, "surreal": true},
+      "exits": ["homestead", "ethereal_glade", "elemental_forge"]
+    },
+    {
+      "id": "void_portal",
+      "name": "The Void Portal",
+      "description": "A gateway to the infinite void between dimensions.",
+      "sceneTags": ["Magical", "Portal", "Dangerous"],
+      "timescale": "Encounter",
+      "outcomeLogic": {
+        "meditate": [
+          { "condition": "roll >= 16", "outcome": "insight", "parameters": { "insight": "void_wisdom", "depth": 4 } },
+          { "condition": "roll < 16", "outcome": "receive_damage", "parameters": { "dice": "3d6" } }
+        ],
+        "pray": [
+          { "condition": "roll >= 18", "outcome": "bless", "parameters": { "blessing": "void_mastery", "duration": 1 } },
+          { "condition": "roll < 18", "outcome": "receive_damage", "parameters": { "dice": "4d4" } }
+        ],
+        "take_it_in": [
+          { "condition": "roll >= 14", "outcome": "learn", "parameters": { "skill": "void_lore", "amount": 3 } },
+          { "condition": "roll < 14", "outcome": "receive_damage", "parameters": { "dice": "2d8" } }
+        ]
+      },
+      "stateFlags": {"magical": true, "portal": true, "dangerous": true},
+      "exits": ["homestead", "dreamscape", "time_vortex"]
+    },
+    {
+      "id": "cosmic_nexus",
+      "name": "The Cosmic Nexus",
+      "description": "A point where all cosmic forces converge and interact.",
+      "sceneTags": ["Magical", "Cosmic", "Powerful"],
+      "timescale": "Day",
+      "outcomeLogic": {
+        "meditate": [
+          { "condition": "roll >= 17", "outcome": "insight", "parameters": { "insight": "cosmic_wisdom", "depth": 5 } },
+          { "condition": "roll < 17", "outcome": "receive_damage", "parameters": { "dice": "4d6" } }
+        ],
+        "pray": [
+          { "condition": "roll >= 19", "outcome": "bless", "parameters": { "blessing": "cosmic_mastery", "duration": 1 } },
+          { "condition": "roll < 19", "outcome": "receive_damage", "parameters": { "dice": "5d4" } }
+        ],
+        "take_it_in": [
+          { "condition": "roll >= 15", "outcome": "learn", "parameters": { "skill": "cosmic_lore", "amount": 4 } },
+          { "condition": "roll < 15", "outcome": "receive_damage", "parameters": { "dice": "3d8" } }
+        ]
+      },
+      "stateFlags": {"magical": true, "cosmic": true, "powerful": true},
+      "exits": ["homestead", "void_portal", "dreamscape"]
     }
   ],
   "traits": [
@@ -1166,7 +1587,7 @@
     {"id": "seeker", "name": "Seeker", "type": "Passive", "effect": "+1d4 to information and discovery actions"},
     {"id": "artisan", "name": "Artisan", "type": "Passive", "effect": "+1d4 to crafting and creative actions"},
     {"id": "sage", "name": "Sage", "type": "Passive", "effect": "+1d4 to knowledge and wisdom actions"},
-    {"id": "berserker", "name": "Berserker", "type": "Triggered", "effect": "When damaged, +2d4 to next combat action"},
+    {"id": "berserker_warrior", "name": "Berserker", "type": "Triggered", "effect": "When damaged, +2d4 to next combat action"},
     {"id": "night_vision", "name": "Night Vision", "type": "Passive", "effect": "+1d4 to actions in darkness"},
     {"id": "water_breathing", "name": "Water Breathing", "type": "Passive", "effect": "Can survive underwater indefinitely"},
     {"id": "fire_resistance", "name": "Fire Resistance", "type": "Passive", "effect": "Half damage from fire sources"},
@@ -1243,7 +1664,7 @@
     {"id": "creation_sense", "name": "Creation Sense", "type": "Passive", "effect": "Can sense creation energy"},
     {"id": "destruction_sense", "name": "Destruction Sense", "type": "Passive", "effect": "Can sense destruction energy"},
     {"id": "birth_sense", "name": "Birth Sense", "type": "Passive", "effect": "Can sense birth energy"},
-    {"id": "death_sense", "name": "Death Sense", "type": "Passive", "effect": "Can sense death energy"},
+    {"id": "death_sense_enhanced", "name": "Death Sense", "type": "Passive", "effect": "Can sense death energy"},
     {"id": "growth_sense", "name": "Growth Sense", "type": "Passive", "effect": "Can sense growth energy"},
     {"id": "decay_sense", "name": "Decay Sense", "type": "Passive", "effect": "Can sense decay energy"},
     {"id": "renewal_sense", "name": "Renewal Sense", "type": "Passive", "effect": "Can sense renewal energy"},
@@ -1333,7 +1754,7 @@
     {"id": "antp_sense", "name": "aNTP Sense", "type": "Passive", "effect": "Can sense aNTP energy"},
     {"id": "bntp_sense", "name": "bNTP Sense", "type": "Passive", "effect": "Can sense bNTP energy"},
     {"id": "cntp_sense", "name": "cNTP Sense", "type": "Passive", "effect": "Can sense cNTP energy"},
-    {"id": "dntp_sense", "name": "dNTP Sense", "type": "Passive", "effect": "Can sense dNTP energy"},
+    {"id": "dntp_sense_enhanced", "name": "dNTP Sense", "type": "Passive", "effect": "Can sense dNTP energy"},
     {"id": "entp_sense", "name": "eNTP Sense", "type": "Passive", "effect": "Can sense eNTP energy"},
     {"id": "fntp_sense", "name": "fNTP Sense", "type": "Passive", "effect": "Can sense fNTP energy"},
     {"id": "gntp_sense", "name": "gNTP Sense", "type": "Passive", "effect": "Can sense gNTP energy"},
@@ -1347,15 +1768,91 @@
     {"id": "ontp_sense", "name": "oNTP Sense", "type": "Passive", "effect": "Can sense oNTP energy"},
     {"id": "pntp_sense", "name": "pNTP Sense", "type": "Passive", "effect": "Can sense pNTP energy"},
     {"id": "qntp_sense", "name": "qNTP Sense", "type": "Passive", "effect": "Can sense qNTP energy"},
-    {"id": "rntp_sense", "name": "rNTP Sense", "type": "Passive", "effect": "Can sense rNTP energy"},
+    {"id": "rntp_sense_enhanced", "name": "rNTP Sense", "type": "Passive", "effect": "Can sense rNTP energy"},
     {"id": "sntp_sense", "name": "sNTP Sense", "type": "Passive", "effect": "Can sense sNTP energy"},
     {"id": "tntp_sense", "name": "tNTP Sense", "type": "Passive", "effect": "Can sense tNTP energy"},
     {"id": "untp_sense", "name": "uNTP Sense", "type": "Passive", "effect": "Can sense uNTP energy"},
     {"id": "vntp_sense", "name": "vNTP Sense", "type": "Passive", "effect": "Can sense vNTP energy"},
     {"id": "wntp_sense", "name": "wNTP Sense", "type": "Passive", "effect": "Can sense wNTP energy"},
-    {"id": "xntp_sense", "name": "xNTP Sense", "type": "Passive", "effect": "Can sense xNTP energy"},
-    {"id": "yntp_sense", "name": "yNTP Sense", "type": "Passive", "effect": "Can sense yNTP energy"},
-    {"id": "zntp_sense", "name": "zNTP Sense", "type": "Passive", "effect": "Can sense zNTP energy"}
+    {"id": "xntp_sense_enhanced", "name": "xNTP Sense", "type": "Passive", "effect": "Can sense xNTP energy"},
+    {"id": "yntp_sense_enhanced", "name": "yNTP Sense", "type": "Passive", "effect": "Can sense yNTP energy"},
+    {"id": "zntp_sense_enhanced", "name": "zNTP Sense", "type": "Passive", "effect": "Can sense zNTP energy"},
+    {"id": "bloodthirsty", "name": "Bloodthirsty", "type": "Triggered", "effect": "Gain +1d4 to combat after dealing damage"},
+    {"id": "pacifist", "name": "Pacifist", "type": "Passive", "effect": "-2d4 to combat, +1d4 to healing and social"},
+    {"id": "berserker_rage", "name": "Berserker Rage", "type": "Triggered", "effect": "When below 25% HP, +3d4 to combat, -1d4 to all other actions"},
+    {"id": "calm_mind", "name": "Calm Mind", "type": "Passive", "effect": "Immune to fear and charm effects"},
+    {"id": "wild_magic", "name": "Wild Magic", "type": "Triggered", "effect": "10% chance for spells to have random effects"},
+    {"id": "lucky_break", "name": "Lucky Break", "type": "Triggered", "effect": "Once per day, turn a critical failure into a success"},
+    {"id": "unlucky", "name": "Unlucky", "type": "Passive", "effect": "Reroll all natural 20s"},
+    {"id": "fortunate", "name": "Fortunate", "type": "Passive", "effect": "Reroll all natural 1s"},
+    {"id": "cursed_luck", "name": "Cursed Luck", "type": "Passive", "effect": "Roll twice and take the worse result"},
+    {"id": "blessed_fortune", "name": "Blessed Fortune", "type": "Passive", "effect": "Roll twice and take the better result"},
+    {"id": "death_defying", "name": "Death Defying", "type": "Triggered", "effect": "Once per game, survive what would be fatal damage"},
+    {"id": "mortal_wound", "name": "Mortal Wound", "type": "Passive", "effect": "Healing effects are halved"},
+    {"id": "regenerative", "name": "Regenerative", "type": "Passive", "effect": "Heal 1 HP at the start of each turn"},
+    {"id": "vampiric", "name": "Vampiric", "type": "Triggered", "effect": "Heal 1 HP when dealing damage"},
+    {"id": "undead", "name": "Undead", "type": "Passive", "effect": "Immune to poison and disease, -1d4 to social actions"},
+    {"id": "divine_touched", "name": "Divine Touched", "type": "Passive", "effect": "+2d4 to divine actions, -1d4 to dark magic"},
+    {"id": "demon_touched", "name": "Demon Touched", "type": "Passive", "effect": "+2d4 to dark magic, -1d4 to divine actions"},
+    {"id": "elemental_attuned", "name": "Elemental Attuned", "type": "Passive", "effect": "+1d4 to elemental actions, choose fire/water/earth/air"},
+    {"id": "shadow_walker", "name": "Shadow Walker", "type": "Passive", "effect": "+2d4 to stealth, can move through shadows"},
+    {"id": "light_bearer", "name": "Light Bearer", "type": "Passive", "effect": "+2d4 to divine actions, can create light"},
+    {"id": "beast_speaker", "name": "Beast Speaker", "type": "Passive", "effect": "Can communicate with animals, +2d4 to animal interactions"},
+    {"id": "plant_whisperer", "name": "Plant Whisperer", "type": "Passive", "effect": "Can communicate with plants, +2d4 to plant interactions"},
+    {"id": "spirit_medium", "name": "Spirit Medium", "type": "Passive", "effect": "Can communicate with spirits, +2d4 to spiritual actions"},
+    {"id": "time_weaver", "name": "Time Weaver", "type": "Triggered", "effect": "Once per day, take an extra turn"},
+    {"id": "space_bender", "name": "Space Bender", "type": "Triggered", "effect": "Once per day, teleport to any known location"},
+    {"id": "reality_anchor", "name": "Reality Anchor", "type": "Passive", "effect": "Immune to reality-warping effects"},
+    {"id": "dream_walker", "name": "Dream Walker", "type": "Triggered", "effect": "Can enter the dreamscape while sleeping"},
+    {"id": "nightmare_warden", "name": "Nightmare Warden", "type": "Passive", "effect": "Immune to nightmare effects, +2d4 to exorcism"},
+    {"id": "hope_bringer", "name": "Hope Bringer", "type": "Passive", "effect": "Allies within 10 feet gain +1d4 to all actions"},
+    {"id": "despair_spreader", "name": "Despair Spreader", "type": "Passive", "effect": "Enemies within 10 feet suffer -1d4 to all actions"},
+    {"id": "peace_keeper", "name": "Peace Keeper", "type": "Passive", "effect": "Can prevent combat from starting with social actions"},
+    {"id": "war_monger", "name": "War Monger", "type": "Passive", "effect": "Can force combat to start with social actions"},
+    {"id": "order_enforcer", "name": "Order Enforcer", "type": "Passive", "effect": "+2d4 to law enforcement actions"},
+    {"id": "chaos_embracer", "name": "Chaos Embracer", "type": "Passive", "effect": "+2d4 to chaotic actions, -1d4 to orderly actions"},
+    {"id": "balance_keeper", "name": "Balance Keeper", "type": "Passive", "effect": "Can sense when balance is disrupted"},
+    {"id": "imbalance_catalyst", "name": "Imbalance Catalyst", "type": "Passive", "effect": "Can sense when balance is restored"},
+    {"id": "harmony_singer", "name": "Harmony Singer", "type": "Passive", "effect": "Can create harmony with music"},
+    {"id": "discord_weaver", "name": "Discord Weaver", "type": "Passive", "effect": "Can create discord with music"},
+    {"id": "unity_builder", "name": "Unity Builder", "type": "Passive", "effect": "Can unite divided groups"},
+    {"id": "division_sower", "name": "Division Sower", "type": "Passive", "effect": "Can divide united groups"},
+    {"id": "creation_master", "name": "Creation Master", "type": "Passive", "effect": "+2d4 to crafting and creation actions"},
+    {"id": "destruction_artist", "name": "Destruction Artist", "type": "Passive", "effect": "+2d4 to destruction actions"},
+    {"id": "birth_giver", "name": "Birth Giver", "type": "Passive", "effect": "Can help with childbirth and new beginnings"},
+    {"id": "death_reaper", "name": "Death Reaper", "type": "Passive", "effect": "Can sense when death is near"},
+    {"id": "growth_catalyst", "name": "Growth Catalyst", "type": "Passive", "effect": "Can accelerate growth in plants and people"},
+    {"id": "decay_accelerator", "name": "Decay Accelerator", "type": "Passive", "effect": "Can accelerate decay in objects and people"},
+    {"id": "renewal_bringer", "name": "Renewal Bringer", "type": "Passive", "effect": "Can bring renewal to tired or damaged things"},
+    {"id": "stagnation_creator", "name": "Stagnation Creator", "type": "Passive", "effect": "Can create stagnation in flowing things"},
+    {"id": "flow_master", "name": "Flow Master", "type": "Passive", "effect": "Can control the flow of water, air, and energy"},
+    {"id": "stasis_warden", "name": "Stasis Warden", "type": "Passive", "effect": "Can create stasis in moving things"},
+    {"id": "motion_controller", "name": "Motion Controller", "type": "Passive", "effect": "Can control the motion of objects and people"},
+    {"id": "stillness_creator", "name": "Stillness Creator", "type": "Passive", "effect": "Can create stillness in chaotic situations"},
+    {"id": "sound_weaver", "name": "Sound Weaver", "type": "Passive", "effect": "Can create and control sound"},
+    {"id": "silence_keeper", "name": "Silence Keeper", "type": "Passive", "effect": "Can create and maintain silence"},
+    {"id": "color_master", "name": "Color Master", "type": "Passive", "effect": "Can create and control colors"},
+    {"id": "gray_warden", "name": "Gray Warden", "type": "Passive", "effect": "Can create and control gray tones"},
+    {"id": "bright_creator", "name": "Bright Creator", "type": "Passive", "effect": "Can create and control brightness"},
+    {"id": "dim_controller", "name": "Dim Controller", "type": "Passive", "effect": "Can create and control dimness"},
+    {"id": "sharp_weaver", "name": "Sharp Weaver", "type": "Passive", "effect": "Can create and control sharpness"},
+    {"id": "blunt_creator", "name": "Blunt Creator", "type": "Passive", "effect": "Can create and control bluntness"},
+    {"id": "smooth_master", "name": "Smooth Master", "type": "Passive", "effect": "Can create and control smoothness"},
+    {"id": "rough_controller", "name": "Rough Controller", "type": "Passive", "effect": "Can create and control roughness"},
+    {"id": "hot_weaver", "name": "Hot Weaver", "type": "Passive", "effect": "Can create and control heat"},
+    {"id": "cold_creator", "name": "Cold Creator", "type": "Passive", "effect": "Can create and control cold"},
+    {"id": "warm_master", "name": "Warm Master", "type": "Passive", "effect": "Can create and control warmth"},
+    {"id": "cool_controller", "name": "Cool Controller", "type": "Passive", "effect": "Can create and control coolness"},
+    {"id": "dry_weaver", "name": "Dry Weaver", "type": "Passive", "effect": "Can create and control dryness"},
+    {"id": "wet_creator", "name": "Wet Creator", "type": "Passive", "effect": "Can create and control wetness"},
+    {"id": "solid_master", "name": "Solid Master", "type": "Passive", "effect": "Can create and control solidity"},
+    {"id": "liquid_controller", "name": "Liquid Controller", "type": "Passive", "effect": "Can create and control liquidity"},
+    {"id": "gas_weaver", "name": "Gas Weaver", "type": "Passive", "effect": "Can create and control gasses"},
+    {"id": "plasma_creator", "name": "Plasma Creator", "type": "Passive", "effect": "Can create and control plasma"},
+    {"id": "crystal_master", "name": "Crystal Master", "type": "Passive", "effect": "Can create and control crystals"},
+    {"id": "metal_controller", "name": "Metal Controller", "type": "Passive", "effect": "Can create and control metals"},
+    {"id": "wood_weaver", "name": "Wood Weaver", "type": "Passive", "effect": "Can create and control wood"},
+    {"id": "stone_creator", "name": "Stone Creator", "type": "Passive", "effect": "Can create and control stone"}
   ],
   "lifepaths": [
     {
