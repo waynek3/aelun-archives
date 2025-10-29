@@ -31,6 +31,12 @@ export interface Outcome {
   success: boolean;
 }
 
+export interface TargetSelection {
+  actionId: string;
+  availableTargets: PredicateCard[];
+  selectedTarget?: PredicateCard;
+}
+
 export interface GameState {
   character: Character | null;
   currentPredicate: PredicateCard | null;
@@ -39,4 +45,5 @@ export interface GameState {
   availableActions: ActionCard[];
   dicePool: DicePool;
   recentOutcome: Outcome | null;
+  targetSelection: TargetSelection | null;
 }

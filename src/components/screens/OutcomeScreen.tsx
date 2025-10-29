@@ -13,6 +13,7 @@ interface OutcomeScreenProps {
 export default function OutcomeScreen({ outcome, onContinue }: OutcomeScreenProps) {
   const setScreen = useUIStore((s) => s.setScreen);
   const character = useGameStore((s) => s.character);
+  const targetSelection = useGameStore((s) => s.targetSelection);
 
   const getOutcomeColor = () => {
     if (outcome.criticalSuccess) return 'text-green-400';
@@ -44,6 +45,15 @@ export default function OutcomeScreen({ outcome, onContinue }: OutcomeScreenProp
         <Panel className="p-4">
           <h3 className="text-cyan-400 font-bold uppercase mb-3">What Happens</h3>
           <p className="text-gray-300 leading-relaxed">{outcome.text}</p>
+          
+          {/* Target Information for Targeted Actions */}
+          {targetSelection?.selectedTarget && (
+            <div className="border-t border-gray-600 pt-3 mt-3">
+              <div className="text-sm text-yellow-400 font-bold mb-1">Target Location:</div>
+              <div className="text-sm text-gray-300">{targetSelection.selectedTarget.name}</div>
+              <div className="text-xs text-gray-400">{targetSelection.selectedTarget.description}</div>
+            </div>
+          )}
         </Panel>
 
         {/* Mechanical Updates */}

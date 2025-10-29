@@ -9,6 +9,7 @@ import { ActionWheel } from '@/components/game/ActionWheel'
 import { StatusBar } from '@/components/game/StatusBar'
 import { getPredicateCards, getActionsArray } from '@/lib/utils/content'
 import { filterActionsByContext } from '@/lib/engine/actionFilter'
+import { getAvailableTargets } from '@/lib/engine/targetFilter'
 import { gameEngine } from '@/lib/utils/workerClient'
 import { executeOutcomeEffects } from '@/lib/engine/outcomeExecutor'
 import { discoverContent } from '@/lib/engine/discoveryManager'
@@ -16,6 +17,7 @@ import { trackFailure } from '@/lib/engine/cardEvolution'
 import OutcomeScreen from './OutcomeScreen'
 import DicePoolScreen from './DicePoolScreen'
 import DeathScreen from './DeathScreen'
+import TargetSelectionScreen from './TargetSelectionScreen'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 import type { DiceResult } from '@/lib/engine/diceSystem'
 import type { Outcome } from '@/lib/engine/predicateEngine'
@@ -23,6 +25,8 @@ import type { Outcome } from '@/lib/engine/predicateEngine'
 export default function GameLoopScreen() {
   const setScreen = useUIStore((s) => s.setScreen)
   const character = useGameStore((s) => s.character)
+  const targetSelection = useGameStore((s) => s.targetSelection)
+  const setTargetSelection = useGameStore((s) => s.setTargetSelection)
   const [loading, setLoading] = useState(true)
 
   const [predicateMap, setPredicateMap] = useState<Record<string, PredicateCard>>({})
@@ -81,27 +85,53 @@ export default function GameLoopScreen() {
 
   function handleSelectAction(cardId: string) {
     const action = actions.find(a => a.id === cardId)
-    if (action) {
-      setSelectedAction(action)
-      
-      // Discover the action card when first used
-      discoverContent('cards', cardId).catch(error => {
-        console.error('Failed to discover action card:', error)
+    if (!action) return
+
+    // Discover the action card when first used
+    discoverContent('cards', cardId).catch(error => {
+      console.error('Failed to discover action card:', error)
+    })
+
+    if (action.actionType === 'Targeted') {
+      // For targeted actions, show target selection
+      const availableTargets = getAvailableTargets(
+        action,
+        Object.values(predicateMap),
+        character?.worldState?.location || 'homestead'
+      )
+
+      if (availableTargets.length === 0) {
+        // No valid targets, show error
+        useUIStore.getState().showNotification(
+          'No valid targets available for this action',
+          3000
+        )
+        return
+      }
+
+      setTargetSelection({
+        actionId: action.id,
+        availableTargets,
+        selectedTarget: undefined
       })
-      
-      // For targeted actions, we'd show target selection
-      // For now, all actions go to dice pool
+    } else {
+      // For untargeted actions, go directly to dice pool
+      setSelectedAction(action)
     }
   }
 
   async function handleDiceResult(result: DiceResult) {
-    if (!character || !selectedAction || !currentPredicate) return;
+    if (!character || !selectedAction) return;
+    
+    // For targeted actions, use the selected target; for untargeted, use current location
+    const targetPredicate = targetSelection?.selectedTarget || currentPredicate;
+    if (!targetPredicate) return;
     
     try {
       // Resolve the action using the predicate engine
       const actionOutcome = await gameEngine.resolveAction({
         actionCard: selectedAction,
-        predicateCard: currentPredicate,
+        predicateCard: targetPredicate,
         character,
         diceResult: result
       });
@@ -120,7 +150,7 @@ export default function GameLoopScreen() {
       // Check for death
       if (isDead) {
         setIsDead(true);
-        setCauseOfDeath(determineCauseOfDeath(selectedAction, currentPredicate, result));
+        setCauseOfDeath(determineCauseOfDeath(selectedAction, targetPredicate, result));
         return;
       }
       
@@ -171,9 +201,28 @@ export default function GameLoopScreen() {
     // Reset state and return to game loop
     setSelectedAction(null);
     setOutcome(null);
+    setTargetSelection(null);
     
     // Advance turn after outcome resolution
     await useGameStore.getState().advanceTurn();
+  }
+
+  function handleTargetSelected(target: PredicateCard) {
+    if (!targetSelection) return
+
+    const action = actions.find(a => a.id === targetSelection.actionId)
+    if (!action) return
+
+    // Set the selected action and target
+    setSelectedAction(action)
+    setTargetSelection({
+      ...targetSelection,
+      selectedTarget: target
+    })
+  }
+
+  function handleTargetSelectionCancel() {
+    setTargetSelection(null)
   }
 
   function handleDeathContinue() {
@@ -233,13 +282,25 @@ export default function GameLoopScreen() {
     )
   }
 
+  // Show target selection screen if we're selecting a target
+  if (targetSelection && !targetSelection.selectedTarget) {
+    return (
+      <TargetSelectionScreen
+        onTargetSelected={handleTargetSelected}
+        onCancel={handleTargetSelectionCancel}
+      />
+    )
+  }
+
   // Show dice pool screen if action is selected
   if (selectedAction && currentPredicate) {
+    const targetPredicate = targetSelection?.selectedTarget
     return (
       <DicePoolScreen
         actionCard={selectedAction}
         predicateCard={currentPredicate}
         onResult={handleDiceResult}
+        targetPredicate={targetPredicate}
       />
     )
   }
