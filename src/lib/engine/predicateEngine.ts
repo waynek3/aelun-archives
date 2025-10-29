@@ -11,7 +11,7 @@ import { getAffinityLevel, getAffinityWeightModifier } from './affinityManager';
 export interface Outcome {
   text: string;
   effects: OutcomeEffect[];
-  stateChanges: Record<string, any>;
+  stateChanges: Record<string, unknown>;
   success: boolean;
   criticalSuccess?: boolean;
   criticalFailure?: boolean;
@@ -26,7 +26,7 @@ export interface OutcomeEffect {
   id?: string;
   location?: string;
   flag?: string;
-  flagValue?: any;
+  flagValue?: unknown;
   text?: string;
   duration?: number;
   permanent?: boolean;
@@ -270,71 +270,71 @@ function executeOutcome(
   // Execute the specific outcome type
   switch (rule.outcome) {
     case 'deal_damage':
-      executeDealDamage(outcome, rule.parameters);
+      executeDealDamage(outcome, rule.parameters as DamageParams);
       break;
     case 'receive_damage':
-      executeReceiveDamage(outcome, rule.parameters);
+      executeReceiveDamage(outcome, rule.parameters as DamageParams);
       break;
     case 'gain_resource':
-      executeGainResource(outcome, rule.parameters);
+      executeGainResource(outcome, rule.parameters as ResourceParams);
       break;
     case 'restore':
-      executeRestore(outcome, rule.parameters);
+      executeRestore(outcome, rule.parameters as RestoreParams);
       break;
     case 'change_affinity':
-      executeChangeAffinity(outcome, rule.parameters);
+      executeChangeAffinity(outcome, rule.parameters as AffinityParams);
       break;
     case 'discover_location':
-      executeDiscoverLocation(outcome, rule.parameters);
+      executeDiscoverLocation(outcome, rule.parameters as LocationParams);
       break;
     case 'anger_entity':
-      executeAngerEntity(outcome, rule.parameters);
+      executeAngerEntity(outcome, rule.parameters as AffinityParams);
       break;
     case 'minor_setback':
-      executeMinorSetback(outcome, rule.parameters);
+      executeMinorSetback(outcome, rule.parameters as TextParams);
       break;
     case 'no_effect':
-      executeNoEffect(outcome, rule.parameters);
+      executeNoEffect(outcome, rule.parameters as unknown);
       break;
     case 'discover':
-      executeDiscover(outcome, rule.parameters);
+      executeDiscover(outcome, rule.parameters as DiscoverParams);
       break;
     case 'learn':
-      executeLearn(outcome, rule.parameters);
+      executeLearn(outcome, rule.parameters as LearnParams);
       break;
     case 'transform':
-      executeTransform(outcome, rule.parameters);
+      executeTransform(outcome, rule.parameters as TransformParams);
       break;
     case 'curse':
-      executeCurse(outcome, rule.parameters);
+      executeCurse(outcome, rule.parameters as CurseParams);
       break;
     case 'bless':
-      executeBless(outcome, rule.parameters);
+      executeBless(outcome, rule.parameters as BlessParams);
       break;
     case 'bond':
-      executeBond(outcome, rule.parameters);
+      executeBond(outcome, rule.parameters as BondParams);
       break;
     case 'rivalry':
-      executeRivalry(outcome, rule.parameters);
+      executeRivalry(outcome, rule.parameters as RivalryParams);
       break;
     case 'quest':
-      executeQuest(outcome, rule.parameters);
+      executeQuest(outcome, rule.parameters as QuestParams);
       break;
     case 'memory':
-      executeMemory(outcome, rule.parameters);
+      executeMemory(outcome, rule.parameters as MemoryParams);
       break;
     case 'insight':
-      executeInsight(outcome, rule.parameters);
+      executeInsight(outcome, rule.parameters as InsightParams);
       break;
     case 'corruption':
-      executeCorruption(outcome, rule.parameters);
+      executeCorruption(outcome, rule.parameters as CorruptionParams);
       break;
     case 'purification':
-      executePurification(outcome, rule.parameters);
+      executePurification(outcome, rule.parameters as PurificationParams);
       break;
     default:
       console.warn(`Unknown outcome type: ${rule.outcome}`);
-      executeNoEffect(outcome, rule.parameters);
+      executeNoEffect(outcome, rule.parameters as unknown);
   }
 
   return outcome;
@@ -1826,7 +1826,7 @@ function getContextualNarrative(
   if (actionNarratives) {
     const locationNarratives = actionNarratives[locationId as keyof typeof actionNarratives];
     if (locationNarratives) {
-      const outcomeNarratives = locationNarratives[outcome as keyof typeof locationNarratives] as any;
+      const outcomeNarratives = locationNarratives[outcome as keyof typeof locationNarratives] as Record<string, string> | undefined;
       if (outcomeNarratives) {
         if (diceResult.criticalSuccess && outcomeNarratives.critical) {
           return outcomeNarratives.critical;
@@ -2166,7 +2166,7 @@ function generateCharacterNarrative(
       if (isApplicable) {
         const tagKey = applicableTags.includes('all') ? 'all' : 
                       actionTags.find(tag => applicableTags.includes(tag)) || 'all';
-        const tagNarrative = traitNarrative[tagKey as keyof typeof traitNarrative] as any;
+        const tagNarrative = traitNarrative[tagKey as keyof typeof traitNarrative] as Record<string, string[]> | undefined;
         
         if (tagNarrative) {
           let narratives: string[];
@@ -2500,7 +2500,11 @@ function generateFallbackNarrative(
 }
 
 // Outcome execution functions
-function executeDealDamage(outcome: Outcome, params: any): void {
+interface DamageParams {
+  dice?: string;
+}
+
+function executeDealDamage(outcome: Outcome, params: DamageParams): void {
   const damage = rollDamage(params.dice || '1d4');
   outcome.effects.push({
     type: 'damage',
@@ -2509,7 +2513,7 @@ function executeDealDamage(outcome: Outcome, params: any): void {
   outcome.text += ` You deal ${damage} damage!`;
 }
 
-function executeReceiveDamage(outcome: Outcome, params: any): void {
+function executeReceiveDamage(outcome: Outcome, params: DamageParams): void {
   const damage = rollDamage(params.dice || '1d4');
   outcome.effects.push({
     type: 'damage',
@@ -2518,7 +2522,12 @@ function executeReceiveDamage(outcome: Outcome, params: any): void {
   outcome.text += ` You take ${damage} damage.`;
 }
 
-function executeGainResource(outcome: Outcome, params: any): void {
+interface ResourceParams {
+  resource?: string;
+  amount?: number;
+}
+
+function executeGainResource(outcome: Outcome, params: ResourceParams): void {
   const resource = params.resource || 'goods';
   const amount = params.amount || 1;
   outcome.effects.push({
@@ -2529,7 +2538,11 @@ function executeGainResource(outcome: Outcome, params: any): void {
   outcome.text += ` You gain ${amount} ${resource}.`;
 }
 
-function executeRestore(outcome: Outcome, params: any): void {
+interface RestoreParams {
+  hp?: number;
+}
+
+function executeRestore(outcome: Outcome, params: RestoreParams): void {
   const hp = params.hp || 1;
   outcome.effects.push({
     type: 'heal',
@@ -2538,7 +2551,12 @@ function executeRestore(outcome: Outcome, params: any): void {
   outcome.text += ` You restore ${hp} health.`;
 }
 
-function executeChangeAffinity(outcome: Outcome, params: any): void {
+interface AffinityParams {
+  entity?: string;
+  change?: number;
+}
+
+function executeChangeAffinity(outcome: Outcome, params: AffinityParams): void {
   const entity = params.entity || 'unknown';
   const change = params.change || 1;
   outcome.effects.push({
@@ -2549,7 +2567,11 @@ function executeChangeAffinity(outcome: Outcome, params: any): void {
   outcome.text += ` Your relationship with ${entity} changes.`;
 }
 
-function executeDiscoverLocation(outcome: Outcome, params: any): void {
+interface LocationParams {
+  location?: string;
+}
+
+function executeDiscoverLocation(outcome: Outcome, params: LocationParams): void {
   const location = params.location || 'unknown';
   outcome.effects.push({
     type: 'unlock',
@@ -2559,7 +2581,7 @@ function executeDiscoverLocation(outcome: Outcome, params: any): void {
   outcome.text += ` You discover: ${location}!`;
 }
 
-function executeAngerEntity(outcome: Outcome, params: any): void {
+function executeAngerEntity(outcome: Outcome, params: AffinityParams): void {
   const entity = params.entity || 'unknown';
   const change = params.change || -1;
   outcome.effects.push({
@@ -2570,16 +2592,27 @@ function executeAngerEntity(outcome: Outcome, params: any): void {
   outcome.text += ` You anger ${entity}.`;
 }
 
-function executeMinorSetback(outcome: Outcome, params: any): void {
+interface TextParams {
+  text?: string;
+}
+
+function executeMinorSetback(outcome: Outcome, params: TextParams): void {
   outcome.text += ` ${params.text || 'A minor setback occurs.'}`;
 }
 
-function executeNoEffect(outcome: Outcome, _params: any): void {
+function executeNoEffect(outcome: Outcome, _params: unknown): void {
   outcome.text += ` Nothing significant happens.`;
 }
 
 // New advanced outcome execution functions
-function executeDiscover(outcome: Outcome, params: any): void {
+interface DiscoverParams {
+  what?: string;
+  category?: string;
+  id?: string;
+  text?: string;
+}
+
+function executeDiscover(outcome: Outcome, params: DiscoverParams): void {
   const what = params.what || 'something interesting';
   const category = params.category || 'lore';
   const id = params.id || 'discovery';
@@ -2593,7 +2626,13 @@ function executeDiscover(outcome: Outcome, params: any): void {
   outcome.text += ` You discover ${what}!`;
 }
 
-function executeLearn(outcome: Outcome, params: any): void {
+interface LearnParams {
+  skill?: string;
+  amount?: number;
+  text?: string;
+}
+
+function executeLearn(outcome: Outcome, params: LearnParams): void {
   const skill = params.skill || 'insight';
   const amount = params.amount || 1;
   
@@ -2606,7 +2645,13 @@ function executeLearn(outcome: Outcome, params: any): void {
   outcome.text += ` You learn something new about ${skill}.`;
 }
 
-function executeTransform(outcome: Outcome, params: any): void {
+interface TransformParams {
+  stat?: string;
+  change?: number;
+  text?: string;
+}
+
+function executeTransform(outcome: Outcome, params: TransformParams): void {
   const stat = params.stat || 'will';
   const change = params.change || 1;
   
@@ -2620,7 +2665,13 @@ function executeTransform(outcome: Outcome, params: any): void {
   outcome.text += ` You feel fundamentally changed.`;
 }
 
-function executeCurse(outcome: Outcome, params: any): void {
+interface CurseParams {
+  curse?: string;
+  duration?: number;
+  text?: string;
+}
+
+function executeCurse(outcome: Outcome, params: CurseParams): void {
   const curse = params.curse || 'misfortune';
   const duration = params.duration || -1; // -1 = permanent
   
@@ -2633,7 +2684,13 @@ function executeCurse(outcome: Outcome, params: any): void {
   outcome.text += ` A dark curse settles upon you.`;
 }
 
-function executeBless(outcome: Outcome, params: any): void {
+interface BlessParams {
+  blessing?: string;
+  duration?: number;
+  text?: string;
+}
+
+function executeBless(outcome: Outcome, params: BlessParams): void {
   const blessing = params.blessing || 'fortune';
   const duration = params.duration || -1; // -1 = permanent
   
@@ -2646,7 +2703,13 @@ function executeBless(outcome: Outcome, params: any): void {
   outcome.text += ` Divine favor shines upon you.`;
 }
 
-function executeBond(outcome: Outcome, params: any): void {
+interface BondParams {
+  entity?: string;
+  strength?: number;
+  text?: string;
+}
+
+function executeBond(outcome: Outcome, params: BondParams): void {
   const entity = params.entity || 'unknown';
   const strength = params.strength || 2;
   
@@ -2659,7 +2722,13 @@ function executeBond(outcome: Outcome, params: any): void {
   outcome.text += ` You feel a deep connection to ${entity}.`;
 }
 
-function executeRivalry(outcome: Outcome, params: any): void {
+interface RivalryParams {
+  entity?: string;
+  intensity?: number;
+  text?: string;
+}
+
+function executeRivalry(outcome: Outcome, params: RivalryParams): void {
   const entity = params.entity || 'unknown';
   const intensity = params.intensity || 2;
   
@@ -2672,7 +2741,12 @@ function executeRivalry(outcome: Outcome, params: any): void {
   outcome.text += ` You feel hostility toward ${entity}.`;
 }
 
-function executeQuest(outcome: Outcome, params: any): void {
+interface QuestParams {
+  quest?: string;
+  description?: string;
+}
+
+function executeQuest(outcome: Outcome, params: QuestParams): void {
   const quest = params.quest || 'mystery';
   const description = params.description || 'A new quest begins.';
   
@@ -2684,7 +2758,13 @@ function executeQuest(outcome: Outcome, params: any): void {
   outcome.text += ` A new quest presents itself.`;
 }
 
-function executeMemory(outcome: Outcome, params: any): void {
+interface MemoryParams {
+  memory?: string;
+  clarity?: number;
+  text?: string;
+}
+
+function executeMemory(outcome: Outcome, params: MemoryParams): void {
   const memory = params.memory || 'forgotten_past';
   const clarity = params.clarity || 1;
   
@@ -2697,7 +2777,13 @@ function executeMemory(outcome: Outcome, params: any): void {
   outcome.text += ` A forgotten memory returns to you.`;
 }
 
-function executeInsight(outcome: Outcome, params: any): void {
+interface InsightParams {
+  insight?: string;
+  depth?: number;
+  text?: string;
+}
+
+function executeInsight(outcome: Outcome, params: InsightParams): void {
   const insight = params.insight || 'wisdom';
   const depth = params.depth || 1;
   
@@ -2710,7 +2796,13 @@ function executeInsight(outcome: Outcome, params: any): void {
   outcome.text += ` A profound insight dawns upon you.`;
 }
 
-function executeCorruption(outcome: Outcome, params: any): void {
+interface CorruptionParams {
+  source?: string;
+  amount?: number;
+  text?: string;
+}
+
+function executeCorruption(outcome: Outcome, params: CorruptionParams): void {
   const source = params.source || 'dark_power';
   const amount = params.amount || 1;
   
@@ -2723,7 +2815,13 @@ function executeCorruption(outcome: Outcome, params: any): void {
   outcome.text += ` You feel darkness creeping into your being.`;
 }
 
-function executePurification(outcome: Outcome, params: any): void {
+interface PurificationParams {
+  source?: string;
+  amount?: number;
+  text?: string;
+}
+
+function executePurification(outcome: Outcome, params: PurificationParams): void {
   const source = params.source || 'divine_light';
   const amount = params.amount || 1;
   

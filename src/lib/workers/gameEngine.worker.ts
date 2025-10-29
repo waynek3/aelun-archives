@@ -4,16 +4,19 @@
  */
 
 import { resolveAction } from '../engine/predicateEngine';
+import type { ActionCard, PredicateCard } from '../../types/cards';
+import type { Character } from '../../types/character';
+import type { DiceResult } from '../engine/diceSystem';
 
 interface WorkerCommand {
   type: string;
-  payload: any;
+  payload: unknown;
   requestId: string;
 }
 
 interface WorkerResponse {
   type: string;
-  payload: any;
+  payload: unknown;
   requestId: string;
   error?: string;
 }
@@ -27,7 +30,7 @@ self.onmessage = async (event: MessageEvent<WorkerCommand>) => {
     
     switch (type) {
       case 'RESOLVE_ACTION':
-        result = await resolveAction(payload);
+        result = await resolveAction(payload as { actionCard: ActionCard; predicateCard: PredicateCard; character: Character; diceResult: DiceResult });
         break;
         
       case 'ROLL_DICE_POOL':

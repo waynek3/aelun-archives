@@ -132,7 +132,7 @@ async function getCardProgress(cardId: string, meta: MetaProgression): Promise<C
   // For now, store progress in a simple way
   // In a real implementation, this would be in a separate store
   const progressKey = `cardProgress_${cardId}`;
-  const stored = (meta as any)[progressKey];
+  const stored = (meta as unknown as Record<string, unknown>)[progressKey] as CardProgress | undefined;
   
   if (stored) {
     return stored;
@@ -160,7 +160,7 @@ async function saveCardProgress(
   const db = await openDB({ name: DB_NAME, version: DB_VERSION, upgrade });
   
   // Store progress in meta progression
-  (meta as any)[`cardProgress_${cardId}`] = progress;
+  (meta as unknown as Record<string, unknown>)[`cardProgress_${cardId}`] = progress;
   
   // Save back to database
   await put(db, 'metaProgression', meta, 'main');
