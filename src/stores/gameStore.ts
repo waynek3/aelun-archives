@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 import type { Character } from '@/types/character'
-import type { DicePool, GameState, TurnPhase } from '@/types/game'
+import type { DicePool, GameState, TurnPhase, TargetSelection } from '@/types/game'
 import { saveCharacter } from '@/lib/persistence/saveManager'
 import { useUIStore } from './uiStore'
 
@@ -12,6 +12,7 @@ interface GameStore extends GameState {
   setAvailableActions: (a: ActionCard[]) => void
   setDicePool: (pool: DicePool) => void
   setRecentOutcome: (o: GameState['recentOutcome']) => void
+  setTargetSelection: (selection: TargetSelection | null) => void
   advanceTurn: () => Promise<void>
   autoSave: () => Promise<void>
   updateCharacter: (updates: Partial<Character>) => void
@@ -25,6 +26,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   availableActions: [],
   dicePool: { advantageDice: 1, bonusDice: [] },
   recentOutcome: null,
+  targetSelection: null,
 
   setCharacter: (c) => set({ character: c }),
   setPredicate: (p) => set({ currentPredicate: p }),
@@ -32,6 +34,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setAvailableActions: (a) => set({ availableActions: a }),
   setDicePool: (pool) => set({ dicePool: pool }),
   setRecentOutcome: (o) => set({ recentOutcome: o }),
+  setTargetSelection: (selection) => set({ targetSelection: selection }),
 
   updateCharacter: (updates) => {
     const { character } = get()

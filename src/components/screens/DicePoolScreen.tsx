@@ -14,9 +14,10 @@ interface DicePoolScreenProps {
   actionCard: ActionCard;
   predicateCard: PredicateCard;
   onResult: (result: DiceResult) => void;
+  targetPredicate?: PredicateCard;
 }
 
-export default function DicePoolScreen({ actionCard, predicateCard, onResult }: DicePoolScreenProps) {
+export default function DicePoolScreen({ actionCard, predicateCard, onResult, targetPredicate }: DicePoolScreenProps) {
   const setScreen = useUIStore((s) => s.setScreen);
   const character = useGameStore((s) => s.character);
   const [dicePool, setDicePool] = useState<ReturnType<typeof buildDicePool> | null>(null);
@@ -82,12 +83,21 @@ export default function DicePoolScreen({ actionCard, predicateCard, onResult }: 
         <Panel className="p-4">
           <h3 className="text-cyan-400 font-bold uppercase mb-2">{actionCard.name}</h3>
           <p className="text-sm text-gray-300 mb-2">{actionCard.description}</p>
-          <div className="flex gap-2 text-xs">
+          <div className="flex gap-2 text-xs mb-2">
             {actionCard.tags.map(tag => (
               <span key={tag} className="tag">[{tag.toUpperCase()}]</span>
             ))}
             <span className="tag">[{actionCard.actionType.toUpperCase()}]</span>
           </div>
+          
+          {/* Target Info for Targeted Actions */}
+          {actionCard.actionType === 'Targeted' && targetPredicate && (
+            <div className="border-t border-gray-600 pt-2 mt-2">
+              <div className="text-sm text-yellow-400 font-bold mb-1">Target:</div>
+              <div className="text-sm text-gray-300">{targetPredicate.name}</div>
+              <div className="text-xs text-gray-400">{targetPredicate.description}</div>
+            </div>
+          )}
         </Panel>
 
         {/* Dice Pool Assembly */}
