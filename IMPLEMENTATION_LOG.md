@@ -2,7 +2,7 @@
 
 **Project:** Aelun Awakened - Pre-MVP Implementation  
 **Date:** October 27, 2025  
-**Status:** ALL SPRINTS COMPLETE - MVP READY FOR LAUNCH  
+**Status:** SPRINTS 1-13 COMPLETE - READY TO BEGIN SPRINT 14 (AFFINITY SYSTEM)  
 
 ## OVERVIEW
 
@@ -437,20 +437,19 @@ This document tracks the implementation progress of Aelun Awakened, a browser-na
 - **Component Structure:** Modular, reusable components
 - **Type Safety:** Comprehensive TypeScript coverage
 
-## NEXT PHASE: SPRINT 11 - DEATH & GRAVEYARD
+## NEXT PHASE: SPRINT 14 - AFFINITY SYSTEM
 
-**Goal:** Implement permadeath and character history system
+**Goal:** Implement the hidden relationship system, universal choice weighting, and affinity-facing UX
 
 **Key Tasks:**
-1. Implement death detection (HP <= 0)
-2. Create death screen with character summary
-3. Implement graveyard entry creation
-4. Create graveyard screen for viewing past characters
-5. Add graveyard sorting and filtering
-6. Integrate with meta-progression system
+1. Wire the `affinityManager` into predicate/outcome logic for all affinity-affecting effects
+2. Finish the universal choice engine (weighted random with affinity modifiers) and route relevant decisions through it
+3. Surface affinity change notifications (semi-visible) and expose current/peak scores in UI + compendium
+4. Persist affinity history inside meta-progression and stitch it into graveyard/compendium views
+5. Add settings toggles for affinity notifications/visibility
 
 **Estimated Duration:** 1 day  
-**Dependencies:** Sprint 10 complete ✅  
+**Dependencies:** Sprints 1-13 complete ✅  
 
 ## KNOWN ISSUES
 

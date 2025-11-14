@@ -7,6 +7,7 @@ import type { Character } from '@/types/character';
 import type { GraveyardEntry } from '@/types/meta';
 import { openDB, put, getAll, del } from '@/lib/persistence/indexedDB';
 import { DB_NAME, DB_VERSION, upgrade } from '@/lib/persistence/migrations';
+import { updateMetaProgression } from '@/lib/persistence/metaProgression';
 
 /**
  * Create a graveyard entry from a dead character
@@ -37,6 +38,15 @@ export function createGraveyardEntry(
 export async function addToGraveyard(entry: GraveyardEntry): Promise<void> {
   const db = await openDB({ name: DB_NAME, version: DB_VERSION, upgrade });
   await put(db, 'graveyard', entry);
+
+  await updateMetaProgression((meta) => {
+    meta.graveyard.push(entry);
+    meta.statistics.totalDeaths = (meta.statistics.totalDeaths || 0) + 1;
+    meta.statistics.longestRunTurns = Math.max(
+      meta.statistics.longestRunTurns || 0,
+      entry.survived
+    );
+  });
 }
 
 /**

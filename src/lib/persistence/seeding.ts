@@ -1,7 +1,8 @@
 import rawContent from '@/data/game-content.json';
 import { validateGameContent } from '@/lib/utils/validation';
-import { openDB, clear, put } from './indexedDB';
+import { openDB, clear, put, get } from './indexedDB';
 import { DB_NAME, DB_VERSION, upgrade } from './migrations';
+import { createDefaultMetaProgression } from './metaProgression';
 
 export async function seedIfNeeded(): Promise<void> {
   const db = await openDB({ name: DB_NAME, version: DB_VERSION, upgrade });
@@ -33,21 +34,11 @@ export async function seedIfNeeded(): Promise<void> {
     await put(db, 'gameContent', rec);
   }
 
-  // Initialize metaProgression
-  await put(db, 'metaProgression', { key: 'main', value: {
-    version: 1,
-    cardUnlocks: {},
-    graveyard: [],
-    compendium: {
-      discoveredCards: [],
-      discoveredPredicates: [],
-      discoveredTraits: [],
-      discoveredAffinities: [],
-      loreFragments: [],
-      completionPercentage: 0
-    },
-    statistics: { totalRuns: 0, longestRunTurns: 0, totalDeaths: 0 }
-  }});
+  // Initialize metaProgression if needed
+  const existingMeta = await get(db, 'metaProgression', 'main');
+  if (!existingMeta) {
+    await put(db, 'metaProgression', createDefaultMetaProgression());
+  }
 
   // Mark seeded
   await put(db, 'metaProgression', { key: 'seeded', value: true });
