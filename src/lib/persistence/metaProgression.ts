@@ -46,7 +46,7 @@ function normalizeMetaRecord(record: unknown): PersistedMetaProgression {
     ? { key: META_KEY, ...legacyValue }
     : ({
         key: META_KEY,
-        ...(raw as MetaProgression),
+        ...(raw as unknown as MetaProgression),
       } as PersistedMetaProgression);
 
   if (!base.cardUnlocks) base.cardUnlocks = {};
