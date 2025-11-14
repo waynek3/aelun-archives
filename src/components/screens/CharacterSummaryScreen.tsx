@@ -6,6 +6,7 @@ import { useGameStore } from '@/stores/gameStore'
 import { lifepathService } from '@/lib/engine/lifepath'
 import { saveCharacter } from '@/lib/persistence/saveManager'
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { getUnlockedCardIds } from '@/lib/engine/cardEvolution'
 
 export default function CharacterSummaryScreen() {
   // DEBUG: Track render count
@@ -28,12 +29,32 @@ export default function CharacterSummaryScreen() {
   })
 
   const [name, setName] = useState('')
+  const [unlockedCards, setUnlockedCards] = useState<string[]>([])
+
+  useEffect(() => {
+    let isMounted = true
+    getUnlockedCardIds()
+      .then((ids) => {
+        if (isMounted) setUnlockedCards(ids)
+      })
+      .catch((error) => {
+        console.error('Failed to load unlocked cards:', error)
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const isComplete = useMemo(() => !!pendingLifepath && lifepathService.isComplete(pendingLifepath), [pendingLifepath])
   const previewCharacter = useMemo(() => {
-    if (!pendingLifepath) return null
-    return lifepathService.buildCharacter(pendingLifepath, name || 'Unnamed Adventurer')
-  }, [pendingLifepath, name])
+      if (!pendingLifepath) return null
+      const baseCharacter = lifepathService.buildCharacter(pendingLifepath, name || 'Unnamed Adventurer')
+      if (unlockedCards.length === 0) {
+        return baseCharacter
+      }
+      const deck = Array.from(new Set([...baseCharacter.actionDeck, ...unlockedCards]))
+      return { ...baseCharacter, actionDeck: deck }
+    }, [pendingLifepath, name, unlockedCards])
 
   if (!pendingLifepath || !isComplete || !previewCharacter) {
     // Safety: if reached without completed lifepath, return to lifepath
@@ -52,6 +73,10 @@ export default function CharacterSummaryScreen() {
   async function handleConfirm() {
     const finalName = (name || '').trim() || 'Unnamed Adventurer'
     const character = lifepathService.buildCharacter(pendingLifepath!, finalName)
+    const unlocked = unlockedCards.length > 0 ? unlockedCards : await getUnlockedCardIds()
+    if (unlocked.length > 0) {
+      character.actionDeck = Array.from(new Set([...character.actionDeck, ...unlocked]))
+    }
     await saveCharacter(character)
     setCharacter(character)
     setPendingLifepath(null)
@@ -78,58 +103,63 @@ export default function CharacterSummaryScreen() {
     )
   }
 
-  return (
-    <ScreenContainer>
-      <div className="py-8 space-y-4">
-        <h2 className="text-2xl text-green-500 font-bold uppercase">Character Summary</h2>
-        <div className="text-xs text-cyan-400">Review your character and confirm</div>
+    return (
+      <ScreenContainer>
+        <div className="py-8 space-y-4">
+          <h2 className="text-2xl text-green-500 font-bold uppercase">Character Summary</h2>
+          <div className="text-xs text-cyan-400">Review your character and confirm</div>
 
-        <Panel className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-cyan-400 uppercase text-xs mb-1" htmlFor="name">Name</label>
-              <input
-                id="name"
-                aria-label="Character name"
-                className="w-full bg-transparent border border-cyan-400/40 focus:border-yellow-300 outline-none px-3 py-2 rounded-sm"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter a name"
-              />
+          <Panel className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-cyan-400 uppercase text-xs mb-1" htmlFor="name">Name</label>
+                <input
+                  id="name"
+                  aria-label="Character name"
+                  className="w-full bg-transparent border border-cyan-400/40 focus:border-yellow-300 outline-none px-3 py-2 rounded-sm"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter a name"
+                />
 
-              <div className="mt-4">
-                <div className="uppercase text-cyan-400 mb-1">Stats</div>
-                <div>Strength: {previewCharacter.stats.strength}</div>
-                <div>Agility: {previewCharacter.stats.agility}</div>
-                <div>Insight: {previewCharacter.stats.insight}</div>
-                <div>Charisma: {previewCharacter.stats.charisma}</div>
-                <div>Fortitude: {previewCharacter.stats.fortitude}</div>
-                <div>Will: {previewCharacter.stats.will}</div>
+                <div className="mt-4">
+                  <div className="uppercase text-cyan-400 mb-1">Stats</div>
+                  <div>Strength: {previewCharacter.stats.strength}</div>
+                  <div>Agility: {previewCharacter.stats.agility}</div>
+                  <div>Insight: {previewCharacter.stats.insight}</div>
+                  <div>Charisma: {previewCharacter.stats.charisma}</div>
+                  <div>Fortitude: {previewCharacter.stats.fortitude}</div>
+                  <div>Will: {previewCharacter.stats.will}</div>
+                </div>
+              </div>
+
+              <div>
+                <div className="uppercase text-cyan-400 mb-1">Traits</div>
+                <ul className="list-disc list-inside text-sm">
+                  {previewCharacter.traits.map((t) => (
+                    <li key={t.id}>{t.name}</li>
+                  ))}
+                </ul>
+
+                <div className="mt-4 uppercase text-cyan-400 mb-1">Starting Deck</div>
+                <div className="text-sm">{previewCharacter.actionDeck.length} cards</div>
+                {unlockedCards.length > 0 && (
+                  <div className="text-xs text-green-400 mt-1">
+                    Includes {unlockedCards.length} unlocked card{unlockedCards.length === 1 ? '' : 's'}
+                  </div>
+                )}
+
+                <div className="mt-4 uppercase text-cyan-400 mb-1">Starting Location</div>
+                <div className="text-sm">{previewCharacter.worldState.location}</div>
               </div>
             </div>
+          </Panel>
 
-            <div>
-              <div className="uppercase text-cyan-400 mb-1">Traits</div>
-              <ul className="list-disc list-inside text-sm">
-                {previewCharacter.traits.map((t) => (
-                  <li key={t.id}>{t.name}</li>
-                ))}
-              </ul>
-
-              <div className="mt-4 uppercase text-cyan-400 mb-1">Starting Deck</div>
-              <div className="text-sm">{previewCharacter.actionDeck.length} cards</div>
-
-              <div className="mt-4 uppercase text-cyan-400 mb-1">Starting Location</div>
-              <div className="text-sm">{previewCharacter.worldState.location}</div>
-            </div>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={handleCancel}>◄ CANCEL</Button>
+            <Button onClick={handleConfirm} disabled={(name || '').trim().length === 0}>► BEGIN ADVENTURE</Button>
           </div>
-        </Panel>
-
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={handleCancel}>◄ CANCEL</Button>
-          <Button onClick={handleConfirm} disabled={(name || '').trim().length === 0}>► BEGIN ADVENTURE</Button>
         </div>
-      </div>
-    </ScreenContainer>
-  )
+      </ScreenContainer>
+    )
 }

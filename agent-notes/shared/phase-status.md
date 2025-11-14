@@ -21,7 +21,7 @@ Sprint 9 (Predicate Engine - Core Resolution) - COMPLETED:
 - Cleaned up debug code and console logs
 - All TypeScript errors resolved, build passing
 
-Current Status: Sprint 9 complete. Core gameplay loop fully functional. Ready for Sprint 10 (Turn Loop Integration) or Sprint 11 (Death & Graveyard).
+Current Status: Sprint 13 complete. Core gameplay, death flow, compendium, and card unlock systems are live; next up is Sprint 14 (Affinity System).
 
 ## PROJECT COMPLETION STATUS (Updated October 27, 2025)
 
@@ -78,7 +78,7 @@ Current Status: Sprint 9 complete. Core gameplay loop fully functional. Ready fo
   - Action filtering by tags and timescale
   - Content loading from IndexedDB
 
-**Phase 3: Core Gameplay (Sprints 8-9) - COMPLETE**
+**Phase 3: Core Gameplay (Sprints 8-13) - COMPLETE**
 - ✅ Sprint 8: Dice System & Rolling
   - Dice system engine with advantage dice and bonus dice
   - Dice pool builder from character stats and traits
@@ -96,31 +96,46 @@ Current Status: Sprint 9 complete. Core gameplay loop fully functional. Ready fo
   - Cleaned up debug code and console logs
   - All TypeScript errors resolved, build passing
 
+- ✅ Sprint 10: Turn Loop Integration
+  - Screen transitions wired end-to-end, including pause/resume and main menu exits
+  - Auto-save after each resolved turn plus manual save shortcut support
+  - Pause menu exposes character sheet, compendium, and save & quit actions
+  - Keyboard shortcuts for pause/save/menu implemented via `useKeyboardShortcuts`
+
+- ✅ Sprint 11: Death & Graveyard
+  - Outcome executor flags death when HP ≤ 0 and routes to `DeathScreen`
+  - `graveyardManager` stores entries, achievements, and peak affinities in both IndexedDB and meta-progression statistics
+  - `GraveyardScreen` now shows aggregate stats and sortable memorial entries
+
+- ✅ Sprint 12: Compendium & Discovery
+  - Meta-progression helper normalizes stored data so discoveries persist across sessions
+  - Discovery manager records cards, locations, traits, affinities, and lore with live completion percentage
+  - `CompendiumScreen` includes category filters, progress metrics, and free-text search
+
+- ✅ Sprint 13: Card Unlock System (Failure Fields)
+  - Failure tracking reads real action definitions from IndexedDB (no more stub lookups)
+  - Unlock selection modal displays card names, descriptions, tags, and timescales for informed choices
+  - Selected evolutions persist via meta-progression and append to future decks during lifepath confirmation
+  - Toast notifications surface after selection to confirm unlock results
+
 ### 🔄 CURRENT PHASE
 
-**Phase 3: Core Gameplay (Sprint 10) - READY TO BEGIN**
-- ⏳ Sprint 10: Turn Loop Integration
-  - Target: Complete the full turn cycle
-  - Status: Ready to begin implementation
+**Phase 4: Meta-Progression (Sprint 14) - READY TO BEGIN**
+- ⏳ Sprint 14: Affinity System
+  - Target: Wire affinity manager + choice engine weighting, add notifications, and extend compendium coverage
+  - Status: Awaiting implementation
 
 ### 📋 NEXT PHASES
 
-**Phase 3: Core Gameplay (Sprint 10)**
-- Sprint 10: Turn Loop Integration
-
-**Phase 4: Meta-Progression (Sprints 11-13)**
-- Sprint 11: Death & Graveyard
-- Sprint 12: Compendium & Discovery
-- Sprint 13: Card Unlock System (Failure Fields)
-
-**Phase 5: Systems & Polish (Sprints 14-16)**
+**Phase 4: Meta-Progression**
 - Sprint 14: Affinity System
+
+**Phase 5: Systems & Polish (Sprints 15-16)**
 - Sprint 15: Content Production
 - Sprint 16: Polish & Launch Prep
 
 ### 🎯 IMMEDIATE NEXT STEPS
 
-1. **Sprint 10 Implementation**: Turn Loop Integration
-2. **Branch Cleanup**: Merge current work to main
-3. **Testing**: Add comprehensive unit tests for new features
-4. **Performance**: Optimize bundle size and loading times
+1. **Sprint 14 Implementation**: Ship affinity manager + notification hooks
+2. **Testing**: Backfill engine/meta unit tests now that persistence is stabilized
+3. **Performance**: Continue bundle + worker optimization as systems expand

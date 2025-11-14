@@ -1079,13 +1079,13 @@ Update this section as you complete work:
 - [x] Sprint 4: Main Menu & Components
 - [x] Sprint 5: Lifepath (Part 1)
 - [x] Sprint 6: Lifepath (Part 2)
-- [x] Sprint 7: Game Loop & Actions
-- [ ] Sprint 8: Dice System
-- [ ] Sprint 9: Predicate Engine
-- [ ] Sprint 10: Turn Loop
-- [ ] Sprint 11: Death & Graveyard
-- [ ] Sprint 12: Compendium
-- [ ] Sprint 13: Card Unlocks
+ - [x] Sprint 7: Game Loop & Actions
+ - [x] Sprint 8: Dice System
+ - [x] Sprint 9: Predicate Engine
+ - [x] Sprint 10: Turn Loop
+ - [x] Sprint 11: Death & Graveyard
+ - [x] Sprint 12: Compendium
+ - [x] Sprint 13: Card Unlocks
 - [ ] Sprint 14: Affinity System
 - [ ] Sprint 15: Content Production
 - [ ] Sprint 16: Polish & Launch
@@ -1129,6 +1129,12 @@ Document implementation notes, decisions, or deviations from spec here:
   - Created `ScenePanel`, `ActionWheel`, and `StatusBar` components under `components/game/`
   - Updated `GameLoopScreen` to load content, filter actions by scene tags + timescale, and render UI per UI spec
   - No action resolution yet (clicks logged only), as per Sprint 7 scope
+  - Sprint 12-13 enhancements (November 2025):
+    - Added meta-progression normalization + migration to ensure discoveries, graveyard entries, and card progress persist correctly
+    - Wired discovery manager into IndexedDB helper so cards/locations/affinities register in the compendium immediately
+    - Finished the failure-field card unlock flow with worker-backed tracking, unlock selection modal, and notifications
+    - Ensured unlocked cards are appended to future decks during lifepath confirmation so selections influence new runs
+    - Updated lifepath summary UI to surface unlocked deck additions for transparency
 
 ---
 

@@ -25,21 +25,22 @@ export default function DicePoolScreen({ actionCard, predicateCard, onResult, ta
   const [isRolling, setIsRolling] = useState(false);
   const [result, setResult] = useState<DiceResult | null>(null);
 
-  // Build dice pool when component mounts
-  useEffect(() => {
-    if (character) {
-      const pool = buildDicePool({
-        character,
-        actionCard,
-        duplicateCards: 0 // TODO: Allow duplicate cards in future
-      });
-      setDicePool(pool);
-      
-      // Calculate DC
-      const difficulty = getDifficultyClass(actionCard, predicateCard.sceneTags || []);
-      setDc(difficulty);
-    }
-  }, [character, actionCard, predicateCard]);
+    // Build dice pool when component mounts
+    useEffect(() => {
+      if (character) {
+        const pool = buildDicePool({
+          character,
+          actionCard,
+          duplicateCards: 0 // TODO: Allow duplicate cards in future
+        });
+        setDicePool(pool);
+        
+        // Calculate DC based on the actual target predicate when available
+        const contextPredicate = targetPredicate ?? predicateCard;
+        const difficulty = getDifficultyClass(actionCard, contextPredicate.sceneTags || []);
+        setDc(difficulty);
+      }
+    }, [character, actionCard, predicateCard, targetPredicate]);
 
   const handleRoll = async () => {
     if (!dicePool) return;

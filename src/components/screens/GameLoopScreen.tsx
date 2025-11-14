@@ -21,13 +21,17 @@ import TargetSelectionScreen from './TargetSelectionScreen'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 import type { DiceResult } from '@/lib/engine/diceSystem'
 import type { Outcome } from '@/lib/engine/predicateEngine'
+import { UnlockSelectionModal } from '@/components/ui/UnlockSelectionModal'
+import type { UnlockResult } from '@/lib/engine/cardEvolution'
 
 export default function GameLoopScreen() {
   const setScreen = useUIStore((s) => s.setScreen)
   const character = useGameStore((s) => s.character)
   const targetSelection = useGameStore((s) => s.targetSelection)
   const setTargetSelection = useGameStore((s) => s.setTargetSelection)
+  const showNotification = useUIStore((s) => s.showNotification)
   const [loading, setLoading] = useState(true)
+  const [pendingUnlock, setPendingUnlock] = useState<UnlockResult | null>(null)
 
   const [predicateMap, setPredicateMap] = useState<Record<string, PredicateCard>>({})
   const [actions, setActions] = useState<ActionCard[]>([])
@@ -35,6 +39,12 @@ export default function GameLoopScreen() {
   const [outcome, setOutcome] = useState<Outcome | null>(null)
   const [isDead, setIsDead] = useState(false)
   const [causeOfDeath, setCauseOfDeath] = useState('')
+
+  const handleUnlockClose = () => setPendingUnlock(null)
+  const handleUnlockSelected = (cardName: string) => {
+    showNotification?.(`Unlocked ${cardName}! Added to future decks.`, 5000)
+    setPendingUnlock(null)
+  }
 
   useEffect(() => {
     let mounted = true
@@ -148,26 +158,25 @@ export default function GameLoopScreen() {
       });
       
       // Check for death
-      if (isDead) {
-        setIsDead(true);
-        setCauseOfDeath(determineCauseOfDeath(selectedAction, targetPredicate, result));
-        return;
-      }
-      
-      // Track failure if action failed
-      if (!actionOutcome.success) {
-        trackFailure(selectedAction.id).then(unlockResult => {
-          if (unlockResult?.unlocked) {
-            useUIStore.getState().showNotification(
-              `Card evolution unlocked! Choose from: ${unlockResult.pool.join(', ')}`,
-              5000
-            );
-          }
-        }).catch(error => {
-          console.error('Failed to track failure:', error);
-        });
-      }
-      
+        if (isDead) {
+          setIsDead(true);
+          setCauseOfDeath(determineCauseOfDeath(selectedAction, targetPredicate, result));
+          return;
+        }
+
+        // Track failure if action failed
+        if (!actionOutcome.success) {
+          trackFailure(selectedAction.id)
+            .then((unlockResult) => {
+              if (unlockResult?.unlocked) {
+                setPendingUnlock(unlockResult);
+              }
+            })
+            .catch((error) => {
+              console.error('Failed to track failure:', error);
+            });
+        }
+
       // Set outcome for display
       setOutcome(actionOutcome);
       
@@ -326,6 +335,17 @@ export default function GameLoopScreen() {
         <div className="mt-2">
           <Button variant="secondary" onClick={() => setScreen('MainMenu')}>◄ BACK TO MENU</Button>
         </div>
+
+        {pendingUnlock && (
+          <UnlockSelectionModal
+            isOpen
+            onClose={handleUnlockClose}
+            cardId={pendingUnlock.cardId}
+            tier={pendingUnlock.tier}
+            pool={pendingUnlock.pool}
+            onUnlockSelected={handleUnlockSelected}
+          />
+        )}
       </div>
     </ScreenContainer>
   )
