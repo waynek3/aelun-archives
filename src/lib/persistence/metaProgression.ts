@@ -1,6 +1,6 @@
 import { openDB, get, put } from './indexedDB';
 import { DB_NAME, DB_VERSION, upgrade } from './migrations';
-import type { MetaProgression, Compendium } from '@/types/meta';
+import type { MetaProgression, Compendium, AffinityHistoryEntry } from '@/types/meta';
 
 const META_KEY = 'main';
 
@@ -31,6 +31,7 @@ export function createDefaultMetaProgression(): PersistedMetaProgression {
       longestRunTurns: 0,
       totalDeaths: 0,
     },
+    affinityHistory: {},
   };
 }
 
@@ -58,6 +59,9 @@ function normalizeMetaRecord(record: unknown): PersistedMetaProgression {
       longestRunTurns: 0,
       totalDeaths: 0,
     };
+  }
+  if (!base.affinityHistory) {
+    base.affinityHistory = {};
   }
 
   // Copy over any cardProgress_* fields from the raw record
@@ -102,4 +106,19 @@ export async function updateMetaProgression(
   updater(meta);
   await saveMetaProgression(meta);
   return meta;
+}
+
+export async function recordAffinityChange(entityId: string, score: number): Promise<void> {
+  if (typeof indexedDB === 'undefined') {
+    return
+  }
+  await updateMetaProgression((meta) => {
+    const history: AffinityHistoryEntry = meta.affinityHistory[entityId] ?? {
+      peak: score,
+      lastKnown: score,
+    };
+    history.lastKnown = score;
+    history.peak = Math.max(history.peak, score);
+    meta.affinityHistory[entityId] = history;
+  });
 }

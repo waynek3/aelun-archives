@@ -3,7 +3,6 @@ import { ScreenContainer } from '@/components/ui/Layout';
 import { Button } from '@/components/ui/Button';
 import { Panel } from '@/components/ui/Panel';
 import { DiceDisplay } from '@/components/game/DiceDisplay';
-import { useUIStore } from '@/stores/uiStore';
 import { useGameStore } from '@/stores/gameStore';
 import { buildDicePool, getDifficultyClass } from '@/lib/engine/dicePoolBuilder';
 import { rollDicePool } from '@/lib/engine/diceSystem';
@@ -15,23 +14,29 @@ interface DicePoolScreenProps {
   predicateCard: PredicateCard;
   onResult: (result: DiceResult) => void;
   targetPredicate?: PredicateCard;
+  maxDuplicates: number;
+  onCancel: () => void;
 }
 
-export default function DicePoolScreen({ actionCard, predicateCard, onResult, targetPredicate }: DicePoolScreenProps) {
-  const setScreen = useUIStore((s) => s.setScreen);
+export default function DicePoolScreen({ actionCard, predicateCard, onResult, targetPredicate, maxDuplicates, onCancel }: DicePoolScreenProps) {
   const character = useGameStore((s) => s.character);
   const [dicePool, setDicePool] = useState<ReturnType<typeof buildDicePool> | null>(null);
   const [dc, setDc] = useState(10);
   const [isRolling, setIsRolling] = useState(false);
   const [result, setResult] = useState<DiceResult | null>(null);
+  const [duplicates, setDuplicates] = useState(0);
 
-    // Build dice pool when component mounts
+  useEffect(() => {
+    setDuplicates((current) => Math.min(current, maxDuplicates));
+  }, [maxDuplicates]);
+
+    // Build dice pool when component mounts or duplicates change
     useEffect(() => {
       if (character) {
         const pool = buildDicePool({
           character,
           actionCard,
-          duplicateCards: 0 // TODO: Allow duplicate cards in future
+          duplicateCards: duplicates
         });
         setDicePool(pool);
         
@@ -40,7 +45,7 @@ export default function DicePoolScreen({ actionCard, predicateCard, onResult, ta
         const difficulty = getDifficultyClass(actionCard, contextPredicate.sceneTags || []);
         setDc(difficulty);
       }
-    }, [character, actionCard, predicateCard, targetPredicate]);
+    }, [character, actionCard, predicateCard, targetPredicate, duplicates]);
 
   const handleRoll = async () => {
     if (!dicePool) return;
@@ -75,10 +80,10 @@ export default function DicePoolScreen({ actionCard, predicateCard, onResult, ta
   return (
     <ScreenContainer>
       <div className="py-6 space-y-4">
-        <header className="flex items-center justify-between">
-          <h2 className="text-green-500 font-bold uppercase">Dice Pool</h2>
-          <Button variant="secondary" onClick={() => setScreen('GameLoop')}>◄ BACK</Button>
-        </header>
+          <header className="flex items-center justify-between">
+            <h2 className="text-green-500 font-bold uppercase">Dice Pool</h2>
+            <Button variant="secondary" onClick={onCancel}>◄ CANCEL</Button>
+          </header>
 
         {/* Action Info */}
         <Panel className="p-4">
@@ -101,9 +106,33 @@ export default function DicePoolScreen({ actionCard, predicateCard, onResult, ta
           )}
         </Panel>
 
-        {/* Dice Pool Assembly */}
+          {/* Dice Pool Assembly */}
         <Panel className="p-4">
           <h3 className="text-cyan-400 font-bold uppercase mb-3">Dice Pool Assembly</h3>
+            {maxDuplicates > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-bold mb-2">Duplicate Cards for Advantage</h4>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => setDuplicates((value) => Math.max(0, value - 1))}
+                    disabled={duplicates === 0}
+                  >
+                    –1
+                  </Button>
+                  <span className="text-sm text-gray-200">
+                    Using {duplicates} additional card{duplicates === 1 ? '' : 's'} (max {maxDuplicates})
+                  </span>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setDuplicates((value) => Math.min(maxDuplicates, value + 1))}
+                    disabled={duplicates >= maxDuplicates}
+                  >
+                    +1
+                  </Button>
+                </div>
+              </div>
+            )}
           
           {/* Advantage Dice */}
           <div className="mb-4">

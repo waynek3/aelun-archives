@@ -7,6 +7,7 @@ import type { Character } from '@/types/character';
 import type { OutcomeEffect } from './predicateEngine';
 import { discoverContent } from './discoveryManager';
 import { modifyAffinity } from './affinityManager';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 /**
  * Apply outcome effects to character and game state
@@ -21,7 +22,9 @@ export function executeOutcomeEffects(
   for (const effect of effects) {
     const result = applyEffect(updatedCharacter, effect);
     updatedCharacter = result.character;
-    if (result.notification) {
+      const allowNotification =
+        effect.type !== 'affinity' || useSettingsStore.getState().showAffinityHints;
+      if (result.notification && allowNotification) {
       notifications.push(result.notification);
     }
   }

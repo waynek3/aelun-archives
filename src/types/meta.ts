@@ -25,10 +25,16 @@ export interface GameStatistics {
   totalDeaths: number;
 }
 
+export interface AffinityHistoryEntry {
+  peak: number;
+  lastKnown: number;
+}
+
 export interface MetaProgression {
   version: number;
   cardUnlocks: Record<string, Record<number, string>>; // baseCardId -> tier -> unlockedCardId
   graveyard: GraveyardEntry[];
   compendium: Compendium;
   statistics: GameStatistics;
+  affinityHistory: Record<string, AffinityHistoryEntry>;
 }

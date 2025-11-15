@@ -5,6 +5,7 @@
 
 import type { Character } from '@/types/character';
 import { discoverContent } from './discoveryManager';
+import { recordAffinityChange } from '@/lib/persistence/metaProgression';
 
 export interface AffinityEntity {
   id: string;
@@ -44,14 +45,20 @@ export function modifyAffinity(
       console.error('Failed to discover affinity entity:', error);
     });
   }
-  
-  return {
+
+  const updatedCharacter = {
     ...character,
     affinities: {
       ...affinities,
       [entity]: newAffinity
     }
   };
+
+  recordAffinityChange(entity, newAffinity).catch((error) => {
+    console.error('Failed to record affinity change:', error);
+  });
+
+  return updatedCharacter;
 }
 
 /**

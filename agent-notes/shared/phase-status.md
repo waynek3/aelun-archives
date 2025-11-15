@@ -21,7 +21,13 @@ Sprint 9 (Predicate Engine - Core Resolution) - COMPLETED:
 - Cleaned up debug code and console logs
 - All TypeScript errors resolved, build passing
 
-Current Status: Sprint 13 complete. Core gameplay, death flow, compendium, and card unlock systems are live; next up is Sprint 14 (Affinity System).
+Sprint 14 (Affinity System & Deck Integrity) - COMPLETED:
+- Game loop now builds the action wheel strictly from the character’s action deck, shows remaining copy counts, and lets players dedicate duplicates to advantage dice before rolling.
+- Targeted actions respect the current scene’s exits, and the target selection UI surfaces context, danger tags, and proper cancellation/return flows.
+- Affinity changes update meta-progression history even across runs, new settings control hint visibility, and the status bar/pause menu/compendium surface semi-visible relationship data.
+- Compendium affinity entries show lore plus peak/current scores; tests/linters run clean after installing dependencies (Vitest warnings remain from validation content only).
+
+Current Status: Sprint 14 complete. Core gameplay, death flow, compendium, card unlocks, and affinity visibility are live; next up is Sprint 15 (Content Production).
 
 ## PROJECT COMPLETION STATUS (Updated October 27, 2025)
 

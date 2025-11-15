@@ -1079,14 +1079,14 @@ Update this section as you complete work:
 - [x] Sprint 4: Main Menu & Components
 - [x] Sprint 5: Lifepath (Part 1)
 - [x] Sprint 6: Lifepath (Part 2)
- - [x] Sprint 7: Game Loop & Actions
- - [x] Sprint 8: Dice System
- - [x] Sprint 9: Predicate Engine
- - [x] Sprint 10: Turn Loop
- - [x] Sprint 11: Death & Graveyard
- - [x] Sprint 12: Compendium
- - [x] Sprint 13: Card Unlocks
-- [ ] Sprint 14: Affinity System
+- [x] Sprint 7: Game Loop & Actions
+- [x] Sprint 8: Dice System
+- [x] Sprint 9: Predicate Engine
+- [x] Sprint 10: Turn Loop
+- [x] Sprint 11: Death & Graveyard
+- [x] Sprint 12: Compendium
+- [x] Sprint 13: Card Unlocks
+- [x] Sprint 14: Affinity System
 - [ ] Sprint 15: Content Production
 - [ ] Sprint 16: Polish & Launch
 
@@ -1135,6 +1135,11 @@ Document implementation notes, decisions, or deviations from spec here:
     - Finished the failure-field card unlock flow with worker-backed tracking, unlock selection modal, and notifications
     - Ensured unlocked cards are appended to future decks during lifepath confirmation so selections influence new runs
     - Updated lifepath summary UI to surface unlocked deck additions for transparency
+  - Sprint 14 complete:
+    - Action wheel now sources strictly from the active character deck, reflects copy counts, and feeds a duplication selector that converts extra cards into advantage dice.
+    - Targeted actions respect scene adjacency/exits, and target selection surfaces richer context with clearer cancel/back flows.
+    - Affinity changes record peak/current history in meta-progression, respect a player-facing setting, and display semi-visible hints via the status bar, pause menu, and compendium.
+    - Compendium affinity entries show narrative details plus peak/current scores, and affinity notifications are gated by the new settings toggle.
 
 ---
 

@@ -35,6 +35,10 @@ export interface TargetSelection {
   actionId: string;
   availableTargets: PredicateCard[];
   selectedTarget?: PredicateCard;
+  /**
+   * Maximum number of duplicate cards that can be committed for advantage dice.
+   */
+  maxDuplicates?: number;
 }
 
 export interface GameState {

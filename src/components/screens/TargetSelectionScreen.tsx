@@ -8,11 +8,13 @@ import type { PredicateCard } from '@/types/cards'
 interface TargetSelectionScreenProps {
   onTargetSelected: (target: PredicateCard) => void
   onCancel: () => void
+  currentLocationId?: string
 }
 
 export default function TargetSelectionScreen({ 
   onTargetSelected, 
-  onCancel 
+  onCancel,
+  currentLocationId
 }: TargetSelectionScreenProps) {
   const targetSelection = useGameStore((s) => s.targetSelection)
   const setScreen = useUIStore((s) => s.setScreen)
@@ -52,9 +54,12 @@ export default function TargetSelectionScreen({
 
         <div className="panel p-4">
           <h3 className="text-cyan-400 font-bold mb-2">Action: {actionId}</h3>
-          <p className="text-sm text-gray-300 mb-4">
-            Select a target for your action. Each location offers different opportunities and risks.
+          <p className="text-sm text-gray-300 mb-2">
+            Select a target for your action. Only adjacent or context-appropriate locations are listed.
           </p>
+          {currentLocationId && (
+            <p className="text-xs text-gray-400">Current location: {currentLocationId}</p>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -69,13 +74,13 @@ export default function TargetSelectionScreen({
                 <Card
                   key={target.id}
                   title={target.name}
+                  subtitle={target.id === currentLocationId ? 'Current Location' : undefined}
                   className="cursor-pointer hover:border-cyan-400 transition-colors"
                   onClick={() => handleTargetSelect(target)}
                 >
-                  <div className="p-3">
-                    <h4 className="text-green-400 font-bold mb-1">{target.name}</h4>
-                    <p className="text-sm text-gray-300 mb-2">{target.description}</p>
-                    <div className="flex flex-wrap gap-1 mb-2">
+                  <div className="p-3 space-y-2">
+                    <p className="text-sm text-gray-300">{target.description}</p>
+                    <div className="flex flex-wrap gap-1">
                       {target.sceneTags.map((tag) => (
                         <span
                           key={tag}
@@ -84,9 +89,9 @@ export default function TargetSelectionScreen({
                           {tag}
                         </span>
                       ))}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      Timescale: {target.timescale}
+                      <span className="px-2 py-1 bg-gray-800 text-xs rounded text-gray-300">
+                        Timescale: {target.timescale}
+                      </span>
                     </div>
                   </div>
                 </Card>
