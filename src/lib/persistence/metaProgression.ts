@@ -19,6 +19,8 @@ const DEFAULT_COMPENDIUM: Compendium = {
   completionPercentage: 0,
 };
 
+let affinityHistoryWriteQueue: Promise<void> = Promise.resolve();
+
 export function createDefaultMetaProgression(): PersistedMetaProgression {
   return {
     key: META_KEY,
@@ -108,17 +110,24 @@ export async function updateMetaProgression(
   return meta;
 }
 
-export async function recordAffinityChange(entityId: string, score: number): Promise<void> {
+export function recordAffinityChange(entityId: string, score: number): Promise<void> {
   if (typeof indexedDB === 'undefined') {
-    return
+    return Promise.resolve();
   }
-  await updateMetaProgression((meta) => {
-    const history: AffinityHistoryEntry = meta.affinityHistory[entityId] ?? {
-      peak: score,
-      lastKnown: score,
-    };
-    history.lastKnown = score;
-    history.peak = Math.max(history.peak, score);
-    meta.affinityHistory[entityId] = history;
-  });
+
+  affinityHistoryWriteQueue = affinityHistoryWriteQueue
+    .catch(() => undefined)
+    .then(() =>
+      updateMetaProgression((meta) => {
+        const history: AffinityHistoryEntry = meta.affinityHistory[entityId] ?? {
+          peak: score,
+          lastKnown: score,
+        };
+        history.lastKnown = score;
+        history.peak = Math.max(history.peak, score);
+        meta.affinityHistory[entityId] = history;
+      }).then(() => undefined),
+    );
+
+  return affinityHistoryWriteQueue;
 }

@@ -38,9 +38,10 @@ export function modifyAffinity(
   const affinities = character.affinities || {};
   const currentAffinity = affinities[entity] || 0;
   const newAffinity = Math.max(-10, Math.min(10, currentAffinity + change));
+  const hadAffinityRecord = Object.prototype.hasOwnProperty.call(affinities, entity);
   
   // Discover the entity if not already known
-  if (!affinities[entity]) {
+  if (!hadAffinityRecord) {
     discoverContent('affinities', entity).catch(error => {
       console.error('Failed to discover affinity entity:', error);
     });

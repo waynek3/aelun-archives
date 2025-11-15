@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -27,12 +27,17 @@ export default function CompendiumScreen() {
   const [activeCategory, setActiveCategory] = useState<'cards' | 'predicates' | 'traits' | 'affinities' | 'lore'>('cards')
   const [searchTerm, setSearchTerm] = useState('')
   const [affinityHistory, setAffinityHistory] = useState<Record<string, { peak: number; lastKnown: number }>>({})
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
     loadCompendium()
+    return () => {
+      isMountedRef.current = false
+    }
   }, [])
 
     const loadCompendium = async () => {
+    if (!isMountedRef.current) return
     setLoading(true)
     try {
         const [compendiumData, statsData, actionsData, predicatesData, historyData] = await Promise.all([
@@ -42,6 +47,7 @@ export default function CompendiumScreen() {
           getPredicateCards(),
           getAffinityHistory(),
       ])
+      if (!isMountedRef.current) return
       setCompendium(compendiumData)
       setStats(statsData)
       setActions(actionsData)
@@ -50,7 +56,9 @@ export default function CompendiumScreen() {
     } catch (error) {
       console.error('Failed to load compendium:', error)
     } finally {
-      setLoading(false)
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
 
