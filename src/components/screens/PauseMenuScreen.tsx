@@ -3,12 +3,15 @@ import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 import { useUIStore } from '@/stores/uiStore'
 import { useGameStore } from '@/stores/gameStore'
+import { useSettingsStore } from '@/stores/settingsStore'
 import { getCharacterAffinities } from '@/lib/engine/affinityManager'
 
 export default function PauseMenuScreen() {
   const setScreen = useUIStore((s) => s.setScreen)
   const character = useGameStore((s) => s.character)
   const autoSave = useGameStore((s) => s.autoSave)
+  const showAffinityHints = useSettingsStore((s) => s.showAffinityHints)
+  const toggleAffinityHints = useSettingsStore((s) => s.toggleAffinityHints)
   const [saving, setSaving] = useState(false)
 
   const handleSaveAndQuit = async () => {
@@ -53,6 +56,9 @@ Location: ${character.worldState?.location || 'Unknown'}${affinityText}`
         <div className="space-y-2">
           <Button onClick={() => setScreen('GameLoop')}>► RESUME ADVENTURE</Button>
           <Button variant="secondary" onClick={handleViewStats}>► CHARACTER SHEET</Button>
+          <Button variant="secondary" onClick={toggleAffinityHints}>
+            ► {showAffinityHints ? 'HIDE' : 'SHOW'} AFFINITY HINTS
+          </Button>
           <Button variant="secondary" onClick={() => setScreen('Compendium')}>► COMPENDIUM</Button>
           <Button variant="secondary">► SETTINGS</Button>
           <Button 

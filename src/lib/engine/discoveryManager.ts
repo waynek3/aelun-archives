@@ -3,7 +3,7 @@
  * Handles content discovery tracking and compendium management
  */
 
-import type { Compendium } from '@/types/meta';
+import type { Compendium, AffinityHistoryEntry } from '@/types/meta';
 import { getMetaProgression, updateMetaProgression } from '@/lib/persistence/metaProgression';
 
 /**
@@ -13,6 +13,9 @@ export async function discoverContent(
   category: 'cards' | 'predicates' | 'traits' | 'affinities' | 'lore',
   id: string
 ): Promise<void> {
+  if (typeof indexedDB === 'undefined') {
+    return
+  }
   await updateMetaProgression((meta) => {
     const list = getDiscoveryList(meta.compendium, category);
     if (!list.includes(id)) {
@@ -28,6 +31,11 @@ export async function discoverContent(
 export async function getCompendium(): Promise<Compendium> {
   const meta = await getMetaProgression();
   return meta.compendium;
+}
+
+export async function getAffinityHistory(): Promise<Record<string, AffinityHistoryEntry>> {
+  const meta = await getMetaProgression();
+  return meta.affinityHistory ?? {};
 }
 
 /**

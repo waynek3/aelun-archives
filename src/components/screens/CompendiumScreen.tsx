@@ -3,10 +3,11 @@ import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { useUIStore } from '@/stores/uiStore'
-import { getCompendium, getDiscoveryStats } from '@/lib/engine/discoveryManager'
+import { getCompendium, getDiscoveryStats, getAffinityHistory } from '@/lib/engine/discoveryManager'
 import { getActionsArray, getPredicateCards } from '@/lib/utils/content'
 import type { ActionCard, PredicateCard } from '@/types/cards'
 import type { Compendium } from '@/types/meta'
+import { getAffinityDefinition } from '@/data/affinities'
 
 export default function CompendiumScreen() {
   const setScreen = useUIStore((s) => s.setScreen)
@@ -25,24 +26,27 @@ export default function CompendiumScreen() {
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState<'cards' | 'predicates' | 'traits' | 'affinities' | 'lore'>('cards')
   const [searchTerm, setSearchTerm] = useState('')
+  const [affinityHistory, setAffinityHistory] = useState<Record<string, { peak: number; lastKnown: number }>>({})
 
   useEffect(() => {
     loadCompendium()
   }, [])
 
-  const loadCompendium = async () => {
+    const loadCompendium = async () => {
     setLoading(true)
     try {
-      const [compendiumData, statsData, actionsData, predicatesData] = await Promise.all([
+        const [compendiumData, statsData, actionsData, predicatesData, historyData] = await Promise.all([
         getCompendium(),
         getDiscoveryStats(),
         getActionsArray(),
-        getPredicateCards()
+          getPredicateCards(),
+          getAffinityHistory(),
       ])
       setCompendium(compendiumData)
       setStats(statsData)
       setActions(actionsData)
       setPredicates(predicatesData)
+        setAffinityHistory(historyData)
     } catch (error) {
       console.error('Failed to load compendium:', error)
     } finally {
@@ -60,8 +64,17 @@ export default function CompendiumScreen() {
         return Object.values(predicates).filter(predicate => compendium.discoveredPredicates.includes(predicate.id))
       case 'traits':
         return [] // Traits would need to be loaded separately
-      case 'affinities':
-        return compendium.discoveredAffinities
+        case 'affinities':
+          return compendium.discoveredAffinities.map(id => {
+            const definition = getAffinityDefinition(id)
+            const history = affinityHistory[id]
+            return {
+              id,
+              name: definition?.name ?? id,
+              description: definition?.description,
+              history,
+            }
+          })
       case 'lore':
         return compendium.loreFragments
       default:
@@ -85,7 +98,10 @@ export default function CompendiumScreen() {
     return false
   })
 
-  if (loading) {
+    const formatAffinityScore = (value?: number) =>
+      value === undefined ? 'Unknown' : `${value > 0 ? '+' : ''}${value}`
+
+    if (loading) {
     return (
       <ScreenContainer>
         <div className="py-12 flex items-center justify-center">
@@ -180,38 +196,61 @@ export default function CompendiumScreen() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {filteredContent.map((item, index) => (
-                <div key={index} className="panel p-4">
-                  {typeof item === 'string' ? (
-                    <div>
-                      <h4 className="text-lg text-yellow-400 font-bold">{item}</h4>
-                    </div>
-                  ) : (
-                    <div>
-                      <h4 className="text-lg text-yellow-400 font-bold">{item.name}</h4>
-                      {item.description && (
-                        <p className="text-sm text-cyan-400 mt-2">{item.description}</p>
-                      )}
-                      {activeCategory === 'cards' && 'tags' in item && (
-                        <div className="mt-2">
-                          <p className="text-xs text-green-400">
-                            Tags: {item.tags.join(', ')}
-                          </p>
+              <div className="space-y-3">
+                {filteredContent.map((item, index) => {
+                  if (activeCategory === 'affinities' && typeof item === 'object' && item !== null) {
+                    const affinityItem = item as {
+                      id: string
+                      name?: string
+                      description?: string
+                      history?: { peak?: number; lastKnown?: number }
+                    }
+                    return (
+                      <div key={affinityItem.id} className="panel p-4">
+                        <h4 className="text-lg text-yellow-400 font-bold">{affinityItem.name}</h4>
+                        <p className="text-sm text-cyan-400 mt-2">
+                          {affinityItem.description ?? 'No lore discovered yet.'}
+                        </p>
+                        <div className="mt-3 text-xs text-green-300">
+                          <p>Current: {formatAffinityScore(affinityItem.history?.lastKnown)}</p>
+                          <p>Peak: {formatAffinityScore(affinityItem.history?.peak)}</p>
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div key={index} className="panel p-4">
+                      {typeof item === 'string' ? (
+                        <div>
+                          <h4 className="text-lg text-yellow-400 font-bold">{item}</h4>
+                        </div>
+                      ) : (
+                        <div>
+                          <h4 className="text-lg text-yellow-400 font-bold">{item.name}</h4>
+                          {item.description && (
+                            <p className="text-sm text-cyan-400 mt-2">{item.description}</p>
+                          )}
+                          {activeCategory === 'cards' && 'tags' in item && (
+                            <div className="mt-2">
+                              <p className="text-xs text-green-400">
+                                Tags: {item.tags.join(', ')}
+                              </p>
+                            </div>
+                          )}
+                          {activeCategory === 'predicates' && 'sceneTags' in item && (
+                            <div className="mt-2">
+                              <p className="text-xs text-blue-400">
+                                Scene: {item.sceneTags.join(', ')}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       )}
-                      {activeCategory === 'predicates' && 'sceneTags' in item && (
-                        <div className="mt-2">
-                          <p className="text-xs text-blue-400">
-                            Scene: {item.sceneTags.join(', ')}
-                          </p>
-                        </div>
-                      )}
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                  )
+                })}
+              </div>
           )}
         </div>
 
