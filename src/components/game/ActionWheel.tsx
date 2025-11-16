@@ -39,11 +39,11 @@ export function ActionWheel({ actions, onSelect }: ActionWheelProps) {
           }
           break
         case 'Home':
-          e.preventDefault()
+          e.preventDefault();
           (buttons[0] as HTMLElement).focus()
           break
         case 'End':
-          e.preventDefault()
+          e.preventDefault();
           (buttons[buttons.length - 1] as HTMLElement).focus()
           break
       }
