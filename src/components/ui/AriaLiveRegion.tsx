@@ -12,7 +12,7 @@ interface AriaLiveRegionProps {
 }
 
 export function AriaLiveRegion({ message, politeness = 'polite', clearDelay = 3000 }: AriaLiveRegionProps) {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     // Clear any existing timeout
