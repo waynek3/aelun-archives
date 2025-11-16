@@ -179,13 +179,13 @@ export class ErrorHandler {
   /**
    * Wrap an async function with error handling
    */
-  wrapAsync<T extends (...args: any[]) => Promise<any>>(
+  wrapAsync<T extends (...args: never[]) => Promise<unknown>>(
     fn: T,
     context: string
   ): (...args: Parameters<T>) => Promise<ReturnType<T> | null> {
     return async (...args: Parameters<T>): Promise<ReturnType<T> | null> => {
       try {
-        return await fn(...args)
+        return await fn(...args) as ReturnType<T>
       } catch (error) {
         this.handleError(error, context)
         return null
@@ -203,7 +203,7 @@ export function handleAsyncError(error: unknown, context?: string): AppError {
 }
 
 // Convenience function for wrapping async functions
-export function wrapAsyncOperation<T extends (...args: any[]) => Promise<any>>(
+export function wrapAsyncOperation<T extends (...args: never[]) => Promise<unknown>>(
   fn: T,
   context: string
 ): (...args: Parameters<T>) => Promise<ReturnType<T> | null> {

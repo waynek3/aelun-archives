@@ -40,19 +40,61 @@ export async function resolveAction(params: {
   predicateCard: PredicateCard;
   character: Character;
   diceResult: DiceResult;
+  selectedEntity?: string;
 }): Promise<Outcome> {
-  const { actionCard, predicateCard, character, diceResult } = params;
+  const { actionCard, predicateCard, character, diceResult, selectedEntity } = params;
+
+  // Special handling for travel actions - automatically transition to the target location
+  if (actionCard.id === 'travel' || actionCard.id === 'scout' || actionCard.id === 'teleport') {
+    const success = diceResult.total >= 10;
+    return {
+      text: success
+        ? `You successfully travel to ${predicateCard.name}.`
+        : `Your journey to ${predicateCard.name} is difficult, but you arrive.`,
+      effects: [{
+        type: 'transition',
+        location: predicateCard.id,
+      }],
+      stateChanges: {},
+      success,
+      criticalSuccess: diceResult.criticalSuccess,
+      criticalFailure: diceResult.criticalFailure
+    };
+  }
+
+  // Special handling for prayer actions when a specific entity is selected
+  if ((actionCard.id === 'pray' || actionCard.id === 'ritual' || actionCard.id === 'pilgrimage') && selectedEntity) {
+    const success = diceResult.total >= 12;
+    const affinityChange = success ? 1 : (diceResult.total >= 10 ? 0 : -1);
+
+    return {
+      text: success
+        ? `Your prayer to ${selectedEntity} is answered favorably.`
+        : affinityChange < 0
+        ? `${selectedEntity} seems displeased with your prayer.`
+        : `Your prayer to ${selectedEntity} is heard, but unanswered.`,
+      effects: affinityChange !== 0 ? [{
+        type: 'affinity',
+        entity: selectedEntity,
+        value: affinityChange,
+      }] : [],
+      stateChanges: {},
+      success,
+      criticalSuccess: diceResult.criticalSuccess,
+      criticalFailure: diceResult.criticalFailure
+    };
+  }
 
   // Get outcome rules for this action
   const outcomeRules = predicateCard.outcomeLogic[actionCard.id];
-  
+
   if (!outcomeRules || outcomeRules.length === 0) {
     return createDefaultOutcome(actionCard, predicateCard, diceResult);
   }
 
   // Find matching rule based on roll result
   const matchingRule = findMatchingRule(outcomeRules, diceResult.total, character);
-  
+
   if (!matchingRule) {
     return createFailureOutcome(actionCard, predicateCard, diceResult);
   }

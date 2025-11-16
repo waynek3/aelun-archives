@@ -88,9 +88,11 @@ describe('targetFilter', () => {
 
       const targets = getAvailableTargets(action, predicateMap, 'current');
 
-      expect(targets).toContainEqual(temple); // Can pray at sacred temple
+      // Prayer now only works at current location - deity selection happens in UI
       expect(targets).toContainEqual(currentPredicate); // Can pray at current location
-      expect(targets).not.toContainEqual(forest); // Cannot pray at non-sacred forest
+      expect(targets).not.toContainEqual(temple); // Temple not in targets (deity selected separately)
+      expect(targets).not.toContainEqual(forest); // Forest not in targets
+      expect(targets).toHaveLength(1); // Only current location
     });
 
     it('should match tags correctly', () => {

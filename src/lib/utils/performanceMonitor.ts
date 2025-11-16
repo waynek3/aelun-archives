@@ -7,7 +7,7 @@ interface PerformanceMetric {
   name: string
   duration: number
   timestamp: number
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 }
 
 interface PerformanceStats {
@@ -38,7 +38,7 @@ export class PerformanceMonitor {
   /**
    * Start timing an operation
    */
-  start(name: string, context?: Record<string, any>): void {
+  start(name: string, context?: Record<string, unknown>): void {
     if (!this.enabled) return
 
     const key = context ? `${name}_${JSON.stringify(context)}` : name
@@ -48,7 +48,7 @@ export class PerformanceMonitor {
   /**
    * End timing an operation and record the metric
    */
-  end(name: string, context?: Record<string, any>): number {
+  end(name: string, context?: Record<string, unknown>): number {
     if (!this.enabled) return 0
 
     const key = context ? `${name}_${JSON.stringify(context)}` : name
@@ -83,7 +83,7 @@ export class PerformanceMonitor {
   async measureAsync<T>(
     name: string,
     fn: () => Promise<T>,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): Promise<T> {
     if (!this.enabled) return fn()
 
@@ -104,7 +104,7 @@ export class PerformanceMonitor {
   measure<T>(
     name: string,
     fn: () => T,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): T {
     if (!this.enabled) return fn()
 
@@ -221,18 +221,18 @@ export class PerformanceMonitor {
 export const performanceMonitor = PerformanceMonitor.getInstance()
 
 // Convenience functions
-export function startPerformanceTimer(name: string, context?: Record<string, any>): void {
+export function startPerformanceTimer(name: string, context?: Record<string, unknown>): void {
   performanceMonitor.start(name, context)
 }
 
-export function endPerformanceTimer(name: string, context?: Record<string, any>): number {
+export function endPerformanceTimer(name: string, context?: Record<string, unknown>): number {
   return performanceMonitor.end(name, context)
 }
 
 export async function measureAsyncPerformance<T>(
   name: string,
   fn: () => Promise<T>,
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ): Promise<T> {
   return performanceMonitor.measureAsync(name, fn, context)
 }
@@ -240,12 +240,12 @@ export async function measureAsyncPerformance<T>(
 export function measurePerformance<T>(
   name: string,
   fn: () => T,
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ): T {
   return performanceMonitor.measure(name, fn, context)
 }
 
 // Expose to window in development for debugging
 if (import.meta.env.DEV) {
-  (window as any).performanceMonitor = performanceMonitor
+  (window as unknown as Window & { performanceMonitor: PerformanceMonitor }).performanceMonitor = performanceMonitor
 }
