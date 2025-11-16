@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { StatBar } from '@/components/ui/StatBar'
 
 interface StatusBarProps {
@@ -9,7 +10,7 @@ interface StatusBarProps {
   showAffinityLabel?: boolean
 }
 
-export function StatusBar({ hp, traitsCount, turn, timescale, affinities, showAffinityLabel = true }: StatusBarProps) {
+export const StatusBar = memo(function StatusBar({ hp, traitsCount, turn, timescale, affinities, showAffinityLabel = true }: StatusBarProps) {
   const affinityText = showAffinityLabel
     ? (affinities && affinities.length > 0
         ? affinities
@@ -34,4 +35,4 @@ export function StatusBar({ hp, traitsCount, turn, timescale, affinities, showAf
       </div>
     </footer>
   )
-}
+})
