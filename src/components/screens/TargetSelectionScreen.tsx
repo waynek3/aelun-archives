@@ -50,12 +50,14 @@ export default function TargetSelectionScreen({
 
   function handleDeitySelect(deityId: string) {
     // Store the selected deity and the current location as the target
-    if (availableTargets.length > 0) {
+    if (availableTargets.length > 0 && targetSelection) {
       const currentLocation = availableTargets[0] // Should be current location
       setTargetSelection({
-        ...targetSelection,
+        actionId,
+        availableTargets,
         selectedTarget: currentLocation,
-        selectedEntity: deityId
+        selectedEntity: deityId,
+        maxDuplicates: targetSelection.maxDuplicates
       })
       // Proceed to dice pool with selected deity
       onTargetSelected(currentLocation)

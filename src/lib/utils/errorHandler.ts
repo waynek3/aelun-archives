@@ -185,7 +185,7 @@ export class ErrorHandler {
   ): (...args: Parameters<T>) => Promise<ReturnType<T> | null> {
     return async (...args: Parameters<T>): Promise<ReturnType<T> | null> => {
       try {
-        return await fn(...args)
+        return await fn(...args) as ReturnType<T>
       } catch (error) {
         this.handleError(error, context)
         return null

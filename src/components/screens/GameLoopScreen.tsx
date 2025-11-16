@@ -188,13 +188,27 @@ export default function GameLoopScreen() {
     }
   }, [character, actionMap, predicateMap, setTargetSelection, buildActionContext])
 
+  const determineCauseOfDeath = useCallback((action: ActionCard, predicate: PredicateCard, result: DiceResult): string => {
+    // Simple cause of death determination based on context
+    if (action.tags.includes('Combat')) {
+      return 'Killed in combat';
+    }
+    if (predicate.sceneTags.includes('Dangerous')) {
+      return 'Succumbed to danger';
+    }
+    if (result.total < 5) {
+      return 'Failed catastrophically';
+    }
+    return 'Met an untimely end';
+  }, [])
+
   const handleDiceResult = useCallback(async (result: DiceResult) => {
     if (!character || !selectedActionContext) return;
-    
+
     // For targeted actions, use the selected target; for untargeted, use current location
     const targetPredicate = targetSelection?.selectedTarget || currentPredicate;
     if (!targetPredicate) return;
-    
+
     try {
       // Resolve the action using the predicate engine
       const actionOutcome = await gameEngine.resolveAction({
@@ -204,18 +218,18 @@ export default function GameLoopScreen() {
         diceResult: result,
         selectedEntity: targetSelection?.selectedEntity
       });
-      
+
       // Apply effects to character
         const { updatedCharacter, notifications, isDead } = executeOutcomeEffects(character, actionOutcome.effects);
-      
+
       // Update character in store
       useGameStore.getState().setCharacter(updatedCharacter);
-      
+
       // Show notifications
       notifications.forEach(notification => {
         useUIStore.getState().notify(notification);
       });
-      
+
       // Check for death
         if (isDead) {
           setIsDead(true);
@@ -238,7 +252,7 @@ export default function GameLoopScreen() {
 
       // Set outcome for display
       setOutcome(actionOutcome);
-      
+
     } catch (error) {
       console.error('Failed to resolve action:', error);
       // Show error outcome
@@ -250,20 +264,6 @@ export default function GameLoopScreen() {
       });
     }
   }, [character, selectedActionContext, targetSelection, currentPredicate, determineCauseOfDeath])
-
-  const determineCauseOfDeath = useCallback((action: ActionCard, predicate: PredicateCard, result: DiceResult): string => {
-    // Simple cause of death determination based on context
-    if (action.tags.includes('Combat')) {
-      return 'Killed in combat';
-    }
-    if (predicate.sceneTags.includes('Dangerous')) {
-      return 'Succumbed to danger';
-    }
-    if (result.total < 5) {
-      return 'Failed catastrophically';
-    }
-    return 'Met an untimely end';
-  }, [])
 
   const handleContinueFromOutcome = useCallback(async () => {
     // Reset state and return to game loop

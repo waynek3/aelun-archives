@@ -247,5 +247,5 @@ export function measurePerformance<T>(
 
 // Expose to window in development for debugging
 if (import.meta.env.DEV) {
-  (window as Window & { performanceMonitor: PerformanceMonitor }).performanceMonitor = performanceMonitor
+  (window as unknown as Window & { performanceMonitor: PerformanceMonitor }).performanceMonitor = performanceMonitor
 }
