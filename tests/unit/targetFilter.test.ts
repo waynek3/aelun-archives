@@ -74,7 +74,10 @@ describe('targetFilter', () => {
 
     it('should filter sacred locations for pray action', () => {
       const action = createMockActionCard({ id: 'pray', tags: ['Divine'] });
-      const currentPredicate = createMockPredicateCard({ id: 'current' });
+      const currentPredicate = createMockPredicateCard({
+        id: 'current',
+        exits: ['temple', 'forest']
+      });
       const temple = createMockPredicateCard({ id: 'temple', sceneTags: ['Sacred'] });
       const forest = createMockPredicateCard({ id: 'forest', sceneTags: ['Wilderness'] });
       const predicateMap = {
@@ -85,8 +88,9 @@ describe('targetFilter', () => {
 
       const targets = getAvailableTargets(action, predicateMap, 'current');
 
-      expect(targets).toContainEqual(temple);
+      expect(targets).toContainEqual(temple); // Can pray at sacred temple
       expect(targets).toContainEqual(currentPredicate); // Can pray at current location
+      expect(targets).not.toContainEqual(forest); // Cannot pray at non-sacred forest
     });
 
     it('should match tags correctly', () => {

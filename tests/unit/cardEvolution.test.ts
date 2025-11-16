@@ -6,23 +6,43 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { trackFailure, selectUnlock, getAvailableUnlocks } from '@/lib/engine/cardEvolution';
 
-// Mock the dependencies
+// Mock the dependencies with persistent state
+let mockMeta = {
+  version: 1,
+  cardUnlocks: {},
+  graveyard: [],
+  compendium: {
+    discoveredCards: new Set(),
+    discoveredPredicates: new Set(),
+    discoveredTraits: new Set(),
+    discoveredAffinities: new Set(),
+    loreFragments: new Set(),
+    completionPercentage: 0
+  },
+  statistics: {}
+}
+
+const createFreshMeta = () => ({
+  version: 1,
+  cardUnlocks: {},
+  graveyard: [],
+  compendium: {
+    discoveredCards: new Set(),
+    discoveredPredicates: new Set(),
+    discoveredTraits: new Set(),
+    discoveredAffinities: new Set(),
+    loreFragments: new Set(),
+    completionPercentage: 0
+  },
+  statistics: {}
+})
+
 vi.mock('@/lib/persistence/metaProgression', () => ({
-  getMetaProgression: vi.fn(() => Promise.resolve({
-    version: 1,
-    cardUnlocks: {},
-    graveyard: [],
-    compendium: {
-      discoveredCards: new Set(),
-      discoveredPredicates: new Set(),
-      discoveredTraits: new Set(),
-      discoveredAffinities: new Set(),
-      loreFragments: new Set(),
-      completionPercentage: 0
-    },
-    statistics: {}
-  })),
-  saveMetaProgression: vi.fn(() => Promise.resolve())
+  getMetaProgression: vi.fn(() => Promise.resolve(mockMeta)),
+  saveMetaProgression: vi.fn((meta) => {
+    Object.assign(mockMeta, meta)
+    return Promise.resolve()
+  })
 }));
 
 vi.mock('@/lib/utils/content', () => ({
@@ -68,6 +88,8 @@ vi.mock('@/lib/engine/discoveryManager', () => ({
 describe('cardEvolution', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset mock meta state with fresh object
+    mockMeta = createFreshMeta()
   });
 
   describe('trackFailure', () => {
