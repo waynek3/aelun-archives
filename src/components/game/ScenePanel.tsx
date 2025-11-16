@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { PredicateCard } from '@/types/cards'
 import { Panel } from '@/components/ui/Panel'
 
@@ -5,7 +6,7 @@ interface ScenePanelProps {
   predicate: PredicateCard | null
 }
 
-export function ScenePanel({ predicate }: ScenePanelProps) {
+export const ScenePanel = memo(function ScenePanel({ predicate }: ScenePanelProps) {
   const name = predicate?.name ?? 'Unknown'
   const desc = predicate?.description ?? '...'
   const tags = predicate?.sceneTags ?? []
@@ -29,4 +30,4 @@ export function ScenePanel({ predicate }: ScenePanelProps) {
       </div>
     </Panel>
   )
-}
+})

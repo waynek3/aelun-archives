@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, memo } from 'react'
 import type { ActionCard } from '@/types/cards'
 import { Button } from '@/components/ui/Button'
 import { Panel } from '@/components/ui/Panel'
@@ -8,7 +8,7 @@ interface ActionWheelProps {
   onSelect: (cardId: string) => void
 }
 
-export function ActionWheel({ actions, onSelect }: ActionWheelProps) {
+export const ActionWheel = memo(function ActionWheel({ actions, onSelect }: ActionWheelProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -85,4 +85,4 @@ export function ActionWheel({ actions, onSelect }: ActionWheelProps) {
       )}
     </Panel>
   )
-}
+})

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { ScreenContainer } from '@/components/ui/Layout'
 import { Button } from '@/components/ui/Button'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -43,11 +43,11 @@ export default function GameLoopScreen() {
   const [isDead, setIsDead] = useState(false)
   const [causeOfDeath, setCauseOfDeath] = useState('')
 
-  const handleUnlockClose = () => setPendingUnlock(null)
-  const handleUnlockSelected = (cardName: string) => {
+  const handleUnlockClose = useCallback(() => setPendingUnlock(null), [])
+  const handleUnlockSelected = useCallback((cardName: string) => {
     showNotification?.(`Unlocked ${cardName}! Added to future decks.`, 5000)
     setPendingUnlock(null)
-  }
+  }, [showNotification])
 
   useEffect(() => {
     let mounted = true
@@ -136,7 +136,7 @@ export default function GameLoopScreen() {
         }))
     }, [character, showAffinityHints])
 
-  function buildActionContext(action: ActionCard | undefined) {
+  const buildActionContext = useCallback((action: ActionCard | undefined) => {
     if (!action) return null
     const copies = deckCounts[action.id] ?? 0
     if (copies <= 0) return null
@@ -144,9 +144,9 @@ export default function GameLoopScreen() {
       action,
       maxDuplicates: Math.max(0, copies - 1),
     }
-  }
+  }, [deckCounts])
 
-  function handleSelectAction(cardId: string) {
+  const handleSelectAction = useCallback((cardId: string) => {
     if (!character) return
     const action = actionMap[cardId]
     const context = buildActionContext(action)
@@ -186,9 +186,9 @@ export default function GameLoopScreen() {
       setTargetSelection(null)
       setSelectedActionContext(context)
     }
-  }
+  }, [character, actionMap, deckCounts, predicateMap, setTargetSelection, buildActionContext])
 
-  async function handleDiceResult(result: DiceResult) {
+  const handleDiceResult = useCallback(async (result: DiceResult) => {
     if (!character || !selectedActionContext) return;
     
     // For targeted actions, use the selected target; for untargeted, use current location
@@ -248,9 +248,9 @@ export default function GameLoopScreen() {
         success: false
       });
     }
-  }
+  }, [character, selectedActionContext, targetSelection, currentPredicate])
 
-  function determineCauseOfDeath(action: ActionCard, predicate: PredicateCard, result: DiceResult): string {
+  const determineCauseOfDeath = useCallback((action: ActionCard, predicate: PredicateCard, result: DiceResult): string => {
     // Simple cause of death determination based on context
     if (action.tags.includes('Combat')) {
       return 'Killed in combat';
@@ -262,19 +262,19 @@ export default function GameLoopScreen() {
       return 'Failed catastrophically';
     }
     return 'Met an untimely end';
-  }
+  }, [])
 
-  async function handleContinueFromOutcome() {
+  const handleContinueFromOutcome = useCallback(async () => {
     // Reset state and return to game loop
     setSelectedActionContext(null);
     setOutcome(null);
     setTargetSelection(null);
-    
+
     // Advance turn after outcome resolution
     await useGameStore.getState().advanceTurn();
-  }
+  }, [setTargetSelection])
 
-  function handleTargetSelected(target: PredicateCard) {
+  const handleTargetSelected = useCallback((target: PredicateCard) => {
     if (!targetSelection) return
 
     const action = actionMap[targetSelection.actionId]
@@ -297,28 +297,28 @@ export default function GameLoopScreen() {
       ...targetSelection,
       selectedTarget: target
     })
-  }
+  }, [targetSelection, actionMap, buildActionContext, setTargetSelection])
 
-  function handleTargetSelectionCancel() {
+  const handleTargetSelectionCancel = useCallback(() => {
     setTargetSelection(null)
     setSelectedActionContext(null)
-  }
+  }, [setTargetSelection])
 
-  function handleDiceCancel() {
+  const handleDiceCancel = useCallback(() => {
     setSelectedActionContext(null)
     if (targetSelection) {
       setTargetSelection({ ...targetSelection, selectedTarget: undefined })
     }
-  }
+  }, [targetSelection, setTargetSelection])
 
-  function handleDeathContinue() {
+  const handleDeathContinue = useCallback(() => {
     // Reset death state and return to main menu
     setIsDead(false);
     setCauseOfDeath('');
     setSelectedActionContext(null);
     setTargetSelection(null);
     setScreen('MainMenu');
-  }
+  }, [setScreen, setTargetSelection])
 
   // function handleBackToGame() {
   //   setSelectedAction(null)
