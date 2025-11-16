@@ -186,7 +186,7 @@ export default function GameLoopScreen() {
       setTargetSelection(null)
       setSelectedActionContext(context)
     }
-  }, [character, actionMap, deckCounts, predicateMap, setTargetSelection, buildActionContext])
+  }, [character, actionMap, predicateMap, setTargetSelection, buildActionContext])
 
   const handleDiceResult = useCallback(async (result: DiceResult) => {
     if (!character || !selectedActionContext) return;
@@ -201,7 +201,8 @@ export default function GameLoopScreen() {
         actionCard: selectedActionContext.action,
         predicateCard: targetPredicate,
         character,
-        diceResult: result
+        diceResult: result,
+        selectedEntity: targetSelection?.selectedEntity
       });
       
       // Apply effects to character
@@ -248,7 +249,7 @@ export default function GameLoopScreen() {
         success: false
       });
     }
-  }, [character, selectedActionContext, targetSelection, currentPredicate])
+  }, [character, selectedActionContext, targetSelection, currentPredicate, determineCauseOfDeath])
 
   const determineCauseOfDeath = useCallback((action: ActionCard, predicate: PredicateCard, result: DiceResult): string => {
     // Simple cause of death determination based on context

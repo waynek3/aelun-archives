@@ -82,6 +82,7 @@ class GameEngineClient {
     predicateCard: PredicateCard;
     character: Character;
     diceResult: DiceResult;
+    selectedEntity?: string;
   }): Promise<Outcome> {
     try {
       return await this.sendCommand('RESOLVE_ACTION', params) as Outcome;

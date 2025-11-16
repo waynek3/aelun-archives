@@ -30,7 +30,7 @@ self.onmessage = async (event: MessageEvent<WorkerCommand>) => {
     
     switch (type) {
       case 'RESOLVE_ACTION':
-        result = await resolveAction(payload as { actionCard: ActionCard; predicateCard: PredicateCard; character: Character; diceResult: DiceResult });
+        result = await resolveAction(payload as { actionCard: ActionCard; predicateCard: PredicateCard; character: Character; diceResult: DiceResult; selectedEntity?: string });
         break;
         
       case 'ROLL_DICE_POOL':

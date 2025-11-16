@@ -36,6 +36,10 @@ export interface TargetSelection {
   availableTargets: PredicateCard[];
   selectedTarget?: PredicateCard;
   /**
+   * For prayer actions, the selected deity/entity to pray to
+   */
+  selectedEntity?: string;
+  /**
    * Maximum number of duplicate cards that can be committed for advantage dice.
    */
   maxDuplicates?: number;

@@ -37,6 +37,32 @@ export const AFFINITY_DEFINITIONS: AffinityDefinition[] = [
     description: 'A martial patron who admires courage and decisive strikes.',
   },
   {
+    id: 'local_spirit',
+    name: 'Local Spirit',
+    category: 'deity',
+    description: 'The protective spirit of your homestead, blessing those who honor the hearth.',
+    region: 'Homesteads',
+  },
+  {
+    id: 'nature_spirits',
+    name: 'Nature Spirits',
+    category: 'deity',
+    description: 'Ancient forces of the natural world who favor those who respect the balance.',
+    region: 'Wilderness',
+  },
+  {
+    id: 'storm_spirits',
+    name: 'Storm Spirits',
+    category: 'deity',
+    description: 'Tempestuous entities who test the worthy with lightning and thunder.',
+  },
+  {
+    id: 'shadow_spirits',
+    name: 'Shadow Spirits',
+    category: 'deity',
+    description: 'Enigmatic beings dwelling in darkness, granting power to those who embrace the shadows.',
+  },
+  {
     id: 'unknown_power',
     name: 'The Unknown Power',
     category: 'npc',
@@ -46,4 +72,8 @@ export const AFFINITY_DEFINITIONS: AffinityDefinition[] = [
 
 export function getAffinityDefinition(id: string): AffinityDefinition | undefined {
   return AFFINITY_DEFINITIONS.find((definition) => definition.id === id);
+}
+
+export function getAllDeities(): AffinityDefinition[] {
+  return AFFINITY_DEFINITIONS.filter((definition) => definition.category === 'deity');
 }

@@ -65,7 +65,8 @@ function matchesActionContext(
     case 'pray':
     case 'ritual':
     case 'pilgrimage':
-      return predicateTags.includes('sacred'.toLowerCase()) || currentIsPredicate
+      // Prayer now works at current location only - deity selection happens separately
+      return currentIsPredicate
     default:
       break
   }
