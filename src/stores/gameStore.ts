@@ -1,75 +1,143 @@
 import { create } from 'zustand'
-import type { ActionCard, PredicateCard } from '@/types/cards'
-import type { Character } from '@/types/character'
-import type { DicePool, GameState, TurnPhase, TargetSelection } from '@/types/game'
-import { saveCharacter } from '@/lib/persistence/saveManager'
-import { useUIStore } from './uiStore'
+import { persist } from 'zustand/middleware'
+import { generateTicket, isFullyScratched } from '@/lib/scratchLogic'
+import type { Ticket, TicketType } from '@/lib/scratchLogic'
 
-interface GameStore extends GameState {
-  setCharacter: (c: Character | null) => void
-  setPredicate: (p: PredicateCard | null) => void
-  setTurnPhase: (phase: TurnPhase) => void
-  setAvailableActions: (a: ActionCard[]) => void
-  setDicePool: (pool: DicePool) => void
-  setRecentOutcome: (o: GameState['recentOutcome']) => void
-  setTargetSelection: (selection: TargetSelection | null) => void
-  advanceTurn: () => Promise<void>
-  autoSave: () => Promise<void>
-  updateCharacter: (updates: Partial<Character>) => void
+export type Screen = 'store' | 'scratch' | 'endofday'
+
+export interface HighScore {
+  date: string
+  finalMoney: number
+  ticketsBought: number
+  netChange: number
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
-  character: null,
-  currentPredicate: null,
-  activeTimescale: 'Day',
-  turnPhase: 'scene_display',
-  availableActions: [],
-  dicePool: { advantageDice: 1, bonusDice: [] },
-  recentOutcome: null,
-  targetSelection: null,
+const STARTING_MONEY = 20
+const MAX_HIGH_SCORES = 10
 
-  setCharacter: (c) => set({ character: c }),
-  setPredicate: (p) => set({ currentPredicate: p }),
-  setTurnPhase: (phase) => set({ turnPhase: phase }),
-  setAvailableActions: (a) => set({ availableActions: a }),
-  setDicePool: (pool) => set({ dicePool: pool }),
-  setRecentOutcome: (o) => set({ recentOutcome: o }),
-  setTargetSelection: (selection) => set({ targetSelection: selection }),
+interface GameState {
+  screen: Screen
+  money: number
+  startMoney: number
+  activeTicket: Ticket | null
+  sessionTickets: Ticket[]
+  highScores: HighScore[]
 
-  updateCharacter: (updates) => {
-    const { character } = get()
-    if (!character) return
-    
-    const updatedCharacter = { ...character, ...updates }
-    set({ character: updatedCharacter })
-  },
+  // Actions
+  goToStore: () => void
+  buyTicket: (type: TicketType) => void
+  scratchCell: (row: number, col: number) => void
+  scratchAll: () => void
+  endDay: () => void
+  startNewDay: () => void
+  goToEndOfDay: () => void
+}
 
-  advanceTurn: async () => {
-    const { character } = get()
-    if (!character) return
+export const useGameStore = create<GameState>()(
+  persist(
+    (set, get) => ({
+      screen: 'store',
+      money: STARTING_MONEY,
+      startMoney: STARTING_MONEY,
+      activeTicket: null,
+      sessionTickets: [],
+      highScores: [],
 
-    const updatedCharacter = {
-      ...character,
-      turnCount: (character.turnCount || 0) + 1,
-      // Add any time-based effects here
+      goToStore: () => set({ screen: 'store' }),
+
+      buyTicket: (type: TicketType) => {
+        const { money } = get()
+        if (money < type) return
+        const ticket = generateTicket(type)
+        set(s => ({
+          money: s.money - type,
+          activeTicket: ticket,
+          sessionTickets: [...s.sessionTickets, ticket],
+          screen: 'scratch',
+        }))
+      },
+
+      scratchCell: (row: number, col: number) => {
+        const { activeTicket } = get()
+        if (!activeTicket) return
+
+        const newCells = activeTicket.cells.map((r, ri) =>
+          r.map((cell, ci) =>
+            ri === row && ci === col ? { ...cell, revealed: true } : cell
+          )
+        )
+
+        const updated: Ticket = { ...activeTicket, cells: newCells }
+        updated.fullyScratched = isFullyScratched(updated)
+
+        set(s => ({
+          activeTicket: updated,
+          // Also update in sessionTickets
+          sessionTickets: s.sessionTickets.map(t =>
+            t.id === updated.id ? updated : t
+          ),
+        }))
+
+        // If fully scratched, collect the prize
+        if (updated.fullyScratched) {
+          set(s => ({ money: s.money + updated.prize }))
+        }
+      },
+
+      scratchAll: () => {
+        const { activeTicket } = get()
+        if (!activeTicket) return
+
+        const newCells = activeTicket.cells.map(row =>
+          row.map(cell => ({ ...cell, revealed: true }))
+        )
+        const updated: Ticket = { ...activeTicket, cells: newCells, fullyScratched: true }
+
+        set(s => ({
+          activeTicket: updated,
+          sessionTickets: s.sessionTickets.map(t =>
+            t.id === updated.id ? updated : t
+          ),
+          money: s.money + updated.prize,
+        }))
+      },
+
+      goToEndOfDay: () => set({ screen: 'endofday' }),
+
+      endDay: () => {
+        const { money, startMoney, sessionTickets, highScores } = get()
+        const netChange = money - startMoney
+        const newScore: HighScore = {
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }),
+          finalMoney: money,
+          ticketsBought: sessionTickets.length,
+          netChange,
+        }
+
+        const updated = [...highScores, newScore]
+          .sort((a, b) => b.finalMoney - a.finalMoney)
+          .slice(0, MAX_HIGH_SCORES)
+
+        set({
+          highScores: updated,
+          screen: 'endofday',
+        })
+      },
+
+      startNewDay: () => {
+        set({
+          screen: 'store',
+          money: STARTING_MONEY,
+          startMoney: STARTING_MONEY,
+          activeTicket: null,
+          sessionTickets: [],
+        })
+      },
+    }),
+    {
+      name: 'scratch-game-storage',
+      // Only persist high scores between sessions; reset game state each load
+      partialize: (state) => ({ highScores: state.highScores }),
     }
-
-    set({ character: updatedCharacter })
-    
-    // Auto-save after turn advancement
-    await get().autoSave()
-  },
-
-  autoSave: async () => {
-    const { character } = get()
-    if (!character) return
-
-    try {
-      await saveCharacter(character)
-      useUIStore.getState().showNotification('Game saved', 2000)
-    } catch (error) {
-      console.error('Auto-save failed:', error)
-      useUIStore.getState().showNotification('Save failed', 3000)
-    }
-  },
-}))
+  )
+)
