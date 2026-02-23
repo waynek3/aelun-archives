@@ -19,7 +19,7 @@ export interface Ticket {
 }
 
 // Symbols used across tickets
-const SYMBOLS = ['$', '7', '*', '#', '!']
+const SYMBOLS = ['🜔','🜁','🜹','🝐','🜿','🝊','🜃','🜩','🜪','🜖','🜞','🜟','🜄','🜋','🜈','🜇','🜉','🜌','🜂','🜀','🜠','🜡','🜢','🜍','🜏','🜒','🜓','🜕']
 
 function randomSymbol(): string {
   return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]
