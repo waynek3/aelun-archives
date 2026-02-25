@@ -44,7 +44,15 @@ export function loadGame(): GameState | null {
     if (!raw) return null;
     const data: SaveData = JSON.parse(raw);
     if (typeof data.version !== 'number' || !data.state) return null;
-    return migrate(data);
+    const state = migrate(data);
+    // Guard against stale saves (e.g. from a previous game version) where
+    // phase is 'scratching' but scratchSession was never written or used a
+    // different field name.  Without this check renderScratch clears the
+    // container and returns early, producing a blank blue screen.
+    if (state.phase === 'scratching' && !state.scratchSession) {
+      return { ...state, phase: 'playing', scratchSession: null };
+    }
+    return state;
   } catch {
     return null;
   }
@@ -64,5 +72,9 @@ export function saveTheme(scheme: string): void {
 }
 
 export function loadTheme(): string | null {
-  return localStorage.getItem(THEME_KEY);
+  try {
+    return localStorage.getItem(THEME_KEY);
+  } catch {
+    return null;
+  }
 }
