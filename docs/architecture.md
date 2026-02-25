@@ -1,15 +1,15 @@
-# Chill Scratch-Off Wizard Simulator — Technical Architecture Proposal
+# Chill Scratch-Off Wizard Simulator — Technical Architecture
 
 ---
 
-## 1. Stack Recommendation
+## 1. Stack
 
 | Layer | Choice | Rationale |
 |-------|--------|-----------|
 | Language | **TypeScript** | Complex interconnected game state (10 gods, 30 symbols, hidden stats, opposition circle math) benefits heavily from static typing. Catches misconfigurations at compile time rather than at runtime mid-play. |
 | Build Tool | **Vite** | Fast HMR for iterative sprint development. Zero-config TypeScript support. Produces a single optimized bundle for mobile deployment. No webpack complexity. |
 | UI Framework | **None (vanilla DOM)** | The UI is text-driven menus and progress bars — no component trees, no virtual DOM diffing, no reactive templating needed. A lightweight rendering layer that writes to the DOM directly keeps the bundle small and the architecture transparent. If menu complexity grows beyond expectations, Preact (3KB) can be dropped in later without restructuring. |
-| Styling | **Plain CSS with CSS custom properties** | EGA palette and the two color schemes map directly to CSS custom properties. Toggle themes by swapping a `data-theme` attribute on `<body>`. No preprocessor needed. |
+| Styling | **Plain CSS with CSS custom properties** | Three retro color schemes map directly to CSS custom properties. Toggle themes by swapping a `data-theme` attribute on `<body>`. No preprocessor needed. |
 | State persistence | **localStorage** | No backend. Game state serializes to JSON. Single save slot is sufficient for launch. |
 | Testing | **Vitest** | Ships with Vite. Fast, TypeScript-native. Systems like affinity math, payout calculation, and opposition circle logic are pure functions — ideal for unit testing. |
 | Linting | **ESLint + typescript-eslint** | Standard tooling. Catches bugs early. |
@@ -25,27 +25,51 @@
 
 ## 2. Core Architecture
 
-The game is structured as a **state machine with a tick-based game loop**. All game logic operates on a single centralized state object. The UI is a thin rendering layer that reads state and dispatches player actions.
+The game is structured as an **action-driven state machine**. There is no real-time game loop. The in-game clock only advances when the player takes an action. All game logic operates on a single centralized state object. The UI is a thin rendering layer that reads state and dispatches player actions.
 
 ```
-┌─────────────────────────────────────────────────┐
-│                   Game Loop                      │
-│  (requestAnimationFrame / setInterval hybrid)    │
-│                                                  │
-│  1. Process elapsed time                         │
-│  2. Run active systems (decay, regen, aging)     │
-│  3. Check triggers (events, rent, curfew)        │
-│  4. Render current screen                        │
-└────────────┬────────────────────┬────────────────┘
-             │                    │
-      ┌──────▼──────┐     ┌──────▼──────┐
-      │  Game State  │     │  UI Layer   │
-      │  (single     │◄────│  (reads     │
-      │   object)    │     │   state,    │
-      │              │────►│   dispatches│
-      └──────────────┘     │   actions)  │
-                           └─────────────┘
+         Player taps a button
+                 │
+                 ▼
+      ┌────────────────────┐
+      │   Action Dispatch   │
+      │                    │
+      │  1. Validate action │
+      │  2. Calculate time  │
+      │     cost            │
+      │  3. Advance clock   │
+      │  4. Run systems for │
+      │     elapsed time    │
+      │  5. Apply action    │
+      │     effects         │
+      │  6. Check triggers  │
+      │     (curfew, rent,  │
+      │      events, death) │
+      │  7. Auto-save       │
+      └─────────┬──────────┘
+                │
+        ┌───────▼───────┐
+        │  Game State    │
+        │  (single obj)  │
+        └───────┬───────┘
+                │
+        ┌───────▼───────┐
+        │  UI Render     │
+        │  (read-only)   │
+        └───────────────┘
 ```
+
+Every action the player can take has a known in-game time cost, displayed to the player before they commit. Travel to a bodega: 5 minutes. Scratch 4 tickets: 1 minute (snapped to :15). Pray for 30 minutes: 30 minutes. The player always knows what they're spending before they spend it.
+
+### Why action-driven, not real-time
+
+There is no idle state where time passes on its own. The player is always making a decision. This means:
+- No `setInterval` / `requestAnimationFrame` game loop.
+- No idle-game-style fast-forward when the tab is backgrounded.
+- No "game speed" tuning constant.
+- Simpler architecture: action → state update → render. That's it.
+
+Passive systems (chill decay, affinity decay, mana regen) still run — they just run in bulk for the elapsed time when an action advances the clock. If the player travels for 15 minutes, chill decays for 15 minutes' worth in one calculation.
 
 ### Why a centralized state object
 
@@ -58,7 +82,7 @@ A single state object avoids scattered state synchronization bugs. Every system 
 
 ### Why NOT Redux / Zustand / signals
 
-The game has one consumer (the renderer) and one producer (the game loop). There's no concurrent UI that needs fine-grained reactivity. A plain object with a `render()` call after each state change is sufficient and easier to debug. If this proves insufficient during development, a pub/sub layer can be added without restructuring.
+The game has one consumer (the renderer) and one producer (the action dispatcher). There's no concurrent UI that needs fine-grained reactivity. A plain object with a `render()` call after each state change is sufficient and easier to debug. If this proves insufficient during development, a pub/sub layer can be added without restructuring.
 
 ---
 
@@ -69,9 +93,8 @@ Top-level state structure. All fields are serializable to JSON for localStorage 
 ```typescript
 interface GameState {
   // Core
-  phase: 'new_run' | 'playing' | 'game_over' | 'legacy';
+  phase: 'new_run' | 'playing' | 'scratching' | 'game_over' | 'legacy';
   cash: number;
-  rent: number;
   day: number;           // day of month (1-based)
   month: number;         // 1-12
   year: number;
@@ -80,9 +103,7 @@ interface GameState {
 
   // Location
   currentNeighborhood: NeighborhoodId;
-  currentLocation: LocationId | 'traveling';
-  travelTarget?: { neighborhood: NeighborhoodId; location: LocationId };
-  travelEndTime?: number;
+  currentLocation: LocationId;
 
   // Stats
   intelligence: number;
@@ -120,19 +141,25 @@ interface GameState {
   // Projects
   activeProject: ProjectState | null;
 
+  // Scratch session (active during 'scratching' phase)
+  scratchSession: ScratchSessionState | null;
+
   // Events
   dadAlive: boolean;
   eventsTriggered: Record<string, number>;  // event id -> count
   bongBreakCount: number;
 
-  // Meta
+  // Meta / legacy tracking
   totalTicketsScratched: number;
   bestSingleWin: number;
   highestFame: number;
   notableEvents: string[];
 
-  // Settings
-  colorScheme: 'blue' | 'green';
+  // RNG
+  rngSeed: number;
+
+  // Settings (persisted separately from game state)
+  colorScheme: 'blue' | 'green' | 'orange';
 }
 ```
 
@@ -149,7 +176,7 @@ Each game system is a pure module that exports functions operating on `GameState
 | System | Reads | Writes | Sprint |
 |--------|-------|--------|--------|
 | **Time** | clock, day, month, year | clock, day, month, year | 2 |
-| **Travel** | currentNeighborhood, clock | currentLocation, clock | 2, 4 |
+| **Travel** | currentNeighborhood, clock | currentLocation, currentNeighborhood, clock | 2, 4 |
 | **Rent** | cash, day | cash, phase | 3 |
 | **Chill** | chill, relaxationRate, restingRelaxation | chill | 5 |
 | **Mana** | mana, maxMana, furniture (bed) | mana | 6 |
@@ -163,50 +190,36 @@ Each game system is a pure module that exports functions operating on `GameState
 | **Projects** | activeProject, chill | activeProject, inventory | 20 |
 | **Events** | location, affinity, wizardFame, RNG | various (per event) | 23 |
 
-### Example: Scratch System
+### Action dispatch pattern
+
+Every player action follows the same flow:
 
 ```typescript
-// systems/scratch.ts
+function dispatch(state: GameState, action: GameAction): GameState {
+  // 1. Calculate time cost for this action
+  const timeCost = getTimeCost(action);
 
-interface ScratchSession {
-  tickets: { tier: TicketTier; count: number }[];
-}
+  // 2. Advance clock and run passive systems for elapsed time
+  let next = advanceClock(state, timeCost);
+  next = runPassiveSystems(next, timeCost); // chill decay, affinity decay, etc.
 
-function resolveScratchSession(
-  state: GameState,
-  session: ScratchSession
-): StateUpdate {
-  const totalTickets = session.tickets.reduce((s, t) => s + t.count, 0);
-  const sessionTime = Math.max(60, totalTickets * 15); // seconds
-  const clockCost = snapToQuarter(Math.ceil(sessionTime / 60)); // minutes
+  // 3. Apply the action's specific effects
+  next = applyAction(next, action);
 
-  let cashDelta = 0;
-  let chillDelta = 0;
-  const results: TicketResult[] = [];
+  // 4. Check triggers
+  next = checkCurfew(next);
+  next = checkRentDue(next);
+  next = checkRandomEvents(next, action);
+  next = checkDeath(next);
 
-  for (const { tier, count } of session.tickets) {
-    cashDelta -= tierCost(tier) * count;
-    for (let i = 0; i < count; i++) {
-      const result = scratchTicket(tier, state.affinity);
-      results.push(result);
-      cashDelta += result.payout;
-      chillDelta += result.payout > 0 ? chillOnWin(result) : chillOnLoss(tier);
-    }
-  }
+  // 5. Auto-save
+  save(next);
 
-  return {
-    cash: state.cash + cashDelta,
-    chill: Math.max(0, state.chill + chillDelta),
-    clock: state.clock + clockCost,
-    totalTicketsScratched: state.totalTicketsScratched + totalTickets,
-    bestSingleWin: Math.max(state.bestSingleWin, ...results.map(r => r.payout)),
-    // addiction updates delegated to addiction system
-    _scratchResults: results, // passed to UI for reveal animation
-  };
+  return next;
 }
 ```
 
-This pattern — pure function, state in, partial state update out — applies to every system.
+Each step is a pure function. The dispatch chain is the only place where state mutation occurs.
 
 ---
 
@@ -214,29 +227,44 @@ This pattern — pure function, state in, partial state update out — applies t
 
 Time is the most cross-cutting system. It needs careful design upfront because every sprint builds on it.
 
+### Action-based clock
+
+The in-game clock is purely action-driven. There is no real-time tick. When the player performs an action, the clock advances by that action's time cost.
+
 ```
-Real time (browser)  ──►  Game tick  ──►  In-game clock (minutes)
-                          (1s interval)     │
-                                            ├── Task snapping (:15 increments)
-                                            ├── Scratch timing (15s/ticket)
-                                            ├── Passive decay/regen (per-minute rates)
-                                            ├── Curfew check
-                                            └── Calendar advancement (day/month/year)
+Player action  ──►  Time cost lookup  ──►  Clock advance
+                                              │
+                                              ├── Run passive systems for elapsed minutes
+                                              ├── Calendar rollover (day → month → year)
+                                              ├── Curfew check
+                                              └── Rent day check
 ```
 
-### Tick model
+### Day cycle
 
-The game loop runs on a **1-second real-time interval**. Each tick:
+- **Wake time:** 10:00 AM (clock = 600)
+- **Curfew:** 2:00 AM (clock = 1560, i.e., next day 02:00)
+- **Waking hours:** 16 hours (960 minutes)
+- All values stored in tuning config.
 
-1. Advances the in-game clock by a configurable number of minutes (game speed).
-2. Checks if any active timed action (scratching, traveling, praying, studying, working) has completed.
-3. Runs per-minute systems: chill decay/regen, mana regen, affinity decay.
-4. Checks triggers: curfew, rent day, aging threshold, event rolls.
-5. Calls `render()`.
+### Time costs
+
+Every action in the game has a time cost. The player sees this cost before committing. Examples:
+
+| Action | Time Cost | Snapping |
+|--------|-----------|----------|
+| Travel within neighborhood | 5 min | Snaps to :15 |
+| Travel to different neighborhood | 15 min | Snaps to :15 |
+| Scratch tickets | 15s/ticket, 1 min minimum | Snaps to :15 after total |
+| Prayer | Player chooses duration | Must be :15 increment |
+| University class | Per-class duration | Snaps to :15 |
+| Buy items at store | 15 min | Already aligned |
+| Sleep | Remainder of night | Advances to next day 10:00 |
+| Work on project | Player chooses duration | Must be :15 increment |
 
 ### Task snapping
 
-All non-scratch tasks snap to :15 using:
+All non-scratch tasks snap to the next :15 increment:
 
 ```typescript
 function snapToQuarter(minutes: number): number {
@@ -244,11 +272,22 @@ function snapToQuarter(minutes: number): number {
 }
 ```
 
-Scratch sessions calculate raw seconds, convert to minutes, then snap.
+Scratch sessions: total seconds = tickets * 15, minimum 60 seconds, convert to minutes, then snap.
 
-### Idle handling
+### Passout
 
-If the browser tab is backgrounded and returns, the game calculates elapsed real time and fast-forwards the game clock, running only passive systems (decay, regen) in bulk. Active player decisions are never auto-resolved.
+If the clock passes curfew (2:00 AM) and the player is not in the tower, they pass out. Consequences (all tunable per neighborhood):
+
+| Neighborhood | Cash Penalty | Chill Restored | Mana Restored |
+|-------------|-------------|----------------|---------------|
+| The Skids | $20 | Low | Moderate |
+| The Burbs | $40 | Slightly below avg | Slightly below avg |
+| Center City | $60 | Moderate | Moderate |
+| Downtown | $80 | Low | Low |
+| Richville | $100 | High | Low |
+| University Heights | $50 | Low | High |
+
+Exact values in `data/balance.json`.
 
 ---
 
@@ -256,40 +295,40 @@ If the browser tab is backgrounded and returns, the game calculates elapsed real
 
 ### Screen stack
 
-The UI is a simple screen stack, not a router. Each screen is a function that takes state and returns DOM content.
+The UI is a simple screen stack, not a router. Each screen is a function that renders to a container.
 
 ```typescript
 type Screen =
   | { type: 'new_run' }
   | { type: 'tower' }
-  | { type: 'travel'; to: NeighborhoodId }
   | { type: 'neighborhood'; id: NeighborhoodId }
   | { type: 'location'; id: LocationId }
-  | { type: 'scratch'; results: TicketResult[] }
+  | { type: 'scratch'; session: ScratchSessionState }
   | { type: 'game_over' }
   | { type: 'legacy' };
 ```
 
 ### Rendering approach
 
-Each screen exports a `render(state, container)` function that writes to a root `<div>`. On state change, the current screen's render function is called. No diffing — full replacement of the screen container's innerHTML. This is fast enough for text-only UI with no images.
+Each screen exports a `render(state, container)` function that writes to a root `<div>`. On state change, the current screen's render function is called. No diffing — full replacement of the screen container's innerHTML except during scratch sessions (see below). This is fast enough for text-only UI.
 
 ### HUD
 
 A persistent HUD bar sits above the screen area and shows:
-- Cash
+- Cash (dollar amount)
 - Clock (HH:MM)
 - Calendar (Day Month Year)
-- Chill bar (percentage, no number)
+- Chill bar (percentage bar, no number)
 - Mana bar (shows current/max)
 
-The HUD re-renders on every tick independently of the screen.
+The HUD re-renders after every action.
 
-### EGA Theme
+### Three Color Schemes
 
-Two themes defined as CSS custom property sets:
+Three retro computing themes, selectable by the player:
 
 ```css
+/* DOS Blue — classic BIOS / Norton Commander */
 [data-theme="blue"] {
   --bg: #0000AA;
   --fg: #55FFFF;
@@ -300,18 +339,30 @@ Two themes defined as CSS custom property sets:
   --muted: #555555;
 }
 
+/* Terminal Green — classic CRT terminal */
 [data-theme="green"] {
-  --bg: #002200;
-  --fg: #55FF55;
-  --accent: #FFAA00;
-  --bar-fill: #55FF55;
-  --bar-empty: #003300;
+  --bg: #0A0A0A;
+  --fg: #33FF33;
+  --accent: #66FF66;
+  --bar-fill: #33FF33;
+  --bar-empty: #0A2A0A;
   --warn: #FF5555;
-  --muted: #555555;
+  --muted: #1A6B1A;
+}
+
+/* Amber — vintage amber phosphor monitor */
+[data-theme="orange"] {
+  --bg: #0A0A0A;
+  --fg: #FFAA00;
+  --accent: #FFCC44;
+  --bar-fill: #FFAA00;
+  --bar-empty: #2A1A00;
+  --warn: #FF5555;
+  --muted: #6B4400;
 }
 ```
 
-All UI elements reference custom properties. Theme toggle swaps `data-theme` on `<body>`.
+All UI elements reference custom properties. Theme toggle swaps `data-theme` on `<body>`. Preference persists in localStorage (separate from game save).
 
 ### Mobile-first layout
 
@@ -332,15 +383,15 @@ All UI elements reference custom properties. Theme toggle swaps `data-theme` on 
 ├── tsconfig.json
 ├── vite.config.ts
 ├── src/
-│   ├── main.ts                    # Entry point: init, game loop, render
+│   ├── main.ts                    # Entry point: init, action dispatch, render
 │   ├── state/
 │   │   ├── types.ts               # GameState, all type definitions
 │   │   ├── initial.ts             # Default starting state for new run
 │   │   └── save.ts                # localStorage serialize/deserialize
 │   ├── engine/
-│   │   ├── loop.ts                # Game loop (setInterval, tick dispatch)
+│   │   ├── dispatch.ts            # Action dispatcher (the core loop)
 │   │   ├── time.ts                # Clock advancement, calendar, snapping
-│   │   └── actions.ts             # Player action dispatcher
+│   │   └── actions.ts             # Action type definitions and validators
 │   ├── systems/
 │   │   ├── scratch.ts             # Ticket generation, resolution, payouts
 │   │   ├── chill.ts               # Chill meter decay and restoration
@@ -355,6 +406,7 @@ All UI elements reference custom properties. Theme toggle swaps `data-theme` on 
 │   │   ├── travel.ts              # Travel time calculation
 │   │   └── events.ts              # Random event trigger and resolution
 │   ├── data/
+│   │   ├── balance.json           # All tuning values (see Section 8)
 │   │   ├── gods.ts                # God definitions, opposition circle
 │   │   ├── symbols.ts             # 30 symbols, element/god/strength mapping
 │   │   ├── neighborhoods.ts       # 6 neighborhoods, god strengths
@@ -363,9 +415,9 @@ All UI elements reference custom properties. Theme toggle swaps `data-theme` on 
 │   │   ├── furniture.ts           # Furniture definitions
 │   │   ├── spells.ts              # Spell bank definitions
 │   │   ├── potions.ts             # Potion definitions
-│   │   └── tickets.ts             # Ticket tier odds and payout tables
+│   │   └── tickets.ts             # Ticket type definitions (formats, odds, payouts)
 │   ├── ui/
-│   │   ├── renderer.ts            # Core render loop, screen manager
+│   │   ├── renderer.ts            # Screen manager, render dispatch
 │   │   ├── hud.ts                 # Persistent HUD bar
 │   │   ├── components.ts          # Reusable: progress bars, menus, buttons
 │   │   ├── screens/
@@ -373,7 +425,7 @@ All UI elements reference custom properties. Theme toggle swaps `data-theme` on 
 │   │   │   ├── tower.ts           # Wizard tower menu
 │   │   │   ├── neighborhood.ts    # Neighborhood location picker
 │   │   │   ├── bodega.ts          # Bodega purchase screen
-│   │   │   ├── scratch.ts         # Scratch reveal screen
+│   │   │   ├── scratch.ts         # Scratch reveal screen (tap-to-reveal)
 │   │   │   ├── temple.ts          # Temple menu (donate, pray)
 │   │   │   ├── university.ts      # University class selection
 │   │   │   ├── furniture-store.ts # Furniture purchase
@@ -381,7 +433,7 @@ All UI elements reference custom properties. Theme toggle swaps `data-theme` on 
 │   │   │   └── legacy.ts          # Death summary screen
 │   │   └── theme.ts               # Theme toggle logic
 │   └── util/
-│       ├── rng.ts                 # Seeded RNG for deterministic testing
+│       ├── rng.ts                 # Seeded PRNG (mulberry32)
 │       └── format.ts              # Currency, time, bar rendering helpers
 ├── test/
 │   ├── systems/
@@ -390,6 +442,7 @@ All UI elements reference custom properties. Theme toggle swaps `data-theme` on 
 │   │   ├── chill.test.ts
 │   │   └── ...
 │   └── engine/
+│       ├── dispatch.test.ts
 │       └── time.test.ts
 ├── docs/
 │   └── architecture.md            # This document
@@ -400,7 +453,224 @@ All UI elements reference custom properties. Theme toggle swaps `data-theme` on 
 
 ---
 
-## 8. Data Model for Static Content
+## 8. Tuning & Balance Config
+
+All gameplay-affecting numbers live in a single human-readable JSON file. This is the designer's control surface — every dial that affects how the game plays is here, not buried in code.
+
+```jsonc
+// data/balance.json
+{
+  "starting": {
+    "cash": 250,
+    "neighborhood": "the_skids",
+    "chill": 50,
+    "mana": 20,
+    "maxMana": 30,
+    "intelligence": 10,
+    "bookbinding": 1,
+    "wizardFame": 0,
+    "relaxationRate": 1.0,
+    "restingRelaxation": 50,
+    "ageHealthScore": 100
+  },
+
+  "rent": {
+    "amount": 100,
+    "dueDay": 1
+  },
+
+  "dayCycle": {
+    "wakeTime": 600,
+    "curfewTime": 1560,
+    "sleepChillRestore": "bed_quality_based",
+    "sleepManaRestore": "bed_quality_based"
+  },
+
+  "travel": {
+    "sameNeighborhoodMinutes": 5,
+    "crossNeighborhoodMinutes": 15
+  },
+
+  "scratching": {
+    "secondsPerTicket": 15,
+    "minimumSessionSeconds": 60
+  },
+
+  "passout": {
+    "the_skids":           { "cashPenalty": 20,  "chillRestore": 0.15, "manaRestore": 0.40 },
+    "the_burbs":           { "cashPenalty": 40,  "chillRestore": 0.30, "manaRestore": 0.30 },
+    "center_city":         { "cashPenalty": 60,  "chillRestore": 0.35, "manaRestore": 0.35 },
+    "downtown":            { "cashPenalty": 80,  "chillRestore": 0.15, "manaRestore": 0.15 },
+    "richville":           { "cashPenalty": 100, "chillRestore": 0.50, "manaRestore": 0.15 },
+    "university_heights":  { "cashPenalty": 50,  "chillRestore": 0.15, "manaRestore": 0.50 }
+  },
+
+  "chill": {
+    "decayPerMinute": 0.05,
+    "lossPerScratchLoss": 2,
+    "gainPerScratchWin": 5,
+    "bongRestoreAmount": 25
+  },
+
+  "mana": {
+    "passoutPenalty": 0.5
+  },
+
+  "affinity": {
+    "scaleFactor": 0.02,
+    "privateDonationMultiplier": 1.5,
+    "publicDonationMultiplier": 0.75,
+    "publicDonationFameGain": 1,
+    "strongMonthMultiplier": 2.0,
+    "passiveDecayPerDay": 0.5,
+    "prayerBuffMultiplier": 2.0,
+    "prayerDebuffMultiplier": 0.5
+  },
+
+  "addiction": {
+    "needGrowthRate": 0.1,
+    "satisfactionPerTicket": 0.05,
+    "restingRelaxationPenaltyPerLevel": 2
+  },
+
+  "aging": {
+    "intelligenceDecayPerYear": 0.5,
+    "addictionSusceptibilityPerYear": 0.02,
+    "baseDeathAge": 80,
+    "healthScoreDeathAgeBonus": 0.2
+  },
+
+  "wizardFame": {
+    "decayPerDay": 0.1
+  }
+}
+```
+
+### How it works in code
+
+```typescript
+import balance from './data/balance.json';
+
+// Systems reference balance values, never hardcode numbers
+function calculateChillDecay(elapsedMinutes: number): number {
+  return elapsedMinutes * balance.chill.decayPerMinute;
+}
+
+function calculateAffinityPayout(basePayout: number, affinity: number): number {
+  const multiplier = 1 + (affinity * balance.affinity.scaleFactor);
+  return Math.floor(basePayout * multiplier);
+}
+```
+
+New tuning values are added to this file as systems are built. The file grows with each sprint but never needs restructuring.
+
+---
+
+## 9. Scratch-Off Ticket Engine
+
+The scratch system is the core mechanic and deserves specific architectural attention.
+
+### Ticket types as data
+
+Each ticket type is a self-contained product definition. Different types can use completely different game formats. The system is extensible — new types are added as data entries, and stores can be configured to stock specific subsets.
+
+```typescript
+interface TicketType {
+  id: string;
+  name: string;              // e.g., "Lucky 9", "Triple Line"
+  cost: number;              // $1, $2, $5, etc.
+  format: TicketFormat;      // grid_match | row_match | match_numbers | etc.
+  grid: { rows: number; cols: number };
+  winCondition: WinCondition; // e.g., { type: 'match_n', n: 3 }
+  payoutTable: PayoutEntry[];
+  symbolWeights?: Record<GodId, number>; // override default symbol distribution
+}
+
+// Example ticket types (defined in data/tickets.ts)
+const TICKET_TYPES: TicketType[] = [
+  {
+    id: 'lucky_9',
+    name: 'Lucky 9',
+    cost: 1,
+    format: 'grid_match',
+    grid: { rows: 3, cols: 3 },
+    winCondition: { type: 'match_n', n: 3 },
+    payoutTable: [
+      { matches: 3, payout: 5 },
+      { matches: 4, payout: 15 },
+      // ...
+    ],
+  },
+  // More ticket types...
+];
+```
+
+EV for every ticket type is negative at base. God affinity bonuses push winning payouts higher, potentially making specific ticket types positive EV when the player has invested in the right gods. This makes the god affinity system the core economic engine of the game.
+
+### Ticket generation
+
+When a ticket is purchased, its outcome is pre-determined:
+
+1. Roll against the win probability for this ticket type.
+2. If a win: select a winning symbol (weighted by neighborhood god strength), place required matches, fill remaining cells randomly.
+3. If a loss: fill all cells randomly, verify no accidental match (re-roll if needed).
+
+The pre-determined result is stored in the scratch session state. The reveal is purely presentational.
+
+### Payout calculation
+
+```
+base_payout = ticket_type.payoutTable[match_count]
+affinity_multiplier = 1 + (affinity[winning_symbol.god] * balance.affinity.scaleFactor)
+final_payout = floor(base_payout * affinity_multiplier)
+```
+
+Negative affinity reduces the multiplier below 1.0, penalizing payouts. At zero affinity, payout equals base. With strong positive affinity, payouts exceed base — this is how the player turns negative-EV tickets profitable.
+
+### Scratch reveal UX
+
+The scratch screen is the most interactive part of the UI. Each ticket's cells start fully covered and are revealed by tapping.
+
+**Cell degradation sequence:**
+
+```
+█  →  ▓  →  ▒  →  ░  →  glyph
+(covered)  (scratching)  (revealed)
+```
+
+Each tap on a covered cell advances it one step through the degradation sequence. The glyph becomes visible beneath the thinning overlay. Four taps to fully reveal a cell.
+
+The player must tap every cell on every ticket. There is no "Scratch All" button. This is intentional — the tedium of scratching is a design lever. Future spells can improve the scratch experience (double taps, row/column reveals, instant reveals), making scratch-quality-of-life a meaningful axis of progression.
+
+**Scratch session state:**
+
+```typescript
+interface ScratchSessionState {
+  tickets: GeneratedTicket[];
+  currentTicketIndex: number;
+  cellStates: CellState[][];  // per-ticket, per-cell scratch progress (0-4)
+}
+
+type CellState = 0 | 1 | 2 | 3 | 4;
+// 0 = █ (covered), 1 = ▓, 2 = ▒, 3 = ░, 4 = fully revealed
+```
+
+The scratch screen does NOT do full innerHTML replacement on each tap — it updates individual cell elements in place for responsive feel on mobile.
+
+### Store stocking
+
+Each store (bodega/gas station) defines which ticket types it stocks. This enables neighborhood-specific ticket availability and can be expanded over time:
+
+```typescript
+interface StoreInventory {
+  ticketTypes: string[];    // ticket type IDs available at this store
+  snacks: string[];         // food item IDs
+}
+```
+
+---
+
+## 10. Data Model for Static Content
 
 Static game data (gods, symbols, neighborhoods, etc.) is defined as typed constants. This keeps data separate from logic and makes it easy to audit against `scope.md`.
 
@@ -421,7 +691,8 @@ const GODS = {
   sofiel:  { name: 'Sofiel',  element: 'fire',  strongMonths: [11] },
 } as const;
 
-// Opposition pairs derived from the circle
+// Opposition pairs derived from the circle:
+// Mesin ↔ Gul, Klossa ↔ Sofiel, Marena ↔ Finhorn, Ara ↔ Azorius, Beroan ↔ Skarhol
 const OPPOSITION: Record<GodId, GodId> = {
   mesin: 'gul', gul: 'mesin',
   klossa: 'sofiel', sofiel: 'klossa',
@@ -434,55 +705,22 @@ const OPPOSITION: Record<GodId, GodId> = {
 ### Symbol Table
 
 ```typescript
-// data/symbols.ts
+// data/symbols.ts — all 30 symbols from scope.md
 const SYMBOLS: Symbol[] = [
-  { id: 1,  glyph: '♪', name: "Mesin's Spark",     unicode: 'U+266A', element: 'life',  god: 'mesin',   strength: 'weak',   color: '#7EC87E' },
-  { id: 2,  glyph: '☼', name: 'The Rising Breath',  unicode: 'U+263C', element: 'life',  god: 'mesin',   strength: 'mid',    color: '#7EC87E' },
-  // ... all 30 symbols
+  { id: 1,  glyph: '♪', name: "Mesin's Spark",      element: 'life',  god: 'mesin',   strength: 'weak',   color: '#7EC87E' },
+  { id: 2,  glyph: '☼', name: 'The Rising Breath',   element: 'life',  god: 'mesin',   strength: 'mid',    color: '#7EC87E' },
+  { id: 3,  glyph: '♫', name: 'Staff of Living',     element: 'life',  god: 'mesin',   strength: 'strong', color: '#7EC87E' },
+  // ... all 30, directly transcribed from scope.md
 ];
 ```
 
 ---
 
-## 9. Scratch-Off Ticket Engine
-
-The scratch system is the core mechanic and deserves specific architectural attention.
-
-### Ticket generation
-
-Each ticket tier defines:
-- **Cost** ($1, $2, $5, $10, $20)
-- **Grid size** (e.g., 3x3 for $1, up to 5x5 for $20)
-- **Win probability** and **payout table**
-- **Symbol pool** (all 30 symbols, weighted by neighborhood god strength)
-
-A ticket is generated by:
-1. Rolling against the win probability table for this tier.
-2. If a win: selecting a winning symbol (weighted by neighborhood god strength), placing the required matches, filling remaining cells randomly.
-3. If a loss: filling all cells randomly, verifying no accidental match (re-roll if needed).
-
-### Payout calculation
-
-```
-base_payout = tier_payout_table[match_type]
-affinity_multiplier = 1 + (affinity[symbol.god] * AFFINITY_SCALE_FACTOR)
-final_payout = floor(base_payout * affinity_multiplier)
-```
-
-Where `AFFINITY_SCALE_FACTOR` is a tuning constant. Negative affinity reduces the multiplier below 1.0, penalizing payouts.
-
-### Reveal sequence
-
-The scratch screen reveals tickets one at a time. Each ticket shows its grid with cells initially covered (e.g., `[?]`). The player taps cells or a "Scratch All" button. This is purely presentational — the outcome is pre-determined at purchase time.
-
----
-
-## 10. Save System
+## 11. Save System
 
 ### Auto-save triggers
 
-- End of each in-game day (on sleep)
-- On any purchase or significant action
+- After every action dispatch (the game is action-based, so this is after every player decision)
 - On `visibilitychange` (tab backgrounding)
 - On `beforeunload`
 
@@ -504,33 +742,49 @@ Each save has a version number. On load, if the version is older than current, a
 const MIGRATIONS: Record<number, (state: any) => any> = {
   2: (s) => ({ ...s, addictionNeed: 0, addictionSatisfaction: 0 }),
   3: (s) => ({ ...s, colorScheme: 'blue' }),
-  // ...
+  // one migration per sprint that changes state shape
 };
 ```
 
 This is critical for a sprint-based project where state shape changes every sprint.
 
+### Settings vs. game state
+
+Color scheme preference is stored separately from the game save in its own localStorage key. This way the player's theme choice persists even when starting a new run.
+
 ---
 
-## 11. RNG Strategy
+## 12. RNG Strategy
 
-The game uses a **seeded PRNG** (e.g., a simple mulberry32 or xoshiro128) for all gameplay randomness. Benefits:
+The game uses a **seeded PRNG** (mulberry32) for all gameplay randomness. Benefits:
 
 - **Reproducible bugs.** If a player reports an issue, the seed + action log can reproduce it exactly.
 - **Testability.** Tests can assert on specific outcomes with known seeds.
-- **Anti-save-scum resilience** (optional). The seed advances deterministically, so reloading and re-scratching produces the same result.
+- **Anti-save-scum resilience.** The seed advances deterministically, so reloading and re-scratching produces the same result.
 
 The seed is generated once per run and stored in `GameState`. All random calls go through a central `rng(state)` function that advances the seed.
 
+```typescript
+// util/rng.ts
+function mulberry32(seed: number): () => number {
+  return () => {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+```
+
 ---
 
-## 12. Sprint Alignment
+## 13. Sprint Alignment
 
 The architecture is designed so that each sprint adds code in isolated areas without restructuring existing systems.
 
-| Sprint | What gets added | Where |
-|--------|----------------|-------|
-| 1 | Scratch engine, bodega screen, basic state | `systems/scratch.ts`, `ui/screens/bodega.ts`, `ui/screens/scratch.ts`, `state/` |
+| Sprint | What gets added | Files touched |
+|--------|----------------|---------------|
+| 1 | Scratch engine, bodega screen, basic state | `systems/scratch.ts`, `ui/screens/bodega.ts`, `ui/screens/scratch.ts`, `state/`, `data/tickets.ts`, `data/balance.json` |
 | 2 | Time system, tower screen, travel | `engine/time.ts`, `systems/travel.ts`, `ui/screens/tower.ts` |
 | 3 | Rent check, game over screen | `systems/rent.ts`, `ui/screens/game-over.ts` |
 | 4 | Neighborhood data, travel UI | `data/neighborhoods.ts`, `ui/screens/neighborhood.ts` |
@@ -562,21 +816,22 @@ No sprint requires restructuring a previous sprint's code — only extending it.
 
 ---
 
-## 13. Testing Strategy
+## 14. Testing Strategy
 
 ### Unit tests (Vitest)
 
 Pure system functions are the primary test target:
 
-- **Scratch engine:** Given a seed, ticket tier, and affinity map, assert correct payout.
+- **Scratch engine:** Given a seed, ticket type, and affinity map, assert correct payout and match detection.
 - **Affinity math:** Donation to god X increases X, decreases opposed god Y. Strong month doubles gains. Opposition circle produces correct pairings.
 - **Time snapping:** Assert all edge cases for :15 snap behavior, scratch session timing (15s/ticket, 1 min minimum, round up).
 - **Chill/Mana:** Decay rates, regen on sleep, passout penalties per neighborhood.
 - **Rent:** Game over triggers on day 1 with insufficient cash.
+- **Ticket type validation:** Each ticket type's payout table produces the expected EV given its cost.
 
 ### Integration tests
 
-Simulate multi-turn game sequences: wake up, travel, buy tickets, scratch, travel home, sleep. Assert state is consistent after a full day cycle.
+Simulate multi-action game sequences: wake up, travel, buy tickets, scratch, travel home, sleep. Assert state is consistent after a full day cycle.
 
 ### No E2E tests at launch
 
@@ -584,27 +839,39 @@ The UI is simple enough that manual testing during sprint development is suffici
 
 ---
 
-## 14. Risks and Mitigations
+## 15. Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| State shape changes break saves | Players lose progress | Versioned save format with migration chain (Section 10) |
+| State shape changes break saves | Players lose progress | Versioned save format with migration chain (Section 11) |
 | Time system bugs (snapping, curfew) | Game logic breaks | Extensive unit tests for time module; fuzz test with random action sequences |
-| Affinity math imbalance | Game too easy/hard | Tuning constants extracted to `data/` files; easy to adjust without code changes |
-| DOM rendering too slow on low-end mobile | UI lag | Profile early. Fallback: batch DOM writes with `documentFragment`, or switch to innerHTML string building |
+| Affinity math imbalance | Game too easy/hard | All tuning constants in `balance.json`; tweak without code changes |
+| Ticket EV imbalance | Game unwinnable or trivial | Unit tests validate EV per ticket type; balance.json tuning |
+| DOM rendering too slow on low-end mobile | UI lag during scratch sessions | Scratch screen updates individual cells (no full re-render); profile early |
 | Scope creep within sprints | Sprints take too long | Architecture enforces clear module boundaries; each sprint touches isolated files |
-| localStorage quota exceeded | Save fails silently | Monitor save size; compress with `JSON.stringify` + `LZString` if needed (unlikely with text-only state) |
+| localStorage quota exceeded | Save fails silently | Monitor save size; compress if needed (unlikely with text-only state) |
+| Tap fatigue on large scratch sessions | Player frustration | Intentional design — spell system provides QoL upgrades as progression |
 
 ---
 
-## 15. Open Questions
+## 16. Resolved Design Decisions
 
-These should be resolved before or during early sprints:
+These were resolved during architecture review and are now final:
 
-1. **Game speed multiplier.** How many in-game minutes pass per real second? This determines session length. Recommendation: start at 1 real second = 1 in-game minute, tunable.
-2. **Scratch reveal UX.** Tap-to-reveal individual cells, or auto-reveal with animation? The spec says "reveals each ticket one at a time" but doesn't specify cell-level interaction.
-3. **Ticket grid sizes per tier.** Not specified in scope.md. Need to define grid dimensions and match-to-win rules (3-in-a-row? match-3? etc.).
-4. **Payout tables.** Specific dollar amounts per tier and match type are not in scope.md. These need to be defined and balanced.
-5. **Starting cash and rent amount.** Not specified. These set the initial difficulty curve.
-6. **Passout cash penalties.** Scope says "~$100 in Richville, ~$20 in The Skids" — need exact values for all 6 neighborhoods.
-7. **Sleep/curfew times.** What time is curfew? What time does the wizard wake up? Not specified.
+1. **Time model:** Action-based, not real-time. The clock advances only when the player takes an action. No game loop interval, no idle handling, no game speed setting.
+
+2. **Scratch reveal:** Tap-to-reveal with Unicode degradation (`█ → ▓ → ▒ → ░ → glyph`). Four taps per cell. No "Scratch All" button — tedium is intentional and improved by spells.
+
+3. **Ticket formats:** Multiple distinct formats per price tier (grid match, row match, bingo-style, etc.). Each ticket type is a data definition. Stores stock subsets of available types.
+
+4. **Ticket economics:** All tickets have negative base EV. God affinity bonuses are the mechanism that pushes specific tickets into positive EV territory. This makes the god system the core economic engine.
+
+5. **Tuning values:** All gameplay-affecting numbers live in `data/balance.json`. Human-readable, easy to tweak without code changes.
+
+6. **Starting values:** $250 cash, $100/month rent, start in The Skids. All tunable in balance.json.
+
+7. **Day cycle:** Wake at 10:00 AM, curfew at 2:00 AM. 16 waking hours per day.
+
+8. **Passout penalties:** Per-neighborhood cash penalties and chill/mana restoration ratios. All in balance.json.
+
+9. **Color schemes:** Three retro computing themes — DOS Blue/Cyan, Terminal Green on Black, Amber on Black. Toggle persists in localStorage separately from game save.
