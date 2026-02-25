@@ -23,8 +23,12 @@ export function render(
   container: HTMLElement,
   dispatch: Dispatch,
 ): void {
+  // Guard: scratchSession must be present to show the scratch screen.
+  // A null session with phase='scratching' (e.g. stale save from a previous
+  // game version) would cause renderScratch to clear the container and return
+  // immediately, leaving only the CSS background visible.
   const targetScreen: ScreenId =
-    state.phase === 'scratching' ? 'scratch' : 'bodega';
+    state.phase === 'scratching' && state.scratchSession !== null ? 'scratch' : 'bodega';
 
   if (targetScreen === 'scratch') {
     if (currentScreen !== 'scratch') {
