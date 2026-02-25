@@ -1,0 +1,334 @@
+/* ─── Color Schemes ─────────────────────────────────────────────────────────── */
+
+/* DOS Blue — default */
+[data-theme="blue"] {
+  --bg:        #0000AA;
+  --fg:        #55FFFF;
+  --accent:    #FFFFFF;
+  --bar-fill:  #55FFFF;
+  --bar-empty: #000055;
+  --warn:      #FF5555;
+  --muted:     #5555FF;
+  --btn-bg:    #000088;
+  --btn-fg:    #55FFFF;
+  --btn-hover: #0000CC;
+  --win:       #55FF55;
+  --loss:      #FF5555;
+  --border:    #55FFFF;
+}
+
+/* Terminal Green */
+[data-theme="green"] {
+  --bg:        #0A0A0A;
+  --fg:        #33FF33;
+  --accent:    #66FF66;
+  --bar-fill:  #33FF33;
+  --bar-empty: #0A2A0A;
+  --warn:      #FF5555;
+  --muted:     #1A6B1A;
+  --btn-bg:    #0A2A0A;
+  --btn-fg:    #33FF33;
+  --btn-hover: #0A3A0A;
+  --win:       #66FF66;
+  --loss:      #FF5555;
+  --border:    #33FF33;
+}
+
+/* Amber */
+[data-theme="orange"] {
+  --bg:        #0A0A0A;
+  --fg:        #FFAA00;
+  --accent:    #FFCC44;
+  --bar-fill:  #FFAA00;
+  --bar-empty: #2A1A00;
+  --warn:      #FF5555;
+  --muted:     #6B4400;
+  --btn-bg:    #2A1A00;
+  --btn-fg:    #FFAA00;
+  --btn-hover: #3A2A00;
+  --win:       #FFCC44;
+  --loss:      #FF5555;
+  --border:    #FFAA00;
+}
+
+/* ─── Reset & Base ───────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0;
+}
+
+/* ─── Screen Container ───────────────────────────────────────────────────────── */
+
+.screen {
+  width: 100%;
+  max-width: 480px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ─── Section Header ─────────────────────────────────────────────────────────── */
+
+.section-header {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* ─── Divider ────────────────────────────────────────────────────────────────── */
+
+.divider {
+  color: var(--muted);
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ─── Cash Bar ───────────────────────────────────────────────────────────────── */
+
+.cash-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.cash-value {
+  color: var(--accent);
+  font-weight: bold;
+}
+
+/* ─── Quantity Rows ──────────────────────────────────────────────────────────── */
+
+.qty-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.ticket-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-cost {
+  color: var(--muted);
+  font-size: 0.9em;
+  min-width: 4ch;
+  text-align: right;
+}
+
+.qty-count {
+  min-width: 3ch;
+  text-align: center;
+  color: var(--accent);
+  font-weight: bold;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────────── */
+
+.btn {
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1em;
+  line-height: 1;
+  padding: 6px 10px;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  background: var(--btn-hover);
+  outline: none;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qty-btn {
+  min-width: 44px;
+  padding: 6px 8px;
+}
+
+.buy-btn {
+  width: 100%;
+  font-size: 1.2em;
+  letter-spacing: 0.1em;
+  min-height: 52px;
+  margin-top: 4px;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.nav-btn {
+  width: 100%;
+  font-size: 1.1em;
+  letter-spacing: 0.05em;
+  min-height: 52px;
+  margin-top: 8px;
+}
+
+/* ─── Total Row ──────────────────────────────────────────────────────────────── */
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-weight: bold;
+}
+
+/* ─── Theme Toggle ───────────────────────────────────────────────────────────── */
+
+.theme-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.theme-btn {
+  min-width: 60px;
+  font-size: 0.85em;
+}
+
+.theme-btn.active {
+  background: var(--border);
+  color: var(--bg);
+}
+
+/* ─── Scratch Grid ───────────────────────────────────────────────────────────── */
+
+.ticket-grid {
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+  justify-items: center;
+}
+
+.scratch-cell {
+  background: var(--btn-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  min-width: 44px;
+  min-height: 44px;
+  transition: background 0.08s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.scratch-cell:hover {
+  background: var(--btn-hover);
+}
+
+.scratch-cell.scratching {
+  color: var(--muted);
+}
+
+.scratch-cell.revealed {
+  background: transparent;
+  border-color: transparent;
+  cursor: default;
+  font-size: 1.6em;
+}
+
+/* ─── Ticket Result ──────────────────────────────────────────────────────────── */
+
+.ticket-result {
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.result-line {
+  text-align: center;
+  padding: 2px 0;
+}
+
+.win-line {
+  color: var(--win);
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.loss-line {
+  color: var(--muted);
+}
+
+.payout-win {
+  color: var(--win);
+  font-weight: bold;
+  font-size: 1.3em;
+}
+
+.payout-loss {
+  color: var(--muted);
+}
+
+/* ─── Summary Screen ─────────────────────────────────────────────────────────── */
+
+.summary-screen .result-line {
+  font-size: 1.1em;
+  text-align: left;
+  padding: 2px 4px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 360px) {
+  .scratch-cell {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2em;
+  }
+
+  .screen {
+    padding: 12px 8px;
+  }
+}
