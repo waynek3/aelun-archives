@@ -1,0 +1,78 @@
+// ─── Primitive IDs ───────────────────────────────────────────────────────────
+
+export type GodId =
+  | 'mesin' | 'gul' | 'klossa' | 'skarhol'
+  | 'marena' | 'azorius' | 'ara' | 'finhorn'
+  | 'beroan' | 'sofiel';
+
+export type ElementId = 'life' | 'death' | 'earth' | 'water' | 'air' | 'fire';
+
+export type StrengthId = 'weak' | 'mid' | 'strong';
+
+export type ColorScheme = 'blue' | 'green' | 'orange';
+
+// ─── Scratch Session ──────────────────────────────────────────────────────────
+
+// 0 = █ covered, 1 = ▓, 2 = ▒, 3 = ░, 4 = glyph revealed
+export type CellState = 0 | 1 | 2 | 3 | 4;
+
+export interface TicketCell {
+  symbolId: number;  // 1–30
+  state: CellState;
+}
+
+export interface GeneratedTicket {
+  typeId: string;
+  typeName: string;
+  cost: number;
+  cells: TicketCell[];
+  rows: number;
+  cols: number;
+  // Pre-determined outcome
+  isWin: boolean;
+  winningSymbolId: number | null;  // null on losses
+  matchCount: number;              // highest matching symbol count
+  basePayout: number;              // 0 on loss
+  // UI state
+  revealed: boolean;               // true when all cells are at state 4
+}
+
+export interface ScratchSessionState {
+  tickets: GeneratedTicket[];
+  currentTicketIndex: number;
+  timeCostMinutes: number;   // pre-computed time cost (used in Sprint 2+)
+  totalPayout: number;       // accumulated winnings so far this session
+  totalCost: number;         // total spent on this session
+}
+
+// ─── Game State ───────────────────────────────────────────────────────────────
+
+// Sprint 1 phase set. Future sprints extend this.
+export type Phase = 'playing' | 'scratching';
+
+export interface GameState {
+  // ── Core ──
+  phase: Phase;
+  cash: number;
+
+  // ── Scratch session (active during 'scratching' phase) ──
+  scratchSession: ScratchSessionState | null;
+
+  // ── Legacy tracking ──
+  totalTicketsScratched: number;
+  bestSingleWin: number;
+
+  // ── RNG ──
+  rngSeed: number;  // current seed state; advances with each RNG call
+
+  // ── Settings ──
+  colorScheme: ColorScheme;
+}
+
+// ─── Save Format ──────────────────────────────────────────────────────────────
+
+export interface SaveData {
+  version: number;
+  state: GameState;
+  timestamp: number;
+}

@@ -1,0 +1,85 @@
+{
+  "starting": {
+    "cash": 250,
+    "neighborhood": "the_skids",
+    "chill": 50,
+    "mana": 20,
+    "maxMana": 30,
+    "intelligence": 10,
+    "bookbinding": 1,
+    "wizardFame": 0,
+    "relaxationRate": 1.0,
+    "restingRelaxation": 50,
+    "ageHealthScore": 100
+  },
+
+  "rent": {
+    "amount": 100,
+    "dueDay": 1
+  },
+
+  "dayCycle": {
+    "wakeTime": 600,
+    "curfewTime": 1560,
+    "sleepChillRestore": "bed_quality_based",
+    "sleepManaRestore": "bed_quality_based"
+  },
+
+  "travel": {
+    "sameNeighborhoodMinutes": 5,
+    "crossNeighborhoodMinutes": 15
+  },
+
+  "scratching": {
+    "secondsPerTicket": 15,
+    "minimumSessionSeconds": 60
+  },
+
+  "passout": {
+    "the_skids":           { "cashPenalty": 20,  "chillRestore": 0.15, "manaRestore": 0.40 },
+    "the_burbs":           { "cashPenalty": 40,  "chillRestore": 0.30, "manaRestore": 0.30 },
+    "center_city":         { "cashPenalty": 60,  "chillRestore": 0.35, "manaRestore": 0.35 },
+    "downtown":            { "cashPenalty": 80,  "chillRestore": 0.15, "manaRestore": 0.15 },
+    "richville":           { "cashPenalty": 100, "chillRestore": 0.50, "manaRestore": 0.15 },
+    "university_heights":  { "cashPenalty": 50,  "chillRestore": 0.15, "manaRestore": 0.50 }
+  },
+
+  "chill": {
+    "decayPerMinute": 0.05,
+    "lossPerScratchLoss": 2,
+    "gainPerScratchWin": 5,
+    "bongRestoreAmount": 25
+  },
+
+  "mana": {
+    "passoutPenalty": 0.5
+  },
+
+  "affinity": {
+    "scaleFactor": 0.02,
+    "privateDonationMultiplier": 1.5,
+    "publicDonationMultiplier": 0.75,
+    "publicDonationFameGain": 1,
+    "strongMonthMultiplier": 2.0,
+    "passiveDecayPerDay": 0.5,
+    "prayerBuffMultiplier": 2.0,
+    "prayerDebuffMultiplier": 0.5
+  },
+
+  "addiction": {
+    "needGrowthRate": 0.1,
+    "satisfactionPerTicket": 0.05,
+    "restingRelaxationPenaltyPerLevel": 2
+  },
+
+  "aging": {
+    "intelligenceDecayPerYear": 0.5,
+    "addictionSusceptibilityPerYear": 0.02,
+    "baseDeathAge": 80,
+    "healthScoreDeathAgeBonus": 0.2
+  },
+
+  "wizardFame": {
+    "decayPerDay": 0.1
+  }
+}

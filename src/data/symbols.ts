@@ -1,0 +1,52 @@
+import type { GodId, ElementId, StrengthId } from '../state/types';
+
+export interface SymbolDef {
+  id: number;
+  glyph: string;
+  name: string;
+  element: ElementId;
+  god: GodId;
+  strength: StrengthId;
+  color: string;
+}
+
+// All 30 symbols from scope.md — CP437/BMP glyphs only
+export const SYMBOLS: SymbolDef[] = [
+  { id:  1, glyph: '♪', name: "Mesin's Spark",        element: 'life',  god: 'mesin',   strength: 'weak',   color: '#7EC87E' },
+  { id:  2, glyph: '☼', name: 'The Rising Breath',    element: 'life',  god: 'mesin',   strength: 'mid',    color: '#7EC87E' },
+  { id:  3, glyph: '♫', name: 'Staff of Living',      element: 'life',  god: 'mesin',   strength: 'strong', color: '#7EC87E' },
+  { id:  4, glyph: '·', name: "Gul's Passage",        element: 'death', god: 'gul',     strength: 'weak',   color: '#9B8FB5' },
+  { id:  5, glyph: '§', name: 'The Rotting Crown',    element: 'death', god: 'gul',     strength: 'mid',    color: '#9B8FB5' },
+  { id:  6, glyph: '◙', name: 'The Void Ember',       element: 'death', god: 'gul',     strength: 'strong', color: '#9B8FB5' },
+  { id:  7, glyph: '•', name: "Klossa's Ground",      element: 'earth', god: 'klossa',  strength: 'weak',   color: '#C8A96E' },
+  { id:  8, glyph: '¶', name: "The Gnome's Salt",     element: 'earth', god: 'klossa',  strength: 'mid',    color: '#C8A96E' },
+  { id:  9, glyph: '※', name: 'Bitter Stone',         element: 'earth', god: 'klossa',  strength: 'strong', color: '#C8A96E' },
+  { id: 10, glyph: '♂', name: "Skarhol's Vein",       element: 'earth', god: 'skarhol', strength: 'weak',   color: '#C8A96E' },
+  { id: 11, glyph: '√', name: 'The Forge Metal',      element: 'earth', god: 'skarhol', strength: 'mid',    color: '#C8A96E' },
+  { id: 12, glyph: '◘', name: "Skarhol's Crown",      element: 'earth', god: 'skarhol', strength: 'strong', color: '#C8A96E' },
+  { id: 13, glyph: '♀', name: "Marena's Tide",        element: 'water', god: 'marena',  strength: 'weak',   color: '#6EB5C8' },
+  { id: 14, glyph: '≈', name: 'The Deep Pull',        element: 'water', god: 'marena',  strength: 'mid',    color: '#6EB5C8' },
+  { id: 15, glyph: 'Ω', name: "Heaven's Mercy",       element: 'water', god: 'marena',  strength: 'strong', color: '#6EB5C8' },
+  { id: 16, glyph: 'α', name: 'The Veil Drop',        element: 'water', god: 'azorius', strength: 'weak',   color: '#6EB5C8' },
+  { id: 17, glyph: 'δ', name: 'Threshold Water',      element: 'water', god: 'azorius', strength: 'mid',    color: '#6EB5C8' },
+  { id: 18, glyph: '©', name: 'The Turning Gate',     element: 'water', god: 'azorius', strength: 'strong', color: '#6EB5C8' },
+  { id: 19, glyph: '►', name: "Ara's Warmth",         element: 'air',   god: 'ara',     strength: 'weak',   color: '#B0C8A0' },
+  { id: 20, glyph: '★', name: "The Lover's Breath",   element: 'air',   god: 'ara',     strength: 'mid',    color: '#B0C8A0' },
+  { id: 21, glyph: '☆', name: "Ara's Wing",           element: 'air',   god: 'ara',     strength: 'strong', color: '#B0C8A0' },
+  { id: 22, glyph: 'β', name: 'The Wandering Dust',   element: 'air',   god: 'finhorn', strength: 'weak',   color: '#B0C8A0' },
+  { id: 23, glyph: 'φ', name: "Halfling's Powder",    element: 'air',   god: 'finhorn', strength: 'mid',    color: '#B0C8A0' },
+  { id: 24, glyph: 'ε', name: "Finhorn's Gust",       element: 'air',   god: 'finhorn', strength: 'strong', color: '#B0C8A0' },
+  { id: 25, glyph: 'Γ', name: "Beroan's Breath",      element: 'fire',  god: 'beroan',  strength: 'weak',   color: '#C86E6E' },
+  { id: 26, glyph: 'Σ', name: "The Dragon's Heart",   element: 'fire',  god: 'beroan',  strength: 'mid',    color: '#C86E6E' },
+  { id: 27, glyph: 'π', name: "Beroan's Pyre",        element: 'fire',  god: 'beroan',  strength: 'strong', color: '#C86E6E' },
+  { id: 28, glyph: '±', name: "Sofiel's Brand",       element: 'fire',  god: 'sofiel',  strength: 'weak',   color: '#C86E6E' },
+  { id: 29, glyph: 'σ', name: 'War Smoke',            element: 'fire',  god: 'sofiel',  strength: 'mid',    color: '#C86E6E' },
+  { id: 30, glyph: '☻', name: "The Conqueror's Mark", element: 'fire',  god: 'sofiel',  strength: 'strong', color: '#C86E6E' },
+];
+
+// Lookup by id (1-indexed)
+export function getSymbol(id: number): SymbolDef {
+  const sym = SYMBOLS[id - 1];
+  if (!sym) throw new Error(`Unknown symbol id: ${id}`);
+  return sym;
+}
