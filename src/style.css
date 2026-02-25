@@ -319,6 +319,122 @@ html, body {
   padding: 2px 4px;
 }
 
+/* ─── Panel / Card ───────────────────────────────────────────────────────────── */
+
+.panel {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  position: relative;
+}
+
+.panel-label {
+  position: absolute;
+  top: -9px;
+  left: 10px;
+  background: var(--bg);
+  padding: 0 4px;
+  font-size: 0.75em;
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* ─── Ticket Header Panel ────────────────────────────────────────────────────── */
+
+.ticket-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ticket-title {
+  font-weight: bold;
+  color: var(--accent);
+  text-transform: uppercase;
+  font-size: 1.05em;
+  letter-spacing: 0.04em;
+}
+
+.ticket-type-badge {
+  font-size: 0.8em;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ticket-counter {
+  font-size: 0.8em;
+  color: var(--muted);
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* ─── Wallet Panel ───────────────────────────────────────────────────────────── */
+
+.wallet-amount {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: var(--win);
+  text-align: right;
+  padding-top: 2px;
+}
+
+/* ─── Scratch Area Panel ─────────────────────────────────────────────────────── */
+
+.scratch-instruction {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85em;
+  padding-bottom: 10px;
+  letter-spacing: 0.04em;
+}
+
+.scratch-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.scratch-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.scratch-cells {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.row-prize {
+  font-size: 0.85em;
+  color: var(--accent);
+  min-width: 40px;
+  text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ─── Info Panel ─────────────────────────────────────────────────────────────── */
+
+.info-text {
+  font-size: 0.8em;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ─── Scratch All Button ─────────────────────────────────────────────────────── */
+
+.scratch-all-btn {
+  width: 100%;
+  font-size: 1.05em;
+  letter-spacing: 0.1em;
+  min-height: 48px;
+  color: var(--fg);
+  border-color: var(--border);
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
 
 @media (max-width: 360px) {

@@ -91,6 +91,20 @@ export function makeQuantityRow(
   };
 }
 
+// ── Panel / Card ──────────────────────────────────────────────────────────────
+
+export function makePanel(label?: string): HTMLElement {
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  if (label) {
+    const lbl = document.createElement('span');
+    lbl.className = 'panel-label';
+    lbl.textContent = label;
+    panel.appendChild(lbl);
+  }
+  return panel;
+}
+
 // ── Divider line ──────────────────────────────────────────────────────────────
 
 export function makeDivider(): HTMLElement {
