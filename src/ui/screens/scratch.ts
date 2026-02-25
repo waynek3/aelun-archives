@@ -4,7 +4,7 @@
 import type { GameState, GeneratedTicket } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
 import { getSymbol } from '../../data/symbols';
-import { formatCash, formatNet } from '../../util/format';
+import { formatCash, formatNet, progressBar } from '../../util/format';
 import { makeButton, makeHeader, makeDivider, makeResultLine } from '../components';
 
 type Dispatch = (action: GameAction) => void;
@@ -42,6 +42,11 @@ export function renderScratch(
     `Ticket ${ticketNum} of ${ticketTotal}: ${ticket.typeName} (${formatCash(ticket.cost)})`,
   ));
   screen.appendChild(makeDivider());
+
+  // ── Session progress bar ──
+  const barEl = makeResultLine(progressBar(session.currentTicketIndex, ticketTotal, 28));
+  barEl.className = 'session-progress';
+  screen.appendChild(barEl);
 
   // ── Scratch grid ──
   const grid = buildGrid(ticket, dispatch);
