@@ -4,8 +4,9 @@
 import type { GameState, GeneratedTicket } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
 import { getSymbol } from '../../data/symbols';
-import { formatCash, formatNet, progressBar } from '../../util/format';
-import { makeButton, makeHeader, makeDivider, makeResultLine } from '../components';
+import { getTicketType } from '../../data/tickets';
+import { formatCash, formatNet } from '../../util/format';
+import { makeButton, makeHeader, makePanel, makeDivider, makeResultLine } from '../components';
 
 type Dispatch = (action: GameAction) => void;
 
@@ -31,35 +32,93 @@ export function renderScratch(
   }
 
   const ticket = session.tickets[session.currentTicketIndex];
+  const ticketNum = session.currentTicketIndex + 1;
+  const ticketTotal = session.tickets.length;
+
   const screen = document.createElement('div');
   screen.className = 'screen scratch-screen';
   screen.id = 'scratch-screen';
 
-  // ── Header ──
-  const ticketNum = session.currentTicketIndex + 1;
-  const ticketTotal = session.tickets.length;
-  screen.appendChild(makeHeader(
-    `Ticket ${ticketNum} of ${ticketTotal}: ${ticket.typeName} (${formatCash(ticket.cost)})`,
-  ));
-  screen.appendChild(makeDivider());
+  // ── Ticket header panel ──
+  const ticketPanel = makePanel();
 
-  // ── Session progress bar ──
-  const barEl = makeResultLine(progressBar(session.currentTicketIndex, ticketTotal, 28));
-  barEl.className = 'session-progress';
-  screen.appendChild(barEl);
+  const headerRow = document.createElement('div');
+  headerRow.className = 'ticket-header-row';
 
-  // ── Scratch grid ──
-  const grid = buildGrid(ticket, dispatch);
-  screen.appendChild(grid);
+  const titleEl = document.createElement('span');
+  titleEl.className = 'ticket-title';
+  titleEl.textContent = `$${ticket.cost} ${ticket.typeName.toUpperCase()}`;
 
-  // ── Result area (hidden until revealed) ──
+  const badgeEl = document.createElement('span');
+  badgeEl.className = 'ticket-type-badge';
+  badgeEl.textContent = 'SCRATCH-OFF';
+
+  headerRow.appendChild(titleEl);
+  headerRow.appendChild(badgeEl);
+  ticketPanel.appendChild(headerRow);
+
+  if (ticketTotal > 1) {
+    const counterEl = document.createElement('div');
+    counterEl.className = 'ticket-counter';
+    counterEl.textContent = `${ticketNum} / ${ticketTotal}`;
+    ticketPanel.appendChild(counterEl);
+  }
+
+  screen.appendChild(ticketPanel);
+
+  // ── Wallet panel ──
+  const walletPanel = makePanel('WALLET');
+  walletPanel.id = 'wallet-panel';
+  const walletAmount = document.createElement('div');
+  walletAmount.className = 'wallet-amount';
+  walletAmount.id = 'wallet-amount';
+  walletAmount.textContent = formatCash(state.cash);
+  walletPanel.appendChild(walletAmount);
+  screen.appendChild(walletPanel);
+
+  // ── Scratch area panel ──
+  const scratchPanel = makePanel();
+
+  const instruction = document.createElement('div');
+  instruction.className = 'scratch-instruction';
+  instruction.textContent = '▼ CLICK CELLS TO SCRATCH ▼';
+  scratchPanel.appendChild(instruction);
+
+  scratchPanel.appendChild(buildGrid(ticket, dispatch));
+
+  // Result area (populated after reveal)
   const resultArea = document.createElement('div');
   resultArea.id = 'ticket-result';
   resultArea.className = 'ticket-result';
   if (ticket.revealed) {
     populateResult(resultArea, ticket);
   }
-  screen.appendChild(resultArea);
+  scratchPanel.appendChild(resultArea);
+  screen.appendChild(scratchPanel);
+
+  // ── Info panel ──
+  const infoPanel = makePanel();
+  const infoText = document.createElement('p');
+  infoText.className = 'info-text';
+  infoText.textContent = 'Match 3 or more identical symbols to win. Higher matches pay more.';
+  infoPanel.appendChild(infoText);
+  screen.appendChild(infoPanel);
+
+  // ── Scratch all button ──
+  const scratchAllBtn = makeButton('[ SCRATCH ALL ]', () => {
+    if (!state.scratchSession) return;
+    const t = state.scratchSession.tickets[state.scratchSession.currentTicketIndex];
+    if (!t || t.revealed) return;
+    t.cells.forEach((cell, idx) => {
+      const steps = 4 - cell.state;
+      for (let i = 0; i < steps; i++) {
+        dispatch({ type: 'SCRATCH_CELL', cellIndex: idx });
+      }
+    });
+  }, 'scratch-all-btn');
+  scratchAllBtn.id = 'scratch-all-btn';
+  scratchAllBtn.style.display = ticket.revealed ? 'none' : '';
+  screen.appendChild(scratchAllBtn);
 
   // ── Nav button ──
   const navBtn = makeButton(
@@ -91,6 +150,10 @@ export function updateScratchCell(
   const cell = ticket.cells[cellIndex];
   if (!cell) return;
 
+  // Update wallet display.
+  const walletAmountEl = document.getElementById('wallet-amount');
+  if (walletAmountEl) walletAmountEl.textContent = formatCash(state.cash);
+
   const cellEl = document.querySelector<HTMLElement>(
     `[data-cell-index="${cellIndex}"]`,
   );
@@ -112,50 +175,75 @@ export function updateScratchCell(
     cellEl.parentNode?.replaceChild(clone, cellEl);
   }
 
-  // If the ticket is now fully revealed, show result + nav button.
+  // If the ticket is now fully revealed, show result + nav button, hide scratch-all.
   if (ticket.revealed) {
     const resultArea = document.getElementById('ticket-result');
     if (resultArea) populateResult(resultArea, ticket);
 
     const navBtn = document.getElementById('scratch-nav-btn') as HTMLElement | null;
     if (navBtn) navBtn.style.display = '';
+
+    const scratchAllBtn = document.getElementById('scratch-all-btn') as HTMLElement | null;
+    if (scratchAllBtn) scratchAllBtn.style.display = 'none';
   }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function buildGrid(ticket: GeneratedTicket, dispatch: Dispatch): HTMLElement {
-  const grid = document.createElement('div');
-  grid.className = 'ticket-grid';
-  grid.style.gridTemplateColumns = `repeat(${ticket.cols}, 1fr)`;
+  const container = document.createElement('div');
+  container.className = 'scratch-grid-container';
 
-  ticket.cells.forEach((cell, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'scratch-cell';
-    btn.dataset.cellIndex = String(idx);
+  const ticketType = getTicketType(ticket.typeId);
 
-    if (cell.state < 4) {
-      // state 0=█ 1=▓ 2=▒ 3=░
-      btn.textContent = CELL_CHARS[cell.state];
-      if (cell.state > 0) btn.className += ' scratching';
-    } else {
-      const sym = getSymbol(cell.symbolId);
-      btn.textContent = sym.glyph;
-      btn.style.color = sym.color;
-      btn.className += ' revealed';
-      btn.setAttribute('aria-label', sym.name);
+  for (let r = 0; r < ticket.rows; r++) {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'scratch-row';
+
+    const cellsEl = document.createElement('div');
+    cellsEl.className = 'scratch-cells';
+
+    for (let c = 0; c < ticket.cols; c++) {
+      const idx = r * ticket.cols + c;
+      const cell = ticket.cells[idx];
+
+      const btn = document.createElement('button');
+      btn.className = 'scratch-cell';
+      btn.dataset.cellIndex = String(idx);
+
+      if (cell.state < 4) {
+        btn.textContent = CELL_CHARS[cell.state];
+        if (cell.state > 0) btn.classList.add('scratching');
+      } else {
+        const sym = getSymbol(cell.symbolId);
+        btn.textContent = sym.glyph;
+        btn.style.color = sym.color;
+        btn.classList.add('revealed');
+        btn.setAttribute('aria-label', sym.name);
+      }
+
+      if (cell.state < 4) {
+        btn.addEventListener('click', () =>
+          dispatch({ type: 'SCRATCH_CELL', cellIndex: idx }),
+        );
+      }
+
+      cellsEl.appendChild(btn);
     }
 
-    if (cell.state < 4) {
-      btn.addEventListener('click', () =>
-        dispatch({ type: 'SCRATCH_CELL', cellIndex: idx }),
-      );
-    }
+    rowEl.appendChild(cellsEl);
 
-    grid.appendChild(btn);
-  });
+    // Prize for this row: payoutTable[0] = 3 matches, [1] = 4 matches, etc.
+    const prizeEl = document.createElement('span');
+    prizeEl.className = 'row-prize';
+    const prizeValue = ticketType.payoutTable[r] ?? ticketType.payoutTable[ticketType.payoutTable.length - 1];
+    prizeEl.textContent = `$${prizeValue}`;
+    rowEl.appendChild(prizeEl);
 
-  return grid;
+    container.appendChild(rowEl);
+  }
+
+  return container;
 }
 
 function populateResult(el: HTMLElement, ticket: GeneratedTicket): void {
