@@ -1,6 +1,6 @@
-import type { ColorScheme } from '../state/types';
+import type { ColorScheme, LocationId } from '../state/types';
 
-// All actions a player can take in Sprint 1.
+// All actions a player can take.
 // Each action is a discriminated union so dispatch can exhaustively handle them.
 
 export type GameAction =
@@ -15,4 +15,10 @@ export type GameAction =
   // Toggle the color scheme.
   | { type: 'SET_THEME'; scheme: ColorScheme }
   // Start a fresh game (clears save).
-  | { type: 'NEW_GAME' };
+  | { type: 'NEW_GAME' }
+  // Sprint 2: travel to a location within the current neighborhood.
+  | { type: 'TRAVEL'; destination: LocationId }
+  // Sprint 2: sleep at the tower (ends the current day, advances to next morning).
+  | { type: 'SLEEP' }
+  // Sprint 2: dismiss the passout screen after waking up.
+  | { type: 'WAKE_UP' };

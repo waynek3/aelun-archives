@@ -11,6 +11,10 @@ export type StrengthId = 'weak' | 'mid' | 'strong';
 
 export type ColorScheme = 'blue' | 'green' | 'orange';
 
+// Sprint 2+: location and neighborhood tracking
+export type LocationId = 'tower' | 'bodega';    // more added in Sprint 4
+export type NeighborhoodId = 'the_skids';        // more added in Sprint 4
+
 // ─── Scratch Session ──────────────────────────────────────────────────────────
 
 // 0 = █ covered, 1 = ▓, 2 = ▒, 3 = ░, 4 = glyph revealed
@@ -47,13 +51,25 @@ export interface ScratchSessionState {
 
 // ─── Game State ───────────────────────────────────────────────────────────────
 
-// Sprint 1 phase set. Future sprints extend this.
-export type Phase = 'playing' | 'scratching';
+export type Phase = 'playing' | 'scratching' | 'passedout';
 
 export interface GameState {
   // ── Core ──
   phase: Phase;
   cash: number;
+
+  // ── Time & Calendar (Sprint 2+) ──
+  clock: number;             // minutes from midnight; 600 = 10:00 AM, 1560 = curfew
+  day: number;               // 1-based, 1–30
+  month: number;             // 1–12
+  year: number;
+
+  // ── Location (Sprint 2+) ──
+  currentNeighborhood: NeighborhoodId;
+  currentLocation: LocationId;
+
+  // ── Passout tracking (Sprint 2+) ──
+  lastPassoutPenalty: number | null;  // shown on passout screen
 
   // ── Scratch session (active during 'scratching' phase) ──
   scratchSession: ScratchSessionState | null;

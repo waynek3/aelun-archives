@@ -72,9 +72,54 @@ html, body {
 #app {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   padding: 0;
+}
+
+/* ─── HUD Bar (Sprint 2+) ────────────────────────────────────────────────────── */
+
+#hud {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-size: 0.85em;
+  gap: 8px;
+}
+
+.hud-cash {
+  color: var(--win);
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.hud-clock {
+  color: var(--accent);
+  text-align: center;
+  flex: 1;
+}
+
+.hud-date {
+  color: var(--muted);
+  font-size: 0.9em;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* ─── Screen Wrapper (Sprint 2+) ─────────────────────────────────────────────── */
+
+#screen {
+  width: 100%;
+  max-width: 480px;
+  flex: 1;
 }
 
 /* ─── Screen Container ───────────────────────────────────────────────────────── */
@@ -86,6 +131,22 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+/* ─── Tower / Passout Screens ────────────────────────────────────────────────── */
+
+.tower-flavor {
+  color: var(--muted);
+  font-size: 0.9em;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.passout-msg {
+  color: var(--fg);
+  text-align: center;
+  padding: 4px 0;
+  line-height: 1.6;
 }
 
 /* ─── Section Header ─────────────────────────────────────────────────────────── */

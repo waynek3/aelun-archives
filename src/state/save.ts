@@ -9,7 +9,21 @@ const THEME_KEY = 'chill_wizard_theme';
 // Keyed by the version they migrate FROM → TO.
 // e.g. migrations[1] upgrades a version-1 save to version-2.
 const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
-  // Sprint 1 is version 1; no migrations needed yet.
+  // Sprint 1 → Sprint 2: add time/location fields.
+  // Old saves had phase='playing' which meant "at bodega"; map to currentLocation='bodega'.
+  1: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return {
+      ...state,
+      clock: 600,
+      day: 1,
+      month: 1,
+      year: 1,
+      currentNeighborhood: 'the_skids',
+      currentLocation: state.phase === 'playing' ? 'bodega' : 'tower',
+      lastPassoutPenalty: null,
+    };
+  },
 };
 
 function migrate(data: SaveData): GameState {
@@ -50,7 +64,7 @@ export function loadGame(): GameState | null {
     // different field name.  Without this check renderScratch clears the
     // container and returns early, producing a blank blue screen.
     if (state.phase === 'scratching' && !state.scratchSession) {
-      return { ...state, phase: 'playing', scratchSession: null };
+      return { ...state, phase: 'playing', currentLocation: 'bodega', scratchSession: null };
     }
     return state;
   } catch {

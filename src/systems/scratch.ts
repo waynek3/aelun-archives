@@ -286,6 +286,7 @@ export function finishSession(state: GameState): GameState {
   return {
     ...state,
     phase: 'playing',
+    currentLocation: 'bodega',  // Sprint 2: player finishes at the bodega counter
     scratchSession: null,
   };
 }
