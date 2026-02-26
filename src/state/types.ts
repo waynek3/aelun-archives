@@ -51,7 +51,7 @@ export interface ScratchSessionState {
 
 // ─── Game State ───────────────────────────────────────────────────────────────
 
-export type Phase = 'playing' | 'scratching' | 'passedout';
+export type Phase = 'playing' | 'scratching' | 'passedout' | 'game_over';
 
 export interface GameState {
   // ── Core ──
