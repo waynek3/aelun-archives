@@ -15,8 +15,9 @@ export function snapToQuarter(minutes: number): number {
 
 // Advance the clock by a raw cost (snapped to next :15 boundary on arrival).
 // Travel cost of 5 min from 10:00 → arrival snaps to 10:15.
+// Snap applies to the ARRIVAL time, not just the cost.
 export function advanceClock(clock: number, costMinutes: number): number {
-  return clock + snapToQuarter(costMinutes);
+  return snapToQuarter(clock + costMinutes);
 }
 
 // Preview what the clock would be after an action (same as advanceClock).
