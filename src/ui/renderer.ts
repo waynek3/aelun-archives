@@ -1,14 +1,18 @@
 // Screen manager — decides which screen to show and how to update it.
 // Handles the distinction between full re-renders and in-place updates.
+// Sprint 2: manages a persistent HUD above the screen area.
 
 import type { GameState } from '../state/types';
 import type { GameAction } from '../engine/actions';
+import { renderHUD } from './hud';
 import { renderBodega } from './screens/bodega';
 import { renderScratch, updateScratchCell } from './screens/scratch';
+import { renderTower } from './screens/tower';
+import { renderPassout } from './screens/passout';
 
 type Dispatch = (action: GameAction) => void;
 
-type ScreenId = 'bodega' | 'scratch' | 'none';
+type ScreenId = 'tower' | 'bodega' | 'scratch' | 'passout' | 'none';
 let currentScreen: ScreenId = 'none';
 
 // The last action that triggered a render — used to decide partial vs full update.
@@ -18,44 +22,79 @@ export function setLastAction(type: string): void {
   lastActionType = type;
 }
 
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
+// Lazily create the #hud and #screen child elements inside #app.
+// This lets the container start as a plain div and gains structure on first render.
+let _hudEl: HTMLElement | null = null;
+let _screenEl: HTMLElement | null = null;
+
+function ensureLayout(container: HTMLElement): { hud: HTMLElement; screen: HTMLElement } {
+  if (!_hudEl || !container.contains(_hudEl)) {
+    container.innerHTML = '';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'center';
+
+    _hudEl = document.createElement('div');
+    _hudEl.id = 'hud';
+
+    _screenEl = document.createElement('div');
+    _screenEl.id = 'screen';
+
+    container.appendChild(_hudEl);
+    container.appendChild(_screenEl);
+    currentScreen = 'none';  // force full re-render after layout reset
+  }
+  return { hud: _hudEl!, screen: _screenEl! };
+}
+
+// ─── Screen Routing ───────────────────────────────────────────────────────────
+
+function getTargetScreen(state: GameState): ScreenId {
+  if (state.phase === 'passedout') return 'passout';
+  if (state.phase === 'scratching' && state.scratchSession !== null) return 'scratch';
+  if (state.phase === 'playing') {
+    return state.currentLocation === 'tower' ? 'tower' : 'bodega';
+  }
+  return 'bodega';  // fallback
+}
+
 export function render(
   state: GameState,
   container: HTMLElement,
   dispatch: Dispatch,
 ): void {
-  // Guard: scratchSession must be present to show the scratch screen.
-  // A null session with phase='scratching' (e.g. stale save from a previous
-  // game version) would cause renderScratch to clear the container and return
-  // immediately, leaving only the CSS background visible.
-  const targetScreen: ScreenId =
-    state.phase === 'scratching' && state.scratchSession !== null ? 'scratch' : 'bodega';
+  const { hud, screen } = ensureLayout(container);
+
+  // HUD always re-renders (it's fast text — no perf concern).
+  renderHUD(state, hud);
+
+  const targetScreen = getTargetScreen(state);
 
   if (targetScreen === 'scratch') {
     if (currentScreen !== 'scratch') {
       // Full render on screen transition.
       currentScreen = 'scratch';
-      renderScratch(state, container, dispatch);
+      renderScratch(state, screen, dispatch);
     } else if (lastActionType === 'SCRATCH_CELL') {
       // In-place cell update — avoid full re-render for tap responsiveness.
-      const session = state.scratchSession;
-      if (session) {
-        // The cell that was tapped is the one whose state just changed.
-        // We find it by scanning for the cell index stored in lastCellIndex.
+      if (state.scratchSession) {
         updateScratchCell(state, _lastCellIndex);
       }
     } else {
       // ADVANCE_TICKET or any other scratch-phase action → full re-render.
-      renderScratch(state, container, dispatch);
+      renderScratch(state, screen, dispatch);
     }
+  } else if (targetScreen === 'tower') {
+    currentScreen = 'tower';
+    renderTower(state, screen, dispatch);
+  } else if (targetScreen === 'passout') {
+    currentScreen = 'passout';
+    renderPassout(state, screen, dispatch);
   } else {
     // bodega
-    if (currentScreen !== 'bodega') {
-      currentScreen = 'bodega';
-      renderBodega(state, container, dispatch);
-    } else {
-      // Bodega is already shown; re-render to reflect cash changes.
-      renderBodega(state, container, dispatch);
-    }
+    currentScreen = 'bodega';
+    renderBodega(state, screen, dispatch);
   }
 
   lastActionType = null;

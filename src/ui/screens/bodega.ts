@@ -4,8 +4,10 @@
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
 import { TICKET_TYPES } from '../../data/tickets';
-import { formatCash } from '../../util/format';
+import { formatCash, calcScratchTimeCost } from '../../util/format';
 import { makeButton, makeHeader, makeCashBar, makeQuantityRow, makeDivider } from '../components';
+import { formatClock, previewClock } from '../../engine/time';
+import { getTravelCostRaw } from '../../systems/travel';
 
 type Dispatch = (action: GameAction) => void;
 
@@ -36,8 +38,6 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
   // ── Ticket list ──
   screen.appendChild(makeHeader('SCRATCH TICKETS'));
 
-  const rows: { typeId: string; updateQty: (n: number) => void }[] = [];
-
   for (const ticketType of TICKET_TYPES) {
     const { row, updateQty } = makeQuantityRow(
       ticketType.name,
@@ -62,7 +62,6 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
         },
       },
     );
-    rows.push({ typeId: ticketType.id, updateQty });
     screen.appendChild(row);
   }
 
@@ -89,27 +88,26 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
   buyBtn.id = 'buy-btn';
   screen.appendChild(buyBtn);
 
-  // ── Theme toggle ──
+  // ── Return to tower ──
   screen.appendChild(makeDivider());
-  const themeRow = document.createElement('div');
-  themeRow.className = 'theme-row';
-  const themes: Array<{ scheme: GameState['colorScheme']; label: string }> = [
-    { scheme: 'blue', label: 'BLU' },
-    { scheme: 'green', label: 'GRN' },
-    { scheme: 'orange', label: 'AMB' },
-  ];
-  for (const { scheme, label } of themes) {
-    const btn = makeButton(label, () => dispatch({ type: 'SET_THEME', scheme }), 'theme-btn');
-    if (state.colorScheme === scheme) btn.classList.add('active');
-    themeRow.appendChild(btn);
-  }
-  screen.appendChild(themeRow);
+  const travelCost = getTravelCostRaw('bodega', 'tower');
+  const homeClock = previewClock(state.clock, travelCost);
+  const returnBtn = makeButton(
+    `RETURN TO TOWER  \u2192  ${formatClock(homeClock)}`,
+    () => dispatch({ type: 'TRAVEL', destination: 'tower' }),
+    'nav-btn',
+  );
+  screen.appendChild(returnBtn);
 
   container.appendChild(screen);
 
   // ── Helpers ──
   function projectedCost(): number {
     return TICKET_TYPES.reduce((sum, t) => sum + t.cost * (quantities[t.id] ?? 0), 0);
+  }
+
+  function totalTicketCount(): number {
+    return TICKET_TYPES.reduce((sum, t) => sum + (quantities[t.id] ?? 0), 0);
   }
 
   function refreshTotal(): void {
@@ -119,8 +117,15 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
 
     const buyBtnEl = document.getElementById('buy-btn') as HTMLButtonElement | null;
     if (buyBtnEl) {
-      const hasTickets = Object.values(quantities).some(q => q > 0);
+      const n = totalTicketCount();
+      const hasTickets = n > 0;
       buyBtnEl.disabled = !hasTickets;
+      if (hasTickets) {
+        const finishClock = state.clock + calcScratchTimeCost(n);
+        buyBtnEl.textContent = `BUY  \u2014  done ${formatClock(finishClock)}`;
+      } else {
+        buyBtnEl.textContent = 'BUY';
+      }
     }
   }
 }

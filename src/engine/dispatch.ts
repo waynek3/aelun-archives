@@ -12,6 +12,10 @@ import {
   advanceTicket,
   finishSession,
 } from '../systems/scratch';
+import { travel } from '../systems/travel';
+import { advanceDay, applyPassout, isCurfewBreached, advanceClock } from './time';
+import { calcScratchTimeCost } from '../util/format';
+import balance from '../data/balance.json';
 
 export type RenderFn = (state: GameState) => void;
 
@@ -44,7 +48,24 @@ function applyAction(state: GameState, action: GameAction): GameState {
       );
       if (totalCost <= 0) return state;
       if (state.cash < totalCost) return state;
-      return startScratchSession(state, action.quantities);
+
+      // Sprint 2: advance clock by scratch session time before creating session.
+      // The time commitment is made when the player buys, not when they finish.
+      const totalTickets = Object.values(action.quantities).reduce((a, b) => a + b, 0);
+      const timeCost = calcScratchTimeCost(totalTickets);
+      const newClock = advanceClock(state.clock, timeCost);
+
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        // Stayed at bodega past curfew — pass out (tickets are lost, cash deducted).
+        const stateAfterBuy: GameState = {
+          ...state,
+          cash: state.cash - totalCost,
+          clock: newClock,
+        };
+        return applyPassout(stateAfterBuy);
+      }
+
+      return startScratchSession({ ...state, clock: newClock }, action.quantities);
     }
 
     case 'SCRATCH_CELL':
@@ -65,6 +86,30 @@ function applyAction(state: GameState, action: GameAction): GameState {
     case 'NEW_GAME': {
       clearSave();
       return createInitialState();
+    }
+
+    // ── Sprint 2 ──────────────────────────────────────────────────────────────
+
+    case 'TRAVEL': {
+      if (state.phase !== 'playing') return state;
+      if (state.currentLocation === action.destination) return state;
+      return travel(state, action.destination);
+    }
+
+    case 'SLEEP': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      const cal = advanceDay(state.day, state.month, state.year);
+      return {
+        ...state,
+        clock: balance.dayCycle.wakeTime,
+        lastPassoutPenalty: null,
+        ...cal,
+      };
+    }
+
+    case 'WAKE_UP': {
+      if (state.phase !== 'passedout') return state;
+      return { ...state, phase: 'playing', lastPassoutPenalty: null };
     }
 
     default:
