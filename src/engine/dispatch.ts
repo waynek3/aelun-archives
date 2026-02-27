@@ -13,6 +13,7 @@ import {
   finishSession,
 } from '../systems/scratch';
 import { travel } from '../systems/travel';
+import { checkRent } from '../systems/rent';
 import { advanceDay, applyPassout, isCurfewBreached, advanceClock } from './time';
 import { calcScratchTimeCost } from '../util/format';
 import balance from '../data/balance.json';
@@ -99,17 +100,20 @@ function applyAction(state: GameState, action: GameAction): GameState {
     case 'SLEEP': {
       if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
       const cal = advanceDay(state.day, state.month, state.year);
-      return {
+      const nextState: GameState = {
         ...state,
         clock: balance.dayCycle.wakeTime,
         lastPassoutPenalty: null,
         ...cal,
       };
+      return checkRent(nextState);
     }
 
     case 'WAKE_UP': {
       if (state.phase !== 'passedout') return state;
-      return { ...state, phase: 'playing', lastPassoutPenalty: null };
+      // applyPassout() already advanced the calendar; check rent if we woke on day 1.
+      const nextState: GameState = { ...state, phase: 'playing', lastPassoutPenalty: null };
+      return checkRent(nextState);
     }
 
     default:

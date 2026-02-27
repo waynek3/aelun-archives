@@ -9,10 +9,11 @@ import { renderBodega } from './screens/bodega';
 import { renderScratch, updateScratchCell } from './screens/scratch';
 import { renderTower } from './screens/tower';
 import { renderPassout } from './screens/passout';
+import { renderGameOver } from './screens/game-over';
 
 type Dispatch = (action: GameAction) => void;
 
-type ScreenId = 'tower' | 'bodega' | 'scratch' | 'passout' | 'none';
+type ScreenId = 'tower' | 'bodega' | 'scratch' | 'passout' | 'game_over' | 'none';
 let currentScreen: ScreenId = 'none';
 
 // The last action that triggered a render — used to decide partial vs full update.
@@ -51,6 +52,7 @@ function ensureLayout(container: HTMLElement): { hud: HTMLElement; screen: HTMLE
 // ─── Screen Routing ───────────────────────────────────────────────────────────
 
 function getTargetScreen(state: GameState): ScreenId {
+  if (state.phase === 'game_over') return 'game_over';
   if (state.phase === 'passedout') return 'passout';
   if (state.phase === 'scratching' && state.scratchSession !== null) return 'scratch';
   if (state.phase === 'playing') {
@@ -91,6 +93,9 @@ export function render(
   } else if (targetScreen === 'passout') {
     currentScreen = 'passout';
     renderPassout(state, screen, dispatch);
+  } else if (targetScreen === 'game_over') {
+    currentScreen = 'game_over';
+    renderGameOver(state, screen, dispatch);
   } else {
     // bodega
     currentScreen = 'bodega';
