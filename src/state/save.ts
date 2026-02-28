@@ -24,6 +24,16 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
       lastPassoutPenalty: null,
     };
   },
+  // Sprint 2 → Sprint 3/4: rename 'bodega' → 'the_skids_bodega'.
+  2: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return {
+      ...state,
+      currentLocation: state.currentLocation === 'bodega'
+        ? 'the_skids_bodega'
+        : state.currentLocation,
+    };
+  },
 };
 
 function migrate(data: SaveData): GameState {
@@ -64,7 +74,7 @@ export function loadGame(): GameState | null {
     // different field name.  Without this check renderScratch clears the
     // container and returns early, producing a blank blue screen.
     if (state.phase === 'scratching' && !state.scratchSession) {
-      return { ...state, phase: 'playing', currentLocation: 'bodega', scratchSession: null };
+      return { ...state, phase: 'playing', scratchSession: null };
     }
     return state;
   } catch {

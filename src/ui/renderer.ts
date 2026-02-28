@@ -10,6 +10,7 @@ import { renderScratch, updateScratchCell } from './screens/scratch';
 import { renderTower } from './screens/tower';
 import { renderPassout } from './screens/passout';
 import { renderGameOver } from './screens/game-over';
+import { getLocationType } from '../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
@@ -56,7 +57,9 @@ function getTargetScreen(state: GameState): ScreenId {
   if (state.phase === 'passedout') return 'passout';
   if (state.phase === 'scratching' && state.scratchSession !== null) return 'scratch';
   if (state.phase === 'playing') {
-    return state.currentLocation === 'tower' ? 'tower' : 'bodega';
+    const locType = getLocationType(state.currentLocation);
+    if (locType === 'tower') return 'tower';
+    return 'bodega';  // all store-type locations use bodega screen
   }
   return 'bodega';  // fallback
 }

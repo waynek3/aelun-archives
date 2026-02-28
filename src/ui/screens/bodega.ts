@@ -1,5 +1,6 @@
 // Bodega screen: buy scratch-off tickets.
 // The player adjusts quantities of each ticket tier and presses BUY.
+// Sprint 4: store name is dynamic per neighborhood; travel section lists all other destinations.
 
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
@@ -8,6 +9,12 @@ import { formatCash, calcScratchTimeCost } from '../../util/format';
 import { makeButton, makeHeader, makeCashBar, makeQuantityRow, makeDivider } from '../components';
 import { formatClock, previewClock } from '../../engine/time';
 import { getTravelCostRaw } from '../../systems/travel';
+import {
+  getLocationData,
+  getLocationNeighborhood,
+  NEIGHBORHOODS,
+  getNeighborhoodBodega,
+} from '../../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
@@ -25,8 +32,9 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
   const screen = document.createElement('div');
   screen.className = 'screen bodega-screen';
 
-  // ── Store name ──
-  screen.appendChild(makeHeader('LUCKY STAR BODEGA'));
+  // ── Store name (dynamic per neighborhood) ──
+  const locData = getLocationData(state.currentLocation);
+  screen.appendChild(makeHeader(locData.displayName));
   screen.appendChild(makeDivider());
 
   // ── Cash display ──
@@ -88,16 +96,35 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
   buyBtn.id = 'buy-btn';
   screen.appendChild(buyBtn);
 
-  // ── Return to tower ──
+  // ── Travel section ──
   screen.appendChild(makeDivider());
-  const travelCost = getTravelCostRaw('bodega', 'tower');
-  const homeClock = previewClock(state.clock, travelCost);
+  screen.appendChild(makeHeader('TRAVEL'));
+
+  // Tower (home) always first.
+  const towerCost = getTravelCostRaw(state.currentLocation, 'tower');
+  const towerClock = previewClock(state.clock, towerCost);
   const returnBtn = makeButton(
-    `RETURN TO TOWER  \u2192  ${formatClock(homeClock)}`,
+    `TOWER (HOME)  \u2192  ${formatClock(towerClock)}`,
     () => dispatch({ type: 'TRAVEL', destination: 'tower' }),
     'nav-btn',
   );
   screen.appendChild(returnBtn);
+
+  // Other neighborhoods' bodegas (skip the current neighborhood).
+  const currentNeighborhood = getLocationNeighborhood(state.currentLocation);
+  for (const neighborhood of NEIGHBORHOODS) {
+    if (neighborhood.id === currentNeighborhood) continue;
+    const destId = getNeighborhoodBodega(neighborhood.id);
+    const destData = getLocationData(destId);
+    const cost = getTravelCostRaw(state.currentLocation, destId);
+    const arrival = previewClock(state.clock, cost);
+    const btn = makeButton(
+      `${neighborhood.name.toUpperCase()}: ${destData.displayName}  \u2192  ${formatClock(arrival)}`,
+      () => dispatch({ type: 'TRAVEL', destination: destId }),
+      'nav-btn',
+    );
+    screen.appendChild(btn);
+  }
 
   container.appendChild(screen);
 
