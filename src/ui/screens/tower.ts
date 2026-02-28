@@ -1,11 +1,12 @@
 // Wizard Tower screen — home base. Player wakes here each morning.
-// Actions: travel to bodega, sleep (end the day).
+// Actions: travel to any neighborhood's store, sleep (end the day).
 
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
 import { makeButton, makeHeader, makeDivider } from '../components';
 import { formatClock, previewClock } from '../../engine/time';
 import { getTravelCostRaw } from '../../systems/travel';
+import { NEIGHBORHOODS, getNeighborhoodBodega, getLocationData } from '../../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
@@ -27,17 +28,29 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
 
   screen.appendChild(makeDivider());
 
-  // ── Travel to bodega ──
-  const travelCost = getTravelCostRaw('tower', 'bodega');
-  const arrivalClock = previewClock(state.clock, travelCost);
-  const arrivalStr = formatClock(arrivalClock);
+  // ── Travel destinations ──
+  // One section per neighborhood; each shows the neighborhood name and its bodega.
+  screen.appendChild(makeHeader('TRAVEL'));
 
-  const travelBtn = makeButton(
-    `TRAVEL TO BODEGA  \u2192  ${arrivalStr}`,
-    () => dispatch({ type: 'TRAVEL', destination: 'bodega' }),
-    'nav-btn',
-  );
-  screen.appendChild(travelBtn);
+  for (const neighborhood of NEIGHBORHOODS) {
+    // Neighborhood label
+    const nbLabel = document.createElement('p');
+    nbLabel.className = 'neighborhood-label';
+    nbLabel.textContent = neighborhood.name.toUpperCase();
+    screen.appendChild(nbLabel);
+
+    const destId = getNeighborhoodBodega(neighborhood.id);
+    const destData = getLocationData(destId);
+    const travelCost = getTravelCostRaw('tower', destId);
+    const arrivalClock = previewClock(state.clock, travelCost);
+
+    const travelBtn = makeButton(
+      `${destData.displayName}  \u2192  ${formatClock(arrivalClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: destId }),
+      'nav-btn',
+    );
+    screen.appendChild(travelBtn);
+  }
 
   screen.appendChild(makeDivider());
 

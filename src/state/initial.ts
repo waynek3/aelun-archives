@@ -1,7 +1,7 @@
 import type { GameState } from './types';
 import balance from '../data/balance.json';
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 export function createInitialState(): GameState {
   return {

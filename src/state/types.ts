@@ -12,8 +12,18 @@ export type StrengthId = 'weak' | 'mid' | 'strong';
 export type ColorScheme = 'blue' | 'green' | 'orange';
 
 // Sprint 2+: location and neighborhood tracking
-export type LocationId = 'tower' | 'bodega';    // more added in Sprint 4
-export type NeighborhoodId = 'the_skids';        // more added in Sprint 4
+export type NeighborhoodId =
+  | 'the_skids' | 'the_burbs' | 'richville'
+  | 'center_city' | 'downtown' | 'university_heights';
+
+export type LocationId =
+  | 'tower'
+  | 'the_skids_bodega'
+  | 'the_burbs_bodega'
+  | 'richville_bodega'
+  | 'center_city_bodega'
+  | 'downtown_bodega'
+  | 'university_heights_bodega';
 
 // ─── Scratch Session ──────────────────────────────────────────────────────────
 
