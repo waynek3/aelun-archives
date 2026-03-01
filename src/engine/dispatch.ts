@@ -100,9 +100,11 @@ function applyAction(state: GameState, action: GameAction): GameState {
     case 'SLEEP': {
       if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
       const cal = advanceDay(state.day, state.month, state.year);
+      // Sprint 5: restore chill on sleep (placeholder; Sprint 13 refines by bed quality).
       const nextState: GameState = {
         ...state,
         clock: balance.dayCycle.wakeTime,
+        chill: Math.min(state.chill + 50, 100),
         lastPassoutPenalty: null,
         ...cal,
       };

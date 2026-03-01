@@ -1,7 +1,7 @@
 import type { GameState } from './types';
 import balance from '../data/balance.json';
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export function createInitialState(): GameState {
   return {
@@ -16,6 +16,8 @@ export function createInitialState(): GameState {
     currentNeighborhood: 'the_skids',
     currentLocation: 'tower',          // new runs start at the tower
     lastPassoutPenalty: null,
+    // Sprint 5: chill meter
+    chill: balance.starting.chill,
     // Scratch session
     scratchSession: null,
     totalTicketsScratched: 0,

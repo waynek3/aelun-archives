@@ -34,6 +34,11 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
         : state.currentLocation,
     };
   },
+  // Sprint 3/4 → Sprint 5: add chill meter.
+  3: (s: unknown) => ({
+    ...(s as Record<string, unknown>),
+    chill: 50,
+  }),
 };
 
 function migrate(data: SaveData): GameState {

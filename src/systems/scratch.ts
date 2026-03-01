@@ -6,6 +6,7 @@ import { SYMBOLS } from '../data/symbols';
 import { getTicketType, TICKET_TYPES } from '../data/tickets';
 import { rng, weightedRandom, randInt } from '../util/rng';
 import { calcScratchTimeCost } from '../util/format';
+import balance from '../data/balance.json';
 
 // ─── Ticket Generation ────────────────────────────────────────────────────────
 
@@ -238,6 +239,7 @@ export function scratchCell(
   let newTotalPayout = session.totalPayout;
   let newBestSingleWin = state.bestSingleWin;
   let newTotalScratched = state.totalTicketsScratched;
+  let newChill = state.chill;
 
   if (allRevealed) {
     // Apply payout immediately when ticket is fully revealed.
@@ -245,11 +247,18 @@ export function scratchCell(
     newTotalPayout += newTicket.basePayout;
     newBestSingleWin = Math.max(newBestSingleWin, newTicket.basePayout);
     newTotalScratched += 1;
+    // Sprint 5: apply chill delta on reveal.
+    if (newTicket.isWin) {
+      newChill = Math.min(state.chill + balance.chill.gainPerScratchWin, 100);
+    } else {
+      newChill = Math.max(state.chill - balance.chill.lossPerScratchLoss, 0);
+    }
   }
 
   return {
     ...state,
     cash: newCash,
+    chill: newChill,
     bestSingleWin: newBestSingleWin,
     totalTicketsScratched: newTotalScratched,
     scratchSession: {
