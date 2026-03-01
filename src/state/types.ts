@@ -84,6 +84,10 @@ export interface GameState {
   // ── Chill meter (Sprint 5+) ──
   chill: number;  // mood meter, floor 0, no hard cap; shown as % bar (100 = full)
 
+  // ── Mana pool (Sprint 6+) ──
+  mana: number;     // current mana, floor 0, cap at maxMana
+  maxMana: number;  // maximum mana capacity
+
   // ── Scratch session (active during 'scratching' phase) ──
   scratchSession: ScratchSessionState | null;
 
