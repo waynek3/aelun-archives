@@ -83,8 +83,7 @@ html, body {
   width: 100%;
   max-width: 480px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 6px 12px;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
@@ -92,6 +91,13 @@ html, body {
   top: 0;
   z-index: 10;
   font-size: 0.85em;
+  gap: 2px;
+}
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 8px;
 }
 
@@ -112,6 +118,19 @@ html, body {
   font-size: 0.9em;
   white-space: nowrap;
   text-align: right;
+}
+
+/* Sprint 5: Chill bar row */
+.hud-bars {
+  display: flex;
+  gap: 12px;
+}
+
+.hud-chill {
+  font-size: 0.8em;
+  color: var(--bar-fill);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 /* ─── Screen Wrapper (Sprint 2+) ─────────────────────────────────────────────── */

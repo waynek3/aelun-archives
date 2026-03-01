@@ -6,10 +6,40 @@ A mobile-first browser game. You are Chill Wizard — a slacker mage who refuses
 
 Before starting any sprint, read the relevant docs:
 
-- `docs/scope.md` — full game design spec; source of truth for all mechanics, systems, and content
-- `docs/sprints.md` — sprint list; each sprint delivers exactly one new playable feature
+- `scope.md` — full game design spec; source of truth for all mechanics, systems, and content (root of repo)
+- `sprints.md` — sprint list; each sprint delivers exactly one new playable feature (root of repo)
+- `docs/architecture.md` — technical architecture, state shape, system design, file structure
 
 Always read `scope.md` before implementing any mechanic. If something isn't in scope.md, ask before building it.
+
+## Implementation Notes (for sprint continuity)
+
+### Save System
+- Current `SAVE_VERSION`: 4 (as of Sprint 5)
+- Migrations are in `src/state/save.ts`, keyed by source version (e.g. `3:` migrates v3→v4)
+- Every sprint that adds fields to `GameState` must bump `SAVE_VERSION` in `src/state/initial.ts` and add a migration
+
+### State & Systems Pattern
+- All game state lives in the flat `GameState` interface in `src/state/types.ts`
+- Systems are pure functions in `src/systems/*.ts` — no side effects, no held state
+- Action dispatch flows through `src/engine/dispatch.ts` → systems → `src/ui/renderer.ts`
+- `src/data/balance.json` holds all tuning constants — never hardcode gameplay numbers in code
+
+### HUD Layout
+- HUD is two rows: Row 1 = cash/clock/date, Row 2 = meter bars (chill, future: mana)
+- CSS class `.hud-row` for the info row, `.hud-bars` for the meters row
+- Use `progressBar()` from `src/util/format.ts` for all text-based bars
+
+### Passout System
+- `applyPassout()` in `src/engine/time.ts` handles all passout effects
+- Uses per-neighborhood entries from `balance.passout` with `cashPenalty`, `chillRestore`
+- Sprint 6 should add `manaRestore` wiring in the same function (entries already in balance.json)
+
+### Chill Meter (Sprint 5)
+- `chill` field on GameState, starts at 50, floor 0, no hard cap
+- Decreases on scratch losses, increases on scratch wins (both in `scratchCell()`)
+- Set to `chillRestore * 100` on passout
+- No passive time-based decay, no sleep restore, no snack/bong restore yet
 
 ## Stack
 

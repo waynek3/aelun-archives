@@ -4,7 +4,7 @@
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
 import { makeButton, makeHeader, makeDivider, makeResultLine } from '../components';
-import { formatCash, formatNet } from '../../util/format';
+import { formatCash, formatNet, progressBar } from '../../util/format';
 import { formatClock } from '../../engine/time';
 
 type Dispatch = (action: GameAction) => void;
@@ -33,6 +33,7 @@ export function renderPassout(state: GameState, container: HTMLElement, dispatch
   const penalty = state.lastPassoutPenalty ?? 0;
   screen.appendChild(makeResultLine(`Fine:   ${formatNet(-penalty)}`, 'payout-loss'));
   screen.appendChild(makeResultLine(`Cash:   ${formatCash(state.cash)}`));
+  screen.appendChild(makeResultLine(`Chill:  ${progressBar(state.chill, 100, 16)}`));
 
   screen.appendChild(makeDivider());
 
