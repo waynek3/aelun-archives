@@ -81,6 +81,9 @@ export interface GameState {
   // ── Passout tracking (Sprint 2+) ──
   lastPassoutPenalty: number | null;  // shown on passout screen
 
+  // ── Chill meter (Sprint 5+) ──
+  chill: number;  // mood meter, floor 0, no hard cap; shown as % bar (100 = full)
+
   // ── Scratch session (active during 'scratching' phase) ──
   scratchSession: ScratchSessionState | null;
 

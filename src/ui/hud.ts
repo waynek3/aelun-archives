@@ -1,13 +1,17 @@
 // Persistent HUD bar — always visible above the screen area.
 // Sprint 2: shows Cash, Clock, and Calendar.
-// Sprint 5+: adds Chill bar. Sprint 6+: adds Mana bar.
+// Sprint 5: adds Chill bar. Sprint 6+: adds Mana bar.
 
 import type { GameState } from '../state/types';
-import { formatCash } from '../util/format';
+import { formatCash, progressBar } from '../util/format';
 import { formatClock, formatDate } from '../engine/time';
 
 export function renderHUD(state: GameState, el: HTMLElement): void {
   el.className = 'hud';
+
+  // ── Row 1: Cash | Clock | Date ──
+  const row1 = document.createElement('div');
+  row1.className = 'hud-row';
 
   const cashEl = document.createElement('span');
   cashEl.className = 'hud-cash';
@@ -21,8 +25,21 @@ export function renderHUD(state: GameState, el: HTMLElement): void {
   dateEl.className = 'hud-date';
   dateEl.textContent = formatDate(state.day, state.month, state.year);
 
+  row1.appendChild(cashEl);
+  row1.appendChild(clockEl);
+  row1.appendChild(dateEl);
+
+  // ── Row 2: Chill bar ──
+  const row2 = document.createElement('div');
+  row2.className = 'hud-bars';
+
+  const chillEl = document.createElement('span');
+  chillEl.className = 'hud-chill';
+  chillEl.textContent = `CHILL ${progressBar(state.chill, 100, 20)}`;
+
+  row2.appendChild(chillEl);
+
   el.innerHTML = '';
-  el.appendChild(cashEl);
-  el.appendChild(clockEl);
-  el.appendChild(dateEl);
+  el.appendChild(row1);
+  el.appendChild(row2);
 }

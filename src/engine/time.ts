@@ -55,16 +55,20 @@ export function advanceDay(
 
 // ─── Passout ──────────────────────────────────────────────────────────────────
 
-// Apply a passout: charge cash penalty, advance to next day, reset to tower.
+// Apply a passout: charge cash penalty, restore chill to neighborhood ratio,
+// advance to next day, reset to tower.
 // Call this when isCurfewBreached returns true.
 export function applyPassout(state: GameState): GameState {
-  const penalties = balance.passout as Record<string, { cashPenalty: number }>;
-  const penalty = penalties[state.currentNeighborhood]?.cashPenalty ?? 20;
+  const penalties = balance.passout as Record<string, { cashPenalty: number; chillRestore: number }>;
+  const entry = penalties[state.currentNeighborhood];
+  const penalty = entry?.cashPenalty ?? 20;
+  const chillRestore = entry?.chillRestore ?? 0.15;
   const cal = advanceDay(state.day, state.month, state.year);
   return {
     ...state,
     phase: 'passedout',
     cash: Math.max(0, state.cash - penalty),
+    chill: Math.round(chillRestore * 100),
     clock: balance.dayCycle.wakeTime,
     currentLocation: 'tower',
     lastPassoutPenalty: penalty,
