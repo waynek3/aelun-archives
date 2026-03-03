@@ -15,7 +15,7 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 ## Implementation Notes (for sprint continuity)
 
 ### Save System
-- Current `SAVE_VERSION`: 5 (as of Sprint 6)
+- Current `SAVE_VERSION`: 6 (as of Sprint 7)
 - Migrations are in `src/state/save.ts`, keyed by source version (e.g. `3:` migrates v3→v4)
 - Every sprint that adds fields to `GameState` must bump `SAVE_VERSION` in `src/state/initial.ts` and add a migration
 
@@ -35,11 +35,12 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 - Uses per-neighborhood entries from `balance.passout` with `cashPenalty`, `chillRestore`, `manaRestore`
 - Chill set to `chillRestore * 100`, mana set to `manaRestore * maxMana`
 
-### Chill Meter (Sprint 5)
+### Chill Meter (Sprint 5+)
 - `chill` field on GameState, starts at 50, floor 0, no hard cap
 - Decreases on scratch losses, increases on scratch wins (both in `scratchCell()`)
 - Set to `chillRestore * 100` on passout
-- No passive time-based decay, no sleep restore, no snack/bong restore yet
+- Sprint 7: snacks restore chill via `CONSUME_SNACK` action (amounts in `balance.snacks.chillRestore`)
+- No passive time-based decay, no sleep restore, no bong restore yet
 
 ### Mana Pool (Sprint 6)
 - `mana` and `maxMana` fields on GameState, starts at 20/30
@@ -47,6 +48,16 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 - Set to `manaRestore * maxMana` on passout (per-neighborhood ratios in balance.passout)
 - No spells, no mana spending yet — resource pool only for Sprint 9+
 - Pure functions in `src/systems/mana.ts`: `applyManaSpend()`, `applyManaRestore()`
+
+### Inventory & Snacks (Sprint 7)
+- `inventory` field on GameState: `(InventoryItem | null)[]`, length 5
+- Pure functions in `src/systems/inventory.ts`: `freeSlots()`, `addItem()`, `removeItem()`, `addMultipleItems()`
+- Snack definitions in `src/data/food.ts` with 6 descriptors: greasy, salty, sugary, bland, healthy, gourmet
+- Chill restore per descriptor in `balance.snacks.chillRestore`
+- `BUY_TICKETS` action extended with optional `snacks` array; `CONSUME_SNACK` action for eating
+- Consuming is instant (no time cost); buying at bodega is part of the store visit
+- Inventory panel (`makeInventoryPanel` in `components.ts`) shown on tower and bodega screens
+- No item stacking, no health/aging impact yet (Sprint 18), no god affinities on food yet
 
 ## Stack
 

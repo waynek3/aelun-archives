@@ -4,8 +4,9 @@ import type { ColorScheme, LocationId } from '../state/types';
 // Each action is a discriminated union so dispatch can exhaustively handle them.
 
 export type GameAction =
-  // Buy a batch of tickets and begin a scratch session.
-  | { type: 'BUY_TICKETS'; quantities: Record<string, number> }
+  // Buy tickets and/or snacks at a bodega.  Snacks are added to inventory;
+  // if tickets > 0, a scratch session begins.
+  | { type: 'BUY_TICKETS'; quantities: Record<string, number>; snacks?: string[] }
   // Tap a scratch cell to advance its reveal state (0→1→2→3→4).
   | { type: 'SCRATCH_CELL'; cellIndex: number }
   // Move to the next ticket after the current one is fully revealed.
@@ -21,4 +22,6 @@ export type GameAction =
   // Sprint 2: sleep at the tower (ends the current day, advances to next morning).
   | { type: 'SLEEP' }
   // Sprint 2: dismiss the passout screen after waking up.
-  | { type: 'WAKE_UP' };
+  | { type: 'WAKE_UP' }
+  // Sprint 7: consume a snack from inventory (instant, no time cost).
+  | { type: 'CONSUME_SNACK'; slotIndex: number };
