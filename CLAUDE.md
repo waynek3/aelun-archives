@@ -6,8 +6,8 @@ A mobile-first browser game. You are Chill Wizard — a slacker mage who refuses
 
 Before starting any sprint, read the relevant docs:
 
-- `scope.md` — full game design spec; source of truth for all mechanics, systems, and content (root of repo)
-- `sprints.md` — sprint list; each sprint delivers exactly one new playable feature (root of repo)
+- `docs/scope.md` — full game design spec; source of truth for all mechanics, systems, and content
+- `docs/sprints.md` — sprint list; each sprint delivers exactly one new playable feature
 - `docs/architecture.md` — technical architecture, state shape, system design, file structure
 
 Always read `scope.md` before implementing any mechanic. If something isn't in scope.md, ask before building it.
@@ -15,7 +15,7 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 ## Implementation Notes (for sprint continuity)
 
 ### Save System
-- Current `SAVE_VERSION`: 4 (as of Sprint 5)
+- Current `SAVE_VERSION`: 5 (as of Sprint 6)
 - Migrations are in `src/state/save.ts`, keyed by source version (e.g. `3:` migrates v3→v4)
 - Every sprint that adds fields to `GameState` must bump `SAVE_VERSION` in `src/state/initial.ts` and add a migration
 
@@ -32,14 +32,21 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 
 ### Passout System
 - `applyPassout()` in `src/engine/time.ts` handles all passout effects
-- Uses per-neighborhood entries from `balance.passout` with `cashPenalty`, `chillRestore`
-- Sprint 6 should add `manaRestore` wiring in the same function (entries already in balance.json)
+- Uses per-neighborhood entries from `balance.passout` with `cashPenalty`, `chillRestore`, `manaRestore`
+- Chill set to `chillRestore * 100`, mana set to `manaRestore * maxMana`
 
 ### Chill Meter (Sprint 5)
 - `chill` field on GameState, starts at 50, floor 0, no hard cap
 - Decreases on scratch losses, increases on scratch wins (both in `scratchCell()`)
 - Set to `chillRestore * 100` on passout
 - No passive time-based decay, no sleep restore, no snack/bong restore yet
+
+### Mana Pool (Sprint 6)
+- `mana` and `maxMana` fields on GameState, starts at 20/30
+- Restores on sleep by flat `balance.mana.sleepManaRestore` (15), capped at maxMana
+- Set to `manaRestore * maxMana` on passout (per-neighborhood ratios in balance.passout)
+- No spells, no mana spending yet — resource pool only for Sprint 9+
+- Pure functions in `src/systems/mana.ts`: `applyManaSpend()`, `applyManaRestore()`
 
 ## Stack
 

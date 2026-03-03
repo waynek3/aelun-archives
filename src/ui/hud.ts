@@ -29,7 +29,7 @@ export function renderHUD(state: GameState, el: HTMLElement): void {
   row1.appendChild(clockEl);
   row1.appendChild(dateEl);
 
-  // ── Row 2: Chill bar ──
+  // ── Row 2: Chill & Mana bars ──
   const row2 = document.createElement('div');
   row2.className = 'hud-bars';
 
@@ -37,7 +37,12 @@ export function renderHUD(state: GameState, el: HTMLElement): void {
   chillEl.className = 'hud-chill';
   chillEl.textContent = `CHILL ${progressBar(state.chill, 100, 20)}`;
 
+  const manaEl = document.createElement('span');
+  manaEl.className = 'hud-mana';
+  manaEl.textContent = `MANA  ${progressBar(state.mana, state.maxMana, 20)}`;
+
   row2.appendChild(chillEl);
+  row2.appendChild(manaEl);
 
   el.innerHTML = '';
   el.appendChild(row1);

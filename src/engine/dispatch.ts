@@ -16,6 +16,7 @@ import { travel } from '../systems/travel';
 import { checkRent } from '../systems/rent';
 import { advanceDay, applyPassout, isCurfewBreached, advanceClock } from './time';
 import { calcScratchTimeCost } from '../util/format';
+import { applyManaRestore } from '../systems/mana';
 import balance from '../data/balance.json';
 
 export type RenderFn = (state: GameState) => void;
@@ -100,10 +101,12 @@ function applyAction(state: GameState, action: GameAction): GameState {
     case 'SLEEP': {
       if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
       const cal = advanceDay(state.day, state.month, state.year);
+      const manaBalance = balance.mana as Record<string, number>;
       const nextState: GameState = {
         ...state,
         clock: balance.dayCycle.wakeTime,
         lastPassoutPenalty: null,
+        mana: applyManaRestore(state.mana, manaBalance.sleepManaRestore, state.maxMana),
         ...cal,
       };
       return checkRent(nextState);

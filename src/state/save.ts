@@ -39,6 +39,11 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
     const state = s as Record<string, unknown>;
     return { ...state, chill: 50 };
   },
+  // Sprint 5 → Sprint 6: add mana pool.
+  4: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return { ...state, mana: 20, maxMana: 30 };
+  },
 };
 
 function migrate(data: SaveData): GameState {

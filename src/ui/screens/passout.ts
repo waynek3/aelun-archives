@@ -34,6 +34,7 @@ export function renderPassout(state: GameState, container: HTMLElement, dispatch
   screen.appendChild(makeResultLine(`Fine:   ${formatNet(-penalty)}`, 'payout-loss'));
   screen.appendChild(makeResultLine(`Cash:   ${formatCash(state.cash)}`));
   screen.appendChild(makeResultLine(`Chill:  ${progressBar(state.chill, 100, 16)}`));
+  screen.appendChild(makeResultLine(`Mana:   ${progressBar(state.mana, state.maxMana, 16)}`));
 
   screen.appendChild(makeDivider());
 

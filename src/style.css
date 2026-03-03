@@ -133,6 +133,14 @@ html, body {
   letter-spacing: 0.02em;
 }
 
+/* Sprint 6: Mana bar */
+.hud-mana {
+  font-size: 0.8em;
+  color: var(--bar-fill);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
 /* ─── Screen Wrapper (Sprint 2+) ─────────────────────────────────────────────── */
 
 #screen {
