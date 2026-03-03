@@ -1,14 +1,16 @@
-// Bodega screen: buy scratch-off tickets.
-// The player adjusts quantities of each ticket tier and presses BUY.
+// Bodega screen: buy scratch-off tickets and snacks.
 // Sprint 4: store name is dynamic per neighborhood; travel section lists all other destinations.
+// Sprint 7: snack purchasing with inventory warnings + inventory panel with EAT.
 
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
 import { TICKET_TYPES } from '../../data/tickets';
+import { SNACKS } from '../../data/food';
 import { formatCash, calcScratchTimeCost } from '../../util/format';
-import { makeButton, makeHeader, makeCashBar, makeQuantityRow, makeDivider } from '../components';
+import { makeButton, makeHeader, makeCashBar, makeQuantityRow, makeDivider, makeInventoryPanel } from '../components';
 import { formatClock, previewClock } from '../../engine/time';
 import { getTravelCostRaw } from '../../systems/travel';
+import { freeSlots } from '../../systems/inventory';
 import {
   getLocationData,
   getLocationNeighborhood,
@@ -20,6 +22,7 @@ type Dispatch = (action: GameAction) => void;
 
 // Local mutable quantity state (not in GameState — just UI state before purchase).
 const quantities: Record<string, number> = {};
+const snackQtys: Record<string, number> = {};
 
 // ─── Render ───────────────────────────────────────────────────────────────────
 
@@ -28,6 +31,7 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
 
   // Reset quantities on fresh render.
   for (const t of TICKET_TYPES) quantities[t.id] = 0;
+  for (const s of SNACKS) snackQtys[s.id] = 0;
 
   const screen = document.createElement('div');
   screen.className = 'screen bodega-screen';
@@ -60,7 +64,6 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
           }
         },
         onIncrement: () => {
-          // Check if adding one more would exceed cash.
           const projected = projectedCost() + ticketType.cost;
           if (projected <= state.cash) {
             quantities[ticketType.id]++;
@@ -72,6 +75,51 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
     );
     screen.appendChild(row);
   }
+
+  screen.appendChild(makeDivider());
+
+  // ── Snack list (Sprint 7) ──
+  screen.appendChild(makeHeader('SNACKS'));
+
+  // Track snack +/- updaters so we can disable when full.
+  const snackUpdaters: Array<{ updateQty: (n: number) => void }> = [];
+
+  for (const snack of SNACKS) {
+    const { row, updateQty } = makeQuantityRow(
+      snack.name,
+      formatCash(snack.cost),
+      0,
+      {
+        onDecrement: () => {
+          if (snackQtys[snack.id] > 0) {
+            snackQtys[snack.id]--;
+            updateQty(snackQtys[snack.id]);
+            refreshTotal();
+          }
+        },
+        onIncrement: () => {
+          // Check cash limit.
+          const projected = projectedCost() + snack.cost;
+          if (projected > state.cash) return;
+          // Check inventory space: free slots minus already-selected snacks.
+          const totalSnackQty = totalSnackCount();
+          if (totalSnackQty >= freeSlots(state.inventory)) return;
+          snackQtys[snack.id]++;
+          updateQty(snackQtys[snack.id]);
+          refreshTotal();
+        },
+      },
+    );
+    snackUpdaters.push({ updateQty });
+    screen.appendChild(row);
+  }
+
+  // Inventory warning (shown when bag is full).
+  const invWarning = document.createElement('p');
+  invWarning.className = 'inv-warning';
+  invWarning.id = 'bodega-inv-warning';
+  invWarning.style.display = 'none';
+  screen.appendChild(invWarning);
 
   screen.appendChild(makeDivider());
 
@@ -90,11 +138,33 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
   // ── BUY button ──
   const buyBtn = makeButton('BUY', () => {
     const hasTickets = Object.values(quantities).some(q => q > 0);
-    if (!hasTickets) return;
-    dispatch({ type: 'BUY_TICKETS', quantities: { ...quantities } });
+    const hasSnacks = Object.values(snackQtys).some(q => q > 0);
+    if (!hasTickets && !hasSnacks) return;
+
+    // Build snack ID array from quantities.
+    const snackIdList: string[] = [];
+    for (const s of SNACKS) {
+      for (let i = 0; i < (snackQtys[s.id] ?? 0); i++) {
+        snackIdList.push(s.id);
+      }
+    }
+
+    dispatch({
+      type: 'BUY_TICKETS',
+      quantities: { ...quantities },
+      snacks: snackIdList.length > 0 ? snackIdList : undefined,
+    });
   }, 'buy-btn');
   buyBtn.id = 'buy-btn';
   screen.appendChild(buyBtn);
+
+  // ── Inventory panel (Sprint 7) ──
+  screen.appendChild(makeDivider());
+  screen.appendChild(
+    makeInventoryPanel(state.inventory, (slotIndex) => {
+      dispatch({ type: 'CONSUME_SNACK', slotIndex });
+    }),
+  );
 
   // ── Travel section ──
   screen.appendChild(makeDivider());
@@ -130,11 +200,17 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
 
   // ── Helpers ──
   function projectedCost(): number {
-    return TICKET_TYPES.reduce((sum, t) => sum + t.cost * (quantities[t.id] ?? 0), 0);
+    const ticketCost = TICKET_TYPES.reduce((sum, t) => sum + t.cost * (quantities[t.id] ?? 0), 0);
+    const snackCost = SNACKS.reduce((sum, s) => sum + s.cost * (snackQtys[s.id] ?? 0), 0);
+    return ticketCost + snackCost;
   }
 
   function totalTicketCount(): number {
     return TICKET_TYPES.reduce((sum, t) => sum + (quantities[t.id] ?? 0), 0);
+  }
+
+  function totalSnackCount(): number {
+    return SNACKS.reduce((sum, s) => sum + (snackQtys[s.id] ?? 0), 0);
   }
 
   function refreshTotal(): void {
@@ -142,14 +218,33 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
     const totalEl = document.getElementById('bodega-total');
     if (totalEl) totalEl.textContent = formatCash(cost);
 
+    // Inventory warning.
+    const free = freeSlots(state.inventory);
+    const snackCount = totalSnackCount();
+    const warn = document.getElementById('bodega-inv-warning');
+    if (warn) {
+      if (snackCount >= free && free > 0) {
+        warn.textContent = `! BAG FULL (${free}/${state.inventory.length} free) !`;
+        warn.style.display = '';
+      } else if (free === 0) {
+        warn.textContent = `! BAG FULL (0/${state.inventory.length} free) !`;
+        warn.style.display = '';
+      } else {
+        warn.style.display = 'none';
+      }
+    }
+
+    // BUY button.
     const buyBtnEl = document.getElementById('buy-btn') as HTMLButtonElement | null;
     if (buyBtnEl) {
-      const n = totalTicketCount();
-      const hasTickets = n > 0;
-      buyBtnEl.disabled = !hasTickets;
-      if (hasTickets) {
-        const finishClock = state.clock + calcScratchTimeCost(n);
+      const nTickets = totalTicketCount();
+      const hasAnything = nTickets > 0 || snackCount > 0;
+      buyBtnEl.disabled = !hasAnything;
+      if (nTickets > 0) {
+        const finishClock = state.clock + calcScratchTimeCost(nTickets);
         buyBtnEl.textContent = `BUY  \u2014  done ${formatClock(finishClock)}`;
+      } else if (hasAnything) {
+        buyBtnEl.textContent = 'BUY SNACKS';
       } else {
         buyBtnEl.textContent = 'BUY';
       }

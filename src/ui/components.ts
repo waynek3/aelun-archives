@@ -1,6 +1,8 @@
 // Reusable DOM component builders.
 // All return HTMLElement instances; no innerHTML string injection.
 
+import type { InventoryItem } from '../state/types';
+
 // ── Button ────────────────────────────────────────────────────────────────────
 
 export function makeButton(
@@ -121,4 +123,37 @@ export function makeResultLine(text: string, className?: string): HTMLElement {
   p.className = `result-line${className ? ` ${className}` : ''}`;
   p.textContent = text;
   return p;
+}
+
+// ── Inventory panel ──────────────────────────────────────────────────────
+// Reusable panel showing current inventory with EAT buttons for snacks.
+
+export function makeInventoryPanel(
+  inventory: (InventoryItem | null)[],
+  onConsume: (slotIndex: number) => void,
+): HTMLElement {
+  const panel = document.createElement('div');
+  panel.className = 'inventory-panel';
+
+  const count = inventory.filter(i => i !== null).length;
+  panel.appendChild(makeHeader(`INVENTORY (${count}/${inventory.length})`));
+
+  for (let i = 0; i < inventory.length; i++) {
+    const item = inventory[i];
+    if (item && item.type === 'snack') {
+      const btn = makeButton(
+        `${item.name}  [EAT]`,
+        () => onConsume(i),
+        'inv-btn',
+      );
+      panel.appendChild(btn);
+    } else {
+      const el = document.createElement('p');
+      el.className = 'inv-empty';
+      el.textContent = '[ empty ]';
+      panel.appendChild(el);
+    }
+  }
+
+  return panel;
 }

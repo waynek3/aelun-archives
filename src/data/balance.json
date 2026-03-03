@@ -56,6 +56,17 @@
     "sleepManaRestore": 15
   },
 
+  "snacks": {
+    "chillRestore": {
+      "greasy":  15,
+      "salty":   15,
+      "sugary":  15,
+      "bland":   5,
+      "healthy": 5,
+      "gourmet": 20
+    }
+  },
+
   "affinity": {
     "scaleFactor": 0.02,
     "privateDonationMultiplier": 1.5,

@@ -11,6 +11,17 @@ export type StrengthId = 'weak' | 'mid' | 'strong';
 
 export type ColorScheme = 'blue' | 'green' | 'orange';
 
+// Sprint 7: food quality descriptors
+export type FoodDescriptor = 'greasy' | 'salty' | 'sugary' | 'bland' | 'healthy' | 'gourmet';
+
+// Sprint 7: inventory items
+export interface InventoryItem {
+  type: 'snack';          // extensible for potions/scrolls in future sprints
+  id: string;             // references definition in food.ts (or potions.ts, etc.)
+  name: string;           // display name, e.g. "Greasy Burrito"
+  descriptor: FoodDescriptor;  // quality descriptor (snacks only for now)
+}
+
 // Sprint 2+: location and neighborhood tracking
 export type NeighborhoodId =
   | 'the_skids' | 'the_burbs' | 'richville'
@@ -87,6 +98,9 @@ export interface GameState {
   // ── Mana pool (Sprint 6+) ──
   mana: number;     // current mana, floor 0, cap at maxMana
   maxMana: number;  // maximum mana capacity
+
+  // ── Inventory (Sprint 7+) ──
+  inventory: (InventoryItem | null)[];  // length 5, null = empty slot
 
   // ── Scratch session (active during 'scratching' phase) ──
   scratchSession: ScratchSessionState | null;
