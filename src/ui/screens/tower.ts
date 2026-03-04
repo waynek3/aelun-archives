@@ -3,7 +3,7 @@
 
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
-import { makeButton, makeHeader, makeDivider, makeInventoryPanel } from '../components';
+import { makeButton, makeHeader, makeDivider, makeInventoryPanel, makeStatsPanel } from '../components';
 import { formatClock, previewClock } from '../../engine/time';
 import { getTravelCostRaw } from '../../systems/travel';
 import { NEIGHBORHOODS, getNeighborhoodBodega, getLocationData } from '../../data/locations';
@@ -25,6 +25,9 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
   flavor.className = 'tower-flavor';
   flavor.textContent = 'Your dingy tower. Home sweet home.';
   screen.appendChild(flavor);
+
+  // ── Stats (Sprint 8) ──
+  screen.appendChild(makeStatsPanel(state));
 
   // ── Inventory (Sprint 7) ──
   screen.appendChild(

@@ -49,6 +49,18 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
     const state = s as Record<string, unknown>;
     return { ...state, inventory: [null, null, null, null, null] };
   },
+  // Sprint 7 → Sprint 8: add player stats.
+  6: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return {
+      ...state,
+      intelligence: 10,
+      bookbinding: 1,
+      wizardFame: 0,
+      relaxationRate: 1.0,
+      restingRelaxation: 50,
+    };
+  },
 };
 
 function migrate(data: SaveData): GameState {

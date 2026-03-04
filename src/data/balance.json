@@ -93,5 +93,15 @@
 
   "wizardFame": {
     "decayPerDay": 0.1
+  },
+
+  "stats": {
+    "displayMax": {
+      "intelligence": 20,
+      "bookbinding": 10,
+      "wizardFame": 100,
+      "relaxationRate": 5.0,
+      "restingRelaxation": 100
+    }
   }
 }
