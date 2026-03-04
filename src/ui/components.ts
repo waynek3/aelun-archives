@@ -1,7 +1,9 @@
 // Reusable DOM component builders.
 // All return HTMLElement instances; no innerHTML string injection.
 
-import type { InventoryItem } from '../state/types';
+import type { GameState, InventoryItem } from '../state/types';
+import { progressBar } from '../util/format';
+import balance from '../data/balance.json';
 
 // ── Button ────────────────────────────────────────────────────────────────────
 
@@ -153,6 +155,34 @@ export function makeInventoryPanel(
       el.textContent = '[ empty ]';
       panel.appendChild(el);
     }
+  }
+
+  return panel;
+}
+
+// ── Stats panel ──────────────────────────────────────────────────────────
+// Reusable panel showing player stats as progress bars (no numeric values).
+
+export function makeStatsPanel(state: GameState): HTMLElement {
+  const panel = document.createElement('div');
+  panel.className = 'stats-panel';
+
+  panel.appendChild(makeHeader('STATS'));
+
+  const dm = balance.stats.displayMax;
+  const stats: Array<{ label: string; value: number; max: number }> = [
+    { label: 'INT ', value: state.intelligence,      max: dm.intelligence },
+    { label: 'BIND', value: state.bookbinding,       max: dm.bookbinding },
+    { label: 'FAME', value: state.wizardFame,        max: dm.wizardFame },
+    { label: 'RELX', value: state.relaxationRate,    max: dm.relaxationRate },
+    { label: 'REST', value: state.restingRelaxation, max: dm.restingRelaxation },
+  ];
+
+  for (const s of stats) {
+    const row = document.createElement('p');
+    row.className = 'stat-row';
+    row.textContent = `${s.label} ${progressBar(s.value, s.max, 20)}`;
+    panel.appendChild(row);
   }
 
   return panel;

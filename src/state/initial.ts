@@ -1,7 +1,7 @@
 import type { GameState } from './types';
 import balance from '../data/balance.json';
 
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 export function createInitialState(): GameState {
   return {
@@ -23,6 +23,12 @@ export function createInitialState(): GameState {
     maxMana: balance.starting.maxMana,
     // Sprint 7: inventory
     inventory: [null, null, null, null, null],
+    // Sprint 8: player stats
+    intelligence: balance.starting.intelligence,
+    bookbinding: balance.starting.bookbinding,
+    wizardFame: balance.starting.wizardFame,
+    relaxationRate: balance.starting.relaxationRate,
+    restingRelaxation: balance.starting.restingRelaxation,
     // Scratch session
     scratchSession: null,
     totalTicketsScratched: 0,

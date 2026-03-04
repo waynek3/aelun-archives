@@ -102,6 +102,13 @@ export interface GameState {
   // ── Inventory (Sprint 7+) ──
   inventory: (InventoryItem | null)[];  // length 5, null = empty slot
 
+  // ── Player Stats (Sprint 8+) ──
+  intelligence: number;       // learning speed at university; degrades with age
+  bookbinding: number;        // spellbook capacity
+  wizardFame: number;         // unlocks, loan caps, event chances
+  relaxationRate: number;     // passive chill restore rate
+  restingRelaxation: number;  // baseline chill target
+
   // ── Scratch session (active during 'scratching' phase) ──
   scratchSession: ScratchSessionState | null;
 
