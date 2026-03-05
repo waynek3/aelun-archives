@@ -2,11 +2,11 @@
 // Central source of truth for all location IDs, display names, neighborhood mapping,
 // and flavor text. No game logic here — pure static data.
 
-import type { NeighborhoodId, LocationId } from '../state/types';
+import type { NeighborhoodId, LocationId, GodId } from '../state/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type LocationType = 'tower' | 'bodega';
+export type LocationType = 'tower' | 'bodega' | 'temple';
 
 export interface NeighborhoodData {
   id: NeighborhoodId;
@@ -19,6 +19,7 @@ export interface LocationData {
   neighborhood: NeighborhoodId;
   type: LocationType;
   displayName: string;
+  godId?: GodId;  // Sprint 9: which god this temple is dedicated to
 }
 
 // ─── Neighborhood Table ───────────────────────────────────────────────────────
@@ -42,6 +43,17 @@ export const LOCATIONS: LocationData[] = [
   { id: 'center_city_bodega',          neighborhood: 'center_city',        type: 'bodega', displayName: 'CORNER MARKET' },
   { id: 'downtown_bodega',             neighborhood: 'downtown',           type: 'bodega', displayName: '24/7 FUEL STOP' },
   { id: 'university_heights_bodega',   neighborhood: 'university_heights', type: 'bodega', displayName: 'STUDENT MART' },
+  // Sprint 9: Temples
+  { id: 'the_skids_temple_gul',            neighborhood: 'the_skids',          type: 'temple', displayName: 'SHRINE OF GUL',        godId: 'gul' },
+  { id: 'the_skids_temple_finhorn',        neighborhood: 'the_skids',          type: 'temple', displayName: "FINHORN'S CHAPEL",      godId: 'finhorn' },
+  { id: 'the_burbs_temple_klossa',         neighborhood: 'the_burbs',          type: 'temple', displayName: "KLOSSA'S BURROW",       godId: 'klossa' },
+  { id: 'the_burbs_temple_ara',            neighborhood: 'the_burbs',          type: 'temple', displayName: "ARA'S GARDEN",          godId: 'ara' },
+  { id: 'richville_temple_skarhol',        neighborhood: 'richville',          type: 'temple', displayName: 'HALL OF SKARHOL',       godId: 'skarhol' },
+  { id: 'richville_temple_sofiel',         neighborhood: 'richville',          type: 'temple', displayName: "SOFIEL'S SANCTUM",      godId: 'sofiel' },
+  { id: 'center_city_temple_beroan',       neighborhood: 'center_city',        type: 'temple', displayName: "BEROAN'S FLAME",        godId: 'beroan' },
+  { id: 'center_city_temple_azorius',      neighborhood: 'center_city',        type: 'temple', displayName: 'AZORIUS GATE',          godId: 'azorius' },
+  { id: 'downtown_temple_marena',          neighborhood: 'downtown',           type: 'temple', displayName: "MARENA'S DEPTHS",       godId: 'marena' },
+  { id: 'university_heights_temple_mesin', neighborhood: 'university_heights', type: 'temple', displayName: "MESIN'S LIGHT",         godId: 'mesin' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -73,4 +85,18 @@ export function getNeighborhoodBodega(neighborhoodId: NeighborhoodId): LocationI
   );
   if (!loc) throw new Error(`No bodega in neighborhood: ${neighborhoodId}`);
   return loc.id;
+}
+
+// Returns all temples in a given neighborhood.
+export function getNeighborhoodTemples(neighborhoodId: NeighborhoodId): LocationData[] {
+  return LOCATIONS.filter(
+    l => l.neighborhood === neighborhoodId && l.type === 'temple',
+  );
+}
+
+// Returns the god a temple is dedicated to.
+export function getTempleGod(id: LocationId): GodId {
+  const loc = getLocationData(id);
+  if (!loc.godId) throw new Error(`Location ${id} is not a temple`);
+  return loc.godId;
 }

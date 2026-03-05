@@ -59,6 +59,19 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 - Inventory panel (`makeInventoryPanel` in `components.ts`) shown on tower and bodega screens
 - No item stacking, no health/aging impact yet (Sprint 18), no god affinities on food yet
 
+### God Affinity & Temples (Sprint 9)
+- Current `SAVE_VERSION`: 8
+- `affinity: Record<GodId, number>` and `prayerBuffs: PrayerBuff[]` fields on GameState
+- 10 gods defined in `src/data/gods.ts` with opposition circle (`OPPOSITION` record)
+- 10 temple locations (1 per god) across 6 neighborhoods in `src/data/locations.ts`
+- `LocationType` now includes `'temple'`; `LocationData` has optional `godId` for temples
+- Pure functions in `src/systems/affinity.ts`: `applyDonation()`, `hasPrayerBuff()`, `pruneExpiredBuffs()`, `createPrayerBuff()`
+- Donation math: `gain = amount * scaleFactor * donationTypeMultiplier`; opposed god loses same amount; prayer buffs modify gain (2x) and loss (0.5x)
+- Prayer advances clock, restores mana (`balance.prayer.manaRestorePerQuarter` per 15 min), creates timed buff
+- Actions: `DONATE_PRIVATE`, `DONATE_PUBLIC`, `PRAY` — god inferred from `state.currentLocation`
+- Temple screen in `src/ui/screens/temple.ts`; tower/bodega travel sections include temple buttons
+- No affinity effects on scratchers yet (Sprint 10), no strong month multipliers (Sprint 11), no passive decay (Sprint 12)
+
 ## Stack
 
 - Mobile-first browser game (no native app)

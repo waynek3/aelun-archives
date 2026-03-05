@@ -67,6 +67,12 @@
     }
   },
 
+  "prayer": {
+    "manaRestorePerQuarter": 3,
+    "donationAmounts": [5, 10, 25, 50, 100],
+    "durationOptions": [15, 30, 45, 60]
+  },
+
   "affinity": {
     "scaleFactor": 0.02,
     "privateDonationMultiplier": 1.5,

@@ -34,7 +34,27 @@ export type LocationId =
   | 'richville_bodega'
   | 'center_city_bodega'
   | 'downtown_bodega'
-  | 'university_heights_bodega';
+  | 'university_heights_bodega'
+  // Sprint 9: Temples
+  | 'the_skids_temple_gul'
+  | 'the_skids_temple_finhorn'
+  | 'the_burbs_temple_klossa'
+  | 'the_burbs_temple_ara'
+  | 'richville_temple_skarhol'
+  | 'richville_temple_sofiel'
+  | 'center_city_temple_beroan'
+  | 'center_city_temple_azorius'
+  | 'downtown_temple_marena'
+  | 'university_heights_temple_mesin';
+
+// Sprint 9: prayer buff
+export interface PrayerBuff {
+  godId: GodId;
+  expiresAtClock: number;   // minutes from midnight
+  expiresOnDay: number;
+  expiresInMonth: number;
+  expiresInYear: number;
+}
 
 // ─── Scratch Session ──────────────────────────────────────────────────────────
 
@@ -108,6 +128,10 @@ export interface GameState {
   wizardFame: number;         // unlocks, loan caps, event chances
   relaxationRate: number;     // passive chill restore rate
   restingRelaxation: number;  // baseline chill target
+
+  // ── God Affinity (Sprint 9+) ──
+  affinity: Record<GodId, number>;    // affinity score per god, starts at 0
+  prayerBuffs: PrayerBuff[];          // active timed prayer buffs
 
   // ── Scratch session (active during 'scratching' phase) ──
   scratchSession: ScratchSessionState | null;

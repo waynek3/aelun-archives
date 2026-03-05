@@ -16,6 +16,7 @@ import {
   getLocationNeighborhood,
   NEIGHBORHOODS,
   getNeighborhoodBodega,
+  getNeighborhoodTemples,
 } from '../../data/locations';
 
 type Dispatch = (action: GameAction) => void;
@@ -180,7 +181,7 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
   );
   screen.appendChild(returnBtn);
 
-  // Other neighborhoods' bodegas (skip the current neighborhood).
+  // Other neighborhoods' bodegas and temples (skip the current neighborhood's bodega).
   const currentNeighborhood = getLocationNeighborhood(state.currentLocation);
   for (const neighborhood of NEIGHBORHOODS) {
     if (neighborhood.id === currentNeighborhood) continue;
@@ -194,6 +195,30 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
       'nav-btn',
     );
     screen.appendChild(btn);
+
+    // Sprint 9: temples in this neighborhood
+    const temples = getNeighborhoodTemples(neighborhood.id);
+    for (const temple of temples) {
+      const tCost = getTravelCostRaw(state.currentLocation, temple.id);
+      const tClock = previewClock(state.clock, tCost);
+      screen.appendChild(makeButton(
+        `${temple.displayName}  \u2192  ${formatClock(tClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: temple.id }),
+        'nav-btn',
+      ));
+    }
+  }
+
+  // Sprint 9: temples in the current neighborhood (accessible from local bodega)
+  const localTemples = getNeighborhoodTemples(currentNeighborhood);
+  for (const temple of localTemples) {
+    const tCost = getTravelCostRaw(state.currentLocation, temple.id);
+    const tClock = previewClock(state.clock, tCost);
+    screen.appendChild(makeButton(
+      `${temple.displayName}  \u2192  ${formatClock(tClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: temple.id }),
+      'nav-btn',
+    ));
   }
 
   container.appendChild(screen);

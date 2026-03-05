@@ -61,6 +61,18 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
       restingRelaxation: 50,
     };
   },
+  // Sprint 8 → Sprint 9: add god affinity and prayer buffs.
+  7: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return {
+      ...state,
+      affinity: {
+        mesin: 0, gul: 0, klossa: 0, skarhol: 0, marena: 0,
+        azorius: 0, ara: 0, finhorn: 0, beroan: 0, sofiel: 0,
+      },
+      prayerBuffs: [],
+    };
+  },
 };
 
 function migrate(data: SaveData): GameState {
