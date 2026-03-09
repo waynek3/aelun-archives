@@ -81,7 +81,9 @@
     "strongMonthMultiplier": 2.0,
     "passiveDecayPerDay": 0.5,
     "prayerBuffMultiplier": 2.0,
-    "prayerDebuffMultiplier": 0.5
+    "prayerDebuffMultiplier": 0.5,
+    "payoutAffinityScale": 0.05,
+    "payoutMultiplierFloor": 0.0
   },
 
   "addiction": {
