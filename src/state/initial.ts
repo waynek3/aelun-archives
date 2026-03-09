@@ -1,7 +1,7 @@
 import type { GameState } from './types';
 import balance from '../data/balance.json';
 
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 
 export function createInitialState(): GameState {
   return {
@@ -29,6 +29,12 @@ export function createInitialState(): GameState {
     wizardFame: balance.starting.wizardFame,
     relaxationRate: balance.starting.relaxationRate,
     restingRelaxation: balance.starting.restingRelaxation,
+    // Sprint 9: god affinity
+    affinity: {
+      mesin: 0, gul: 0, klossa: 0, skarhol: 0, marena: 0,
+      azorius: 0, ara: 0, finhorn: 0, beroan: 0, sofiel: 0,
+    },
+    prayerBuffs: [],
     // Scratch session
     scratchSession: null,
     totalTicketsScratched: 0,

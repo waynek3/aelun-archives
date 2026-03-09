@@ -24,4 +24,8 @@ export type GameAction =
   // Sprint 2: dismiss the passout screen after waking up.
   | { type: 'WAKE_UP' }
   // Sprint 7: consume a snack from inventory (instant, no time cost).
-  | { type: 'CONSUME_SNACK'; slotIndex: number };
+  | { type: 'CONSUME_SNACK'; slotIndex: number }
+  // Sprint 9: temple actions (god inferred from currentLocation).
+  | { type: 'DONATE_PRIVATE'; amount: number }
+  | { type: 'DONATE_PUBLIC'; amount: number }
+  | { type: 'PRAY'; duration: number };

@@ -8,13 +8,14 @@ import { renderHUD } from './hud';
 import { renderBodega } from './screens/bodega';
 import { renderScratch, updateScratchCell } from './screens/scratch';
 import { renderTower } from './screens/tower';
+import { renderTemple } from './screens/temple';
 import { renderPassout } from './screens/passout';
 import { renderGameOver } from './screens/game-over';
 import { getLocationType } from '../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
-type ScreenId = 'tower' | 'bodega' | 'scratch' | 'passout' | 'game_over' | 'none';
+type ScreenId = 'tower' | 'bodega' | 'temple' | 'scratch' | 'passout' | 'game_over' | 'none';
 let currentScreen: ScreenId = 'none';
 
 // The last action that triggered a render — used to decide partial vs full update.
@@ -59,6 +60,7 @@ function getTargetScreen(state: GameState): ScreenId {
   if (state.phase === 'playing') {
     const locType = getLocationType(state.currentLocation);
     if (locType === 'tower') return 'tower';
+    if (locType === 'temple') return 'temple';
     return 'bodega';  // all store-type locations use bodega screen
   }
   return 'bodega';  // fallback
@@ -93,6 +95,9 @@ export function render(
   } else if (targetScreen === 'tower') {
     currentScreen = 'tower';
     renderTower(state, screen, dispatch);
+  } else if (targetScreen === 'temple') {
+    currentScreen = 'temple';
+    renderTemple(state, screen, dispatch);
   } else if (targetScreen === 'passout') {
     currentScreen = 'passout';
     renderPassout(state, screen, dispatch);

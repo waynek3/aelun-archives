@@ -20,6 +20,8 @@ import { applyManaRestore } from '../systems/mana';
 import { applyChillGain } from '../systems/chill';
 import { getSnack } from '../data/food';
 import { addMultipleItems, canFitItems, removeItem } from '../systems/inventory';
+import { applyDonation, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
+import { getLocationData } from '../data/locations';
 import type { InventoryItem } from '../state/types';
 import balance from '../data/balance.json';
 
@@ -161,6 +163,74 @@ function applyAction(state: GameState, action: GameAction): GameState {
         ...state,
         chill: applyChillGain(state.chill, restoreAmount),
         inventory: removeItem(state.inventory, action.slotIndex),
+      };
+    }
+
+    // ── Sprint 9 ──────────────────────────────────────────────────────────────
+
+    case 'DONATE_PRIVATE': {
+      if (state.phase !== 'playing') return state;
+      if (state.cash < action.amount) return state;
+      const locData = getLocationData(state.currentLocation);
+      if (locData.type !== 'temple' || !locData.godId) return state;
+      const godId = locData.godId;
+      return {
+        ...state,
+        cash: state.cash - action.amount,
+        affinity: applyDonation(
+          state.affinity, godId, action.amount, false,
+          state.prayerBuffs, state.clock, state.day, state.month, state.year,
+        ),
+      };
+    }
+
+    case 'DONATE_PUBLIC': {
+      if (state.phase !== 'playing') return state;
+      if (state.cash < action.amount) return state;
+      const locData = getLocationData(state.currentLocation);
+      if (locData.type !== 'temple' || !locData.godId) return state;
+      const godId = locData.godId;
+      return {
+        ...state,
+        cash: state.cash - action.amount,
+        affinity: applyDonation(
+          state.affinity, godId, action.amount, true,
+          state.prayerBuffs, state.clock, state.day, state.month, state.year,
+        ),
+        wizardFame: state.wizardFame + balance.affinity.publicDonationFameGain,
+      };
+    }
+
+    case 'PRAY': {
+      if (state.phase !== 'playing') return state;
+      const locData = getLocationData(state.currentLocation);
+      if (locData.type !== 'temple' || !locData.godId) return state;
+      if (action.duration <= 0) return state;
+      const godId = locData.godId;
+
+      // Advance clock by prayer duration.
+      const newClock = advanceClock(state.clock, action.duration);
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
+      }
+
+      // Mana restore: per-quarter flat amount.
+      const prayerBal = (balance as Record<string, unknown>).prayer as { manaRestorePerQuarter: number };
+      const quarters = action.duration / 15;
+      const newMana = Math.min(state.maxMana, state.mana + quarters * prayerBal.manaRestorePerQuarter);
+
+      // Create prayer buff (expires after same duration from post-prayer clock).
+      const buff = createPrayerBuff(godId, action.duration, newClock, state.day, state.month, state.year);
+
+      // Replace any existing buff for this god, prune expired.
+      const filteredBuffs = state.prayerBuffs.filter(b => b.godId !== godId);
+      const newBuffs = pruneExpiredBuffs([...filteredBuffs, buff], newClock, state.day, state.month, state.year);
+
+      return {
+        ...state,
+        clock: newClock,
+        mana: newMana,
+        prayerBuffs: newBuffs,
       };
     }
 

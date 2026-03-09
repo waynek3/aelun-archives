@@ -6,7 +6,7 @@ import type { GameAction } from '../../engine/actions';
 import { makeButton, makeHeader, makeDivider, makeInventoryPanel, makeStatsPanel } from '../components';
 import { formatClock, previewClock } from '../../engine/time';
 import { getTravelCostRaw } from '../../systems/travel';
-import { NEIGHBORHOODS, getNeighborhoodBodega, getLocationData } from '../../data/locations';
+import { NEIGHBORHOODS, getNeighborhoodBodega, getNeighborhoodTemples, getLocationData } from '../../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
@@ -60,6 +60,18 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
       'nav-btn',
     );
     screen.appendChild(travelBtn);
+
+    // Sprint 9: temples in this neighborhood
+    const temples = getNeighborhoodTemples(neighborhood.id);
+    for (const temple of temples) {
+      const templeCost = getTravelCostRaw('tower', temple.id);
+      const templeClock = previewClock(state.clock, templeCost);
+      screen.appendChild(makeButton(
+        `${temple.displayName}  \u2192  ${formatClock(templeClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: temple.id }),
+        'nav-btn',
+      ));
+    }
   }
 
   screen.appendChild(makeDivider());
