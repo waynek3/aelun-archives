@@ -1,5 +1,6 @@
 // Pure functions for god affinity manipulation.
-// Handles donations (private/public), prayer buff creation, and buff expiry.
+// Handles donations (private/public), prayer buff creation, buff expiry,
+// and affinity-based payout multiplier calculation (Sprint 10+).
 
 import type { GodId, PrayerBuff } from '../state/types';
 import { getOpposedGod } from '../data/gods';
@@ -98,4 +99,19 @@ export function applyDonation(
   result[godId] = result[godId] + gain;
   result[opposedGod] = result[opposedGod] - loss;
   return result;
+}
+
+// ─── Payout Multiplier (Sprint 10) ──────────────────────────────────────────
+
+// Returns the payout multiplier for a winning symbol based on the player's
+// affinity with the associated god.
+// multiplier = clamp(payoutMultiplierFloor, ∞, 1 + affinity * payoutAffinityScale)
+// e.g. affinity 20, scale 0.05 → 2× payout; affinity −20 → 0× (wiped out)
+export function calcAffinityPayoutMultiplier(
+  affinity: Record<GodId, number>,
+  godId: GodId,
+): number {
+  const score = affinity[godId] ?? 0;
+  const raw = 1 + score * aff.payoutAffinityScale;
+  return Math.max(aff.payoutMultiplierFloor, raw);
 }

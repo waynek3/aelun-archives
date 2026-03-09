@@ -77,7 +77,8 @@ export interface GeneratedTicket {
   isWin: boolean;
   winningSymbolId: number | null;  // null on losses
   matchCount: number;              // highest matching symbol count
-  basePayout: number;              // 0 on loss
+  basePayout: number;              // 0 on loss; pre-affinity payout
+  actualPayout: number;            // 0 until revealed; post-affinity payout applied to cash
   // UI state
   revealed: boolean;               // true when all cells are at state 4
 }

@@ -257,7 +257,7 @@ function populateResult(el: HTMLElement, ticket: GeneratedTicket): void {
       'win-line',
     );
     el.appendChild(matchLine);
-    const payoutLine = makeResultLine(formatNet(ticket.basePayout), 'payout-win');
+    const payoutLine = makeResultLine(formatNet(ticket.actualPayout), 'payout-win');
     el.appendChild(payoutLine);
   } else {
     el.appendChild(makeResultLine('No match.', 'loss-line'));

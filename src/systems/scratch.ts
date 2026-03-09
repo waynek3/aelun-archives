@@ -2,11 +2,12 @@
 // All functions are pure — they take state and return new state/values.
 
 import type { GameState, GeneratedTicket, TicketCell, CellState } from '../state/types';
-import { SYMBOLS } from '../data/symbols';
+import { SYMBOLS, getSymbol } from '../data/symbols';
 import { getTicketType, TICKET_TYPES } from '../data/tickets';
 import { rng, weightedRandom, randInt } from '../util/rng';
 import { calcScratchTimeCost } from '../util/format';
 import { applyChillLoss, applyChillGain } from './chill';
+import { calcAffinityPayoutMultiplier } from './affinity';
 import balance from '../data/balance.json';
 
 // ─── Ticket Generation ────────────────────────────────────────────────────────
@@ -95,6 +96,7 @@ function generateTicket(
         winningSymbolId,
         matchCount,
         basePayout,
+        actualPayout: 0,
         revealed: false,
       },
       s,
@@ -115,6 +117,7 @@ function generateTicket(
         winningSymbolId: null,
         matchCount: 0,
         basePayout: 0,
+        actualPayout: 0,
         revealed: false,
       },
       s,
@@ -243,10 +246,20 @@ export function scratchCell(
   let newTotalScratched = state.totalTicketsScratched;
 
   if (allRevealed) {
-    // Apply payout immediately when ticket is fully revealed.
-    newCash += newTicket.basePayout;
-    newTotalPayout += newTicket.basePayout;
-    newBestSingleWin = Math.max(newBestSingleWin, newTicket.basePayout);
+    // Sprint 10: apply affinity-based payout multiplier on wins.
+    let actualPayout = 0;
+    if (newTicket.isWin && newTicket.winningSymbolId !== null) {
+      const god = getSymbol(newTicket.winningSymbolId).god;
+      const multiplier = calcAffinityPayoutMultiplier(state.affinity, god);
+      actualPayout = Math.round(newTicket.basePayout * multiplier);
+    }
+
+    // Mutate the ticket copy to record actual payout for UI display.
+    newTickets[ticketIdx] = { ...newTicket, actualPayout };
+
+    newCash += actualPayout;
+    newTotalPayout += actualPayout;
+    newBestSingleWin = Math.max(newBestSingleWin, actualPayout);
     newTotalScratched += 1;
 
     // Sprint 5: chill reacts to scratch outcomes.
