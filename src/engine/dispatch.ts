@@ -20,7 +20,7 @@ import { applyManaRestore } from '../systems/mana';
 import { applyChillGain } from '../systems/chill';
 import { getSnack } from '../data/food';
 import { addMultipleItems, canFitItems, removeItem } from '../systems/inventory';
-import { applyDonation, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
+import { applyDonation, applyAffinityDecay, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
 import { getLocationData } from '../data/locations';
 import type { InventoryItem } from '../state/types';
 import balance from '../data/balance.json';
@@ -137,6 +137,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
         clock: balance.dayCycle.wakeTime,
         lastPassoutPenalty: null,
         mana: applyManaRestore(state.mana, manaBalance.sleepManaRestore, state.maxMana),
+        affinity: applyAffinityDecay(state.affinity, 1),
         ...cal,
       };
       return checkRent(nextState);

@@ -104,6 +104,28 @@ export function applyDonation(
   return result;
 }
 
+// ─── Passive Decay (Sprint 12) ───────────────────────────────────────────────
+
+// Apply daily passive decay to all god affinities.
+// Scores move toward zero: positive values decrease, negative values increase.
+// Decay never crosses zero (no sign flip).
+export function applyAffinityDecay(
+  affinity: Record<GodId, number>,
+  daysPassed: number,
+): Record<GodId, number> {
+  const decayAmount = aff.passiveDecayPerDay * daysPassed;
+  const result = { ...affinity };
+  for (const godId of Object.keys(result) as GodId[]) {
+    const score = result[godId];
+    if (score > 0) {
+      result[godId] = Math.max(0, score - decayAmount);
+    } else if (score < 0) {
+      result[godId] = Math.min(0, score + decayAmount);
+    }
+  }
+  return result;
+}
+
 // ─── Payout Multiplier (Sprint 10) ──────────────────────────────────────────
 
 // Returns the payout multiplier for a winning symbol based on the player's

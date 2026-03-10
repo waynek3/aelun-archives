@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   applyDonation,
+  applyAffinityDecay,
   hasPrayerBuff,
   pruneExpiredBuffs,
   createPrayerBuff,
@@ -180,6 +181,54 @@ describe('createPrayerBuff', () => {
     expect(buff.expiresOnDay).toBe(1);
     expect(buff.expiresInMonth).toBe(1);
     expect(buff.expiresInYear).toBe(2);
+  });
+});
+
+describe('applyAffinityDecay', () => {
+  it('decays positive affinity toward zero', () => {
+    const aff = { ...zeroAffinity(), mesin: 10 };
+    const result = applyAffinityDecay(aff, 1);
+    expect(result.mesin).toBe(9.5); // 10 - 0.5
+  });
+
+  it('decays negative affinity toward zero', () => {
+    const aff = { ...zeroAffinity(), gul: -10 };
+    const result = applyAffinityDecay(aff, 1);
+    expect(result.gul).toBe(-9.5); // -10 + 0.5
+  });
+
+  it('does not change zero affinity', () => {
+    const result = applyAffinityDecay(zeroAffinity(), 1);
+    for (const godId of ALL_GOD_IDS) {
+      expect(result[godId]).toBe(0);
+    }
+  });
+
+  it('does not cross zero from positive', () => {
+    const aff = { ...zeroAffinity(), mesin: 0.3 };
+    const result = applyAffinityDecay(aff, 1); // decay 0.5 > 0.3
+    expect(result.mesin).toBe(0);
+  });
+
+  it('does not cross zero from negative', () => {
+    const aff = { ...zeroAffinity(), gul: -0.3 };
+    const result = applyAffinityDecay(aff, 1);
+    expect(result.gul).toBe(0);
+  });
+
+  it('applies multi-day decay correctly', () => {
+    const aff = { ...zeroAffinity(), mesin: 10 };
+    const result = applyAffinityDecay(aff, 3);
+    expect(result.mesin).toBe(8.5); // 10 - (0.5 * 3)
+  });
+
+  it('decays all gods independently', () => {
+    const aff = { ...zeroAffinity(), mesin: 10, gul: -5, ara: 2 };
+    const result = applyAffinityDecay(aff, 1);
+    expect(result.mesin).toBe(9.5);
+    expect(result.gul).toBe(-4.5);
+    expect(result.ara).toBe(1.5);
+    expect(result.klossa).toBe(0);
   });
 });
 
