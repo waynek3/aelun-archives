@@ -28,4 +28,6 @@ export type GameAction =
   // Sprint 9: temple actions (god inferred from currentLocation).
   | { type: 'DONATE_PRIVATE'; amount: number }
   | { type: 'DONATE_PUBLIC'; amount: number }
-  | { type: 'PRAY'; duration: number };
+  | { type: 'PRAY'; duration: number }
+  // Sprint 11: set birthday month during new-run setup.
+  | { type: 'SET_BIRTHDAY'; month: number };

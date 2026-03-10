@@ -93,7 +93,7 @@ export interface ScratchSessionState {
 
 // ─── Game State ───────────────────────────────────────────────────────────────
 
-export type Phase = 'playing' | 'scratching' | 'passedout' | 'game_over';
+export type Phase = 'setup' | 'playing' | 'scratching' | 'passedout' | 'game_over';
 
 export interface GameState {
   // ── Core ──
@@ -133,6 +133,9 @@ export interface GameState {
   // ── God Affinity (Sprint 9+) ──
   affinity: Record<GodId, number>;    // affinity score per god, starts at 0
   prayerBuffs: PrayerBuff[];          // active timed prayer buffs
+
+  // ── Birthday (Sprint 11+) ──
+  birthdayMonth: number;  // 1–12; set during new-run setup; used for Birthday event (Sprint 23+)
 
   // ── Scratch session (active during 'scratching' phase) ──
   scratchSession: ScratchSessionState | null;

@@ -11,11 +11,12 @@ import { renderTower } from './screens/tower';
 import { renderTemple } from './screens/temple';
 import { renderPassout } from './screens/passout';
 import { renderGameOver } from './screens/game-over';
+import { renderSetup } from './screens/setup';
 import { getLocationType } from '../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
-type ScreenId = 'tower' | 'bodega' | 'temple' | 'scratch' | 'passout' | 'game_over' | 'none';
+type ScreenId = 'setup' | 'tower' | 'bodega' | 'temple' | 'scratch' | 'passout' | 'game_over' | 'none';
 let currentScreen: ScreenId = 'none';
 
 // The last action that triggered a render — used to decide partial vs full update.
@@ -54,6 +55,7 @@ function ensureLayout(container: HTMLElement): { hud: HTMLElement; screen: HTMLE
 // ─── Screen Routing ───────────────────────────────────────────────────────────
 
 function getTargetScreen(state: GameState): ScreenId {
+  if (state.phase === 'setup') return 'setup';
   if (state.phase === 'game_over') return 'game_over';
   if (state.phase === 'passedout') return 'passout';
   if (state.phase === 'scratching' && state.scratchSession !== null) return 'scratch';
@@ -78,7 +80,10 @@ export function render(
 
   const targetScreen = getTargetScreen(state);
 
-  if (targetScreen === 'scratch') {
+  if (targetScreen === 'setup') {
+    currentScreen = 'setup';
+    renderSetup(state, screen, dispatch);
+  } else if (targetScreen === 'scratch') {
     if (currentScreen !== 'scratch') {
       // Full render on screen transition.
       currentScreen = 'scratch';
