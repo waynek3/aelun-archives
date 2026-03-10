@@ -3,7 +3,7 @@
 // and affinity-based payout multiplier calculation (Sprint 10+).
 
 import type { GodId, PrayerBuff } from '../state/types';
-import { getOpposedGod } from '../data/gods';
+import { getOpposedGod, getGod } from '../data/gods';
 import balance from '../data/balance.json';
 
 const aff = balance.affinity;
@@ -92,7 +92,10 @@ export function applyDonation(
   const hasTargetBuff = hasPrayerBuff(buffs, godId, clock, day, month, year);
   const hasOpposedBuff = hasPrayerBuff(buffs, opposedGod, clock, day, month, year);
 
-  const gain = hasTargetBuff ? baseChange * aff.prayerBuffMultiplier : baseChange;
+  // Sprint 11: strong month doubles gain (but not loss) for the target god.
+  const isStrongMonth = getGod(godId).strongMonths.includes(month);
+  const strongMultiplier = isStrongMonth ? aff.strongMonthMultiplier : 1;
+  const gain = baseChange * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMultiplier;
   const loss = hasOpposedBuff ? baseChange * aff.prayerDebuffMultiplier : baseChange;
 
   const result = { ...affinity };

@@ -38,6 +38,15 @@ export function renderTemple(state: GameState, container: HTMLElement, dispatch:
   subtitle.className = 'temple-subtitle';
   subtitle.textContent = `Dedicated to ${god.name}`;
   screen.appendChild(subtitle);
+
+  // Sprint 11: show strong month indicator when current month is god's strong month.
+  if (god.strongMonths.includes(state.month)) {
+    const strongLine = document.createElement('p');
+    strongLine.className = 'temple-strong-month';
+    strongLine.textContent = '\u2605 STRONG MONTH \u2014 AFFINITY GAINS DOUBLED';
+    screen.appendChild(strongLine);
+  }
+
   screen.appendChild(makeDivider());
 
   // ── Cash ──

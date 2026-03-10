@@ -166,6 +166,14 @@ function applyAction(state: GameState, action: GameAction): GameState {
       };
     }
 
+    // ── Sprint 11 ─────────────────────────────────────────────────────────────
+
+    case 'SET_BIRTHDAY': {
+      if (state.phase !== 'setup') return state;
+      if (action.month < 1 || action.month > 12) return state;
+      return { ...state, birthdayMonth: action.month, phase: 'playing' };
+    }
+
     // ── Sprint 9 ──────────────────────────────────────────────────────────────
 
     case 'DONATE_PRIVATE': {

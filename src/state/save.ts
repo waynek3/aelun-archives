@@ -73,6 +73,11 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
       prayerBuffs: [],
     };
   },
+  // Sprint 9 → Sprint 11: add birthdayMonth (default 1 = January for existing runs).
+  8: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return { ...state, birthdayMonth: 1 };
+  },
 };
 
 function migrate(data: SaveData): GameState {
