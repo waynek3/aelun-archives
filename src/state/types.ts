@@ -11,6 +11,16 @@ export type StrengthId = 'weak' | 'mid' | 'strong';
 
 export type ColorScheme = 'blue' | 'green' | 'orange';
 
+// Sprint 13: furniture types
+export type FurnitureType = 'bed' | 'lab_table' | 'bong';
+
+export interface FurnitureItem {
+  type: FurnitureType;
+  id: string;        // e.g. 'bed_basic', 'bed_standard', 'bong'
+  name: string;      // display name
+  quality: number;   // 1-3 for beds; 1 for lab table and bong
+}
+
 // Sprint 7: food quality descriptors
 export type FoodDescriptor = 'greasy' | 'salty' | 'sugary' | 'bland' | 'healthy' | 'gourmet';
 
@@ -45,7 +55,14 @@ export type LocationId =
   | 'center_city_temple_beroan'
   | 'center_city_temple_azorius'
   | 'downtown_temple_marena'
-  | 'university_heights_temple_mesin';
+  | 'university_heights_temple_mesin'
+  // Sprint 13: Furniture stores
+  | 'the_skids_furniture'
+  | 'the_burbs_furniture'
+  | 'richville_furniture'
+  | 'center_city_furniture'
+  | 'downtown_furniture'
+  | 'university_heights_furniture';
 
 // Sprint 9: prayer buff
 export interface PrayerBuff {
@@ -133,6 +150,9 @@ export interface GameState {
   // ── God Affinity (Sprint 9+) ──
   affinity: Record<GodId, number>;    // affinity score per god, starts at 0
   prayerBuffs: PrayerBuff[];          // active timed prayer buffs
+
+  // ── Furniture (Sprint 13+) ──
+  furniture: FurnitureItem[];  // max 10 slots
 
   // ── Birthday (Sprint 11+) ──
   birthdayMonth: number;  // 1–12; set during new-run setup; used for Birthday event (Sprint 23+)

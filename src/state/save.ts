@@ -78,6 +78,14 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
     const state = s as Record<string, unknown>;
     return { ...state, birthdayMonth: 1 };
   },
+  // Sprint 11 → Sprint 13: add furniture with one basic bed.
+  9: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return {
+      ...state,
+      furniture: [{ type: 'bed', id: 'bed_basic', name: 'Dusty Mattress', quality: 1 }],
+    };
+  },
 };
 
 function migrate(data: SaveData): GameState {

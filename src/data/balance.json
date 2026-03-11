@@ -103,6 +103,20 @@
     "decayPerDay": 0.1
   },
 
+  "furniture": {
+    "maxSlots": 10,
+    "beds": {
+      "bed_basic":    { "cost": 0,   "sleepMana": 10, "sleepChill": 5 },
+      "bed_standard": { "cost": 150, "sleepMana": 15, "sleepChill": 15 },
+      "bed_deluxe":   { "cost": 500, "sleepMana": 20, "sleepChill": 25 }
+    },
+    "lab_table": { "cost": 200 },
+    "bong": {
+      "cost": 50,
+      "breakChance": 0.10
+    }
+  },
+
   "stats": {
     "displayMax": {
       "intelligence": 20,

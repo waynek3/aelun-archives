@@ -1,7 +1,7 @@
 import type { GameState } from './types';
 import balance from '../data/balance.json';
 
-export const SAVE_VERSION = 9;
+export const SAVE_VERSION = 10;
 
 export function createInitialState(): GameState {
   return {
@@ -29,6 +29,8 @@ export function createInitialState(): GameState {
     wizardFame: balance.starting.wizardFame,
     relaxationRate: balance.starting.relaxationRate,
     restingRelaxation: balance.starting.restingRelaxation,
+    // Sprint 13: furniture (start with one basic bed)
+    furniture: [{ type: 'bed' as const, id: 'bed_basic', name: 'Dusty Mattress', quality: 1 }],
     // Sprint 11: birthday month (set by player during setup)
     birthdayMonth: 1,
     // Sprint 9: god affinity

@@ -30,4 +30,8 @@ export type GameAction =
   | { type: 'DONATE_PUBLIC'; amount: number }
   | { type: 'PRAY'; duration: number }
   // Sprint 11: set birthday month during new-run setup.
-  | { type: 'SET_BIRTHDAY'; month: number };
+  | { type: 'SET_BIRTHDAY'; month: number }
+  // Sprint 13: furniture actions.
+  | { type: 'BUY_FURNITURE'; furnitureId: string }
+  | { type: 'USE_BONG'; furnitureIndex: number }
+  | { type: 'RECYCLE_FURNITURE'; furnitureIndex: number };
