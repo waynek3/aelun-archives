@@ -6,7 +6,7 @@ import type { NeighborhoodId, LocationId, GodId } from '../state/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type LocationType = 'tower' | 'bodega' | 'temple';
+export type LocationType = 'tower' | 'bodega' | 'temple' | 'furniture_store';
 
 export interface NeighborhoodData {
   id: NeighborhoodId;
@@ -54,6 +54,13 @@ export const LOCATIONS: LocationData[] = [
   { id: 'center_city_temple_azorius',      neighborhood: 'center_city',        type: 'temple', displayName: 'AZORIUS GATE',          godId: 'azorius' },
   { id: 'downtown_temple_marena',          neighborhood: 'downtown',           type: 'temple', displayName: "MARENA'S DEPTHS",       godId: 'marena' },
   { id: 'university_heights_temple_mesin', neighborhood: 'university_heights', type: 'temple', displayName: "MESIN'S LIGHT",         godId: 'mesin' },
+  // Sprint 13: Furniture stores
+  { id: 'the_skids_furniture',            neighborhood: 'the_skids',          type: 'furniture_store', displayName: 'JUNK FURNITURE' },
+  { id: 'the_burbs_furniture',            neighborhood: 'the_burbs',          type: 'furniture_store', displayName: 'HOME DEPOT WIZARD' },
+  { id: 'richville_furniture',            neighborhood: 'richville',          type: 'furniture_store', displayName: 'FINE FURNISHINGS' },
+  { id: 'center_city_furniture',          neighborhood: 'center_city',        type: 'furniture_store', displayName: 'ARTISAN DECOR' },
+  { id: 'downtown_furniture',             neighborhood: 'downtown',           type: 'furniture_store', displayName: 'OFFICE SURPLUS' },
+  { id: 'university_heights_furniture',   neighborhood: 'university_heights', type: 'furniture_store', displayName: 'DORM LIQUIDATORS' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -92,6 +99,15 @@ export function getNeighborhoodTemples(neighborhoodId: NeighborhoodId): Location
   return LOCATIONS.filter(
     l => l.neighborhood === neighborhoodId && l.type === 'temple',
   );
+}
+
+// Returns the furniture store for a given neighborhood.
+export function getNeighborhoodFurnitureStore(neighborhoodId: NeighborhoodId): LocationId {
+  const loc = LOCATIONS.find(
+    l => l.neighborhood === neighborhoodId && l.type === 'furniture_store',
+  );
+  if (!loc) throw new Error(`No furniture store in neighborhood: ${neighborhoodId}`);
+  return loc.id;
 }
 
 // Returns the god a temple is dedicated to.

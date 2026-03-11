@@ -22,7 +22,10 @@ import { getSnack } from '../data/food';
 import { addMultipleItems, canFitItems, removeItem } from '../systems/inventory';
 import { applyDonation, applyAffinityDecay, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
 import { getLocationData } from '../data/locations';
-import type { InventoryItem } from '../state/types';
+import type { FurnitureItem, InventoryItem } from '../state/types';
+import { getBed, addFurniture, removeFurniture, replaceBed } from '../systems/furniture';
+import { getFurnitureDef, getBedSleepRestore } from '../data/furniture';
+import { rng } from '../util/rng';
 import balance from '../data/balance.json';
 
 export type RenderFn = (state: GameState) => void;
@@ -130,13 +133,17 @@ function applyAction(state: GameState, action: GameAction): GameState {
 
     case 'SLEEP': {
       if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      // Sprint 13: require a bed to sleep.
+      const bed = getBed(state.furniture);
+      if (!bed) return state;
+      const bedRestore = getBedSleepRestore(bed.id);
       const cal = advanceDay(state.day, state.month, state.year);
-      const manaBalance = balance.mana as Record<string, number>;
       const nextState: GameState = {
         ...state,
         clock: balance.dayCycle.wakeTime,
         lastPassoutPenalty: null,
-        mana: applyManaRestore(state.mana, manaBalance.sleepManaRestore, state.maxMana),
+        mana: applyManaRestore(state.mana, bedRestore.sleepMana, state.maxMana),
+        chill: applyChillGain(state.chill, bedRestore.sleepChill),
         affinity: applyAffinityDecay(state.affinity, 1),
         ...cal,
       };
@@ -240,6 +247,69 @@ function applyAction(state: GameState, action: GameAction): GameState {
         clock: newClock,
         mana: newMana,
         prayerBuffs: newBuffs,
+      };
+    }
+
+    // ── Sprint 13 ─────────────────────────────────────────────────────────────
+
+    case 'BUY_FURNITURE': {
+      if (state.phase !== 'playing') return state;
+      const locData = getLocationData(state.currentLocation);
+      if (locData.type !== 'furniture_store') return state;
+      const def = getFurnitureDef(action.furnitureId);
+      if (state.cash < def.cost) return state;
+
+      const furnitureBalance = balance.furniture as { maxSlots: number };
+      const item: FurnitureItem = {
+        type: def.type,
+        id: def.id,
+        name: def.name,
+        quality: def.quality,
+      };
+
+      // Beds swap: replace existing bed instead of adding.
+      if (def.type === 'bed') {
+        const existingBed = getBed(state.furniture);
+        if (existingBed && existingBed.quality >= def.quality) return state; // can't downgrade
+        const newFurniture = existingBed
+          ? replaceBed(state.furniture, item)
+          : addFurniture(state.furniture, item, furnitureBalance.maxSlots);
+        if (!newFurniture) return state;
+        return { ...state, cash: state.cash - def.cost, furniture: newFurniture };
+      }
+
+      // Non-bed: normal slot check.
+      const newFurniture = addFurniture(state.furniture, item, furnitureBalance.maxSlots);
+      if (!newFurniture) return state;
+      return { ...state, cash: state.cash - def.cost, furniture: newFurniture };
+    }
+
+    case 'USE_BONG': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      const item = state.furniture[action.furnitureIndex];
+      if (!item || item.type !== 'bong') return state;
+
+      const bongBalance = (balance.furniture as { bong: { breakChance: number } }).bong;
+      const chillRestore = (balance.chill as { bongRestoreAmount: number }).bongRestoreAmount;
+
+      // Roll for break.
+      const [roll, nextSeed] = rng(state.rngSeed);
+      const broke = roll < bongBalance.breakChance;
+
+      return {
+        ...state,
+        chill: applyChillGain(state.chill, chillRestore),
+        furniture: broke ? removeFurniture(state.furniture, action.furnitureIndex) : state.furniture,
+        rngSeed: nextSeed,
+      };
+    }
+
+    case 'RECYCLE_FURNITURE': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (action.furnitureIndex < 0 || action.furnitureIndex >= state.furniture.length) return state;
+      return {
+        ...state,
+        furniture: removeFurniture(state.furniture, action.furnitureIndex),
       };
     }
 

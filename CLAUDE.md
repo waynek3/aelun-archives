@@ -15,7 +15,7 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 ## Implementation Notes (for sprint continuity)
 
 ### Save System
-- Current `SAVE_VERSION`: 6 (as of Sprint 7)
+- Current `SAVE_VERSION`: 10 (as of Sprint 13)
 - Migrations are in `src/state/save.ts`, keyed by source version (e.g. `3:` migrates v3→v4)
 - Every sprint that adds fields to `GameState` must bump `SAVE_VERSION` in `src/state/initial.ts` and add a migration
 
@@ -71,6 +71,24 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 - Actions: `DONATE_PRIVATE`, `DONATE_PUBLIC`, `PRAY` — god inferred from `state.currentLocation`
 - Temple screen in `src/ui/screens/temple.ts`; tower/bodega travel sections include temple buttons
 - No affinity effects on scratchers yet (Sprint 10), no strong month multipliers (Sprint 11), no passive decay (Sprint 12)
+
+### Wizard Tower & Furniture (Sprint 13)
+- Current `SAVE_VERSION`: 10
+- `furniture: FurnitureItem[]` field on GameState (max 10 slots, from `balance.furniture.maxSlots`)
+- `FurnitureItem` interface: `{ type: FurnitureType, id: string, name: string, quality: number }`
+- `FurnitureType = 'bed' | 'lab_table' | 'bong'`
+- Furniture catalog in `src/data/furniture.ts`: 3 bed tiers, 1 lab table, 1 bong
+- Pure functions in `src/systems/furniture.ts`: `getBed()`, `addFurniture()`, `removeFurniture()`, `replaceBed()`, `findBong()`, `hasLabTable()`
+- Bed quality determines sleep mana/chill restore (values in `balance.furniture.beds[bedId]`)
+- Beds swap on upgrade: buying a better bed replaces the existing one (only 1 bed at a time)
+- Bong restores chill (`balance.chill.bongRestoreAmount`) with break chance (`balance.furniture.bong.breakChance`); broken bong is silently removed (Random Events in Sprint 23)
+- Lab Table is placeholder only — no interaction until Sprint 20
+- `LocationType` now includes `'furniture_store'`; 6 furniture stores (one per neighborhood)
+- Actions: `BUY_FURNITURE`, `USE_BONG`, `RECYCLE_FURNITURE`
+- Furniture store screen in `src/ui/screens/furniture-store.ts`
+- Tower screen shows furniture panel with USE (bong) and RECYCLE buttons; sleep gated on having a bed
+- Tower starts with one basic Bed ("Dusty Mattress", quality 1)
+- No Crystal Ball furniture yet (Sprint 19), no Wizard Projects via Lab Table yet (Sprint 20)
 
 ## Stack
 

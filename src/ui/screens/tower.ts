@@ -1,12 +1,21 @@
 // Wizard Tower screen — home base. Player wakes here each morning.
 // Actions: travel to any neighborhood's store, sleep (end the day).
+// Sprint 13: furniture panel with bong USE / recycle buttons.
 
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
 import { makeButton, makeHeader, makeDivider, makeInventoryPanel, makeStatsPanel } from '../components';
 import { formatClock, previewClock } from '../../engine/time';
 import { getTravelCostRaw } from '../../systems/travel';
-import { NEIGHBORHOODS, getNeighborhoodBodega, getNeighborhoodTemples, getLocationData } from '../../data/locations';
+import {
+  NEIGHBORHOODS,
+  getNeighborhoodBodega,
+  getNeighborhoodTemples,
+  getNeighborhoodFurnitureStore,
+  getLocationData,
+} from '../../data/locations';
+import { getBed } from '../../systems/furniture';
+import balance from '../../data/balance.json';
 
 type Dispatch = (action: GameAction) => void;
 
@@ -35,6 +44,10 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
       dispatch({ type: 'CONSUME_SNACK', slotIndex });
     }),
   );
+
+  // ── Furniture (Sprint 13) ──
+  const furnitureMax = (balance.furniture as { maxSlots: number }).maxSlots;
+  screen.appendChild(makeFurniturePanel(state, furnitureMax, dispatch));
 
   screen.appendChild(makeDivider());
 
@@ -72,16 +85,35 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
         'nav-btn',
       ));
     }
+
+    // Sprint 13: furniture store in this neighborhood
+    const furnitureStoreId = getNeighborhoodFurnitureStore(neighborhood.id);
+    const furnitureStoreData = getLocationData(furnitureStoreId);
+    const fsCost = getTravelCostRaw('tower', furnitureStoreId);
+    const fsClock = previewClock(state.clock, fsCost);
+    screen.appendChild(makeButton(
+      `${furnitureStoreData.displayName}  \u2192  ${formatClock(fsClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: furnitureStoreId }),
+      'nav-btn',
+    ));
   }
 
   screen.appendChild(makeDivider());
 
   // ── Sleep ──
+  const bed = getBed(state.furniture);
+  if (!bed) {
+    const warning = document.createElement('p');
+    warning.className = 'inv-warning';
+    warning.textContent = '! You need a bed to sleep !';
+    screen.appendChild(warning);
+  }
   const sleepBtn = makeButton(
     `SLEEP  (tomorrow: ${formatClock(600)})`,
     () => dispatch({ type: 'SLEEP' }),
     'nav-btn',
   );
+  if (!bed) sleepBtn.disabled = true;
   screen.appendChild(sleepBtn);
 
   // ── Theme toggle ──
@@ -101,4 +133,59 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
   screen.appendChild(themeRow);
 
   container.appendChild(screen);
+}
+
+// ── Furniture Panel ──────────────────────────────────────────────────────────
+
+function makeFurniturePanel(
+  state: GameState,
+  maxSlots: number,
+  dispatch: Dispatch,
+): HTMLElement {
+  const panel = document.createElement('div');
+  panel.className = 'furniture-panel';
+
+  panel.appendChild(makeHeader(`FURNITURE (${state.furniture.length}/${maxSlots})`));
+
+  if (state.furniture.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'inv-empty';
+    empty.textContent = '[ empty tower ]';
+    panel.appendChild(empty);
+    return panel;
+  }
+
+  for (let i = 0; i < state.furniture.length; i++) {
+    const item = state.furniture[i];
+    const row = document.createElement('div');
+    row.className = 'furniture-row';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'furniture-name';
+
+    if (item.type === 'lab_table') {
+      nameEl.textContent = `${item.name}  (Gathering dust...)`;
+    } else {
+      nameEl.textContent = item.name;
+    }
+    row.appendChild(nameEl);
+
+    // Bong: USE button
+    if (item.type === 'bong') {
+      const useBtn = makeButton('[USE]', () => {
+        dispatch({ type: 'USE_BONG', furnitureIndex: i });
+      }, 'furniture-btn');
+      row.appendChild(useBtn);
+    }
+
+    // All items: RECYCLE button
+    const recycleBtn = makeButton('[RECYCLE]', () => {
+      dispatch({ type: 'RECYCLE_FURNITURE', furnitureIndex: i });
+    }, 'furniture-btn');
+    row.appendChild(recycleBtn);
+
+    panel.appendChild(row);
+  }
+
+  return panel;
 }
