@@ -34,4 +34,10 @@ export type GameAction =
   // Sprint 13: furniture actions.
   | { type: 'BUY_FURNITURE'; furnitureId: string }
   | { type: 'USE_BONG'; furnitureIndex: number }
-  | { type: 'RECYCLE_FURNITURE'; furnitureIndex: number };
+  | { type: 'RECYCLE_FURNITURE'; furnitureIndex: number }
+  // Sprint 14: university & spellbook actions.
+  | { type: 'ATTEND_CLASS'; spellId: string }
+  | { type: 'LEARN_BOOKBINDING' }
+  | { type: 'ADD_SPELL_TO_BOOK'; spellId: string }
+  | { type: 'REMOVE_SPELL_FROM_BOOK'; spellId: string }
+  | { type: 'CAST_SPELL'; spellId: string };

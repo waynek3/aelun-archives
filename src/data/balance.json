@@ -125,5 +125,20 @@
       "relaxationRate": 5.0,
       "restingRelaxation": 100
     }
+  },
+
+  "university": {
+    "openTime": 600,
+    "closeTime": 960,
+    "classesPerDay": 3,
+    "bookbindingCost": 75,
+    "bookbindingTime": 30,
+    "bookbindingMana": 8,
+    "intelligenceSpeedFactor": 0.05
+  },
+
+  "spellbook": {
+    "addTimeMultiplier": 3,
+    "removeTimeMultiplier": 0.5
   }
 }

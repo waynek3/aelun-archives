@@ -86,6 +86,15 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
       furniture: [{ type: 'bed', id: 'bed_basic', name: 'Dusty Mattress', quality: 1 }],
     };
   },
+  // Sprint 13 → Sprint 14: add spellbook fields.
+  10: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return {
+      ...state,
+      knownSpells: [],
+      equippedSpells: [],
+    };
+  },
 };
 
 function migrate(data: SaveData): GameState {

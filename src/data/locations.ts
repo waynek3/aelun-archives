@@ -6,7 +6,7 @@ import type { NeighborhoodId, LocationId, GodId } from '../state/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type LocationType = 'tower' | 'bodega' | 'temple' | 'furniture_store';
+export type LocationType = 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'university';
 
 export interface NeighborhoodData {
   id: NeighborhoodId;
@@ -61,6 +61,8 @@ export const LOCATIONS: LocationData[] = [
   { id: 'center_city_furniture',          neighborhood: 'center_city',        type: 'furniture_store', displayName: 'ARTISAN DECOR' },
   { id: 'downtown_furniture',             neighborhood: 'downtown',           type: 'furniture_store', displayName: 'OFFICE SURPLUS' },
   { id: 'university_heights_furniture',   neighborhood: 'university_heights', type: 'furniture_store', displayName: 'DORM LIQUIDATORS' },
+  // Sprint 14: University
+  { id: 'university_heights_university', neighborhood: 'university_heights', type: 'university',       displayName: 'UNIVERSITY' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -108,6 +110,14 @@ export function getNeighborhoodFurnitureStore(neighborhoodId: NeighborhoodId): L
   );
   if (!loc) throw new Error(`No furniture store in neighborhood: ${neighborhoodId}`);
   return loc.id;
+}
+
+// Returns the university in a neighborhood, or null if none.
+export function getNeighborhoodUniversity(neighborhoodId: NeighborhoodId): LocationId | null {
+  const loc = LOCATIONS.find(
+    l => l.neighborhood === neighborhoodId && l.type === 'university',
+  );
+  return loc ? loc.id : null;
 }
 
 // Returns the god a temple is dedicated to.
