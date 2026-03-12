@@ -25,6 +25,18 @@ import { getLocationData } from '../data/locations';
 import type { FurnitureItem, InventoryItem } from '../state/types';
 import { getBed, addFurniture, removeFurniture, replaceBed } from '../systems/furniture';
 import { getFurnitureDef, getBedSleepRestore } from '../data/furniture';
+import { getSpellDef, BOOKBINDING_CLASS } from '../data/spells';
+import {
+  calcLearningTime,
+  isSpellKnown,
+  learnSpell,
+  canAddToBook,
+  addToBook,
+  removeFromBook,
+  calcAddToBookTime,
+  calcRemoveFromBookTime,
+} from '../systems/spellbook';
+import { applyManaSpend } from '../systems/mana';
 import { rng } from '../util/rng';
 import balance from '../data/balance.json';
 
@@ -310,6 +322,136 @@ function applyAction(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         furniture: removeFurniture(state.furniture, action.furnitureIndex),
+      };
+    }
+
+    // ── Sprint 14 ─────────────────────────────────────────────────────────────
+
+    case 'ATTEND_CLASS': {
+      if (state.phase !== 'playing') return state;
+      const locData = getLocationData(state.currentLocation);
+      if (locData.type !== 'university') return state;
+
+      // Check university hours.
+      const uniBal = (balance as Record<string, unknown>).university as {
+        openTime: number; closeTime: number;
+      };
+      if (state.clock < uniBal.openTime || state.clock >= uniBal.closeTime) return state;
+
+      // Already known?
+      if (isSpellKnown(state.knownSpells, action.spellId)) return state;
+
+      const spell = getSpellDef(action.spellId);
+      if (state.cash < spell.learningCost) return state;
+      if (state.mana < spell.learningMana) return state;
+
+      // Calculate time and check it fits before closing.
+      const learnTime = calcLearningTime(spell.learningTime, state.intelligence);
+      const newClock = advanceClock(state.clock, learnTime);
+
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
+      }
+
+      return {
+        ...state,
+        clock: newClock,
+        cash: state.cash - spell.learningCost,
+        mana: applyManaSpend(state.mana, spell.learningMana),
+        knownSpells: learnSpell(state.knownSpells, action.spellId),
+      };
+    }
+
+    case 'LEARN_BOOKBINDING': {
+      if (state.phase !== 'playing') return state;
+      const locData = getLocationData(state.currentLocation);
+      if (locData.type !== 'university') return state;
+
+      const uniBal = (balance as Record<string, unknown>).university as {
+        openTime: number; closeTime: number;
+      };
+      if (state.clock < uniBal.openTime || state.clock >= uniBal.closeTime) return state;
+
+      if (state.cash < BOOKBINDING_CLASS.cost) return state;
+      if (state.mana < BOOKBINDING_CLASS.mana) return state;
+
+      const learnTime = calcLearningTime(BOOKBINDING_CLASS.baseTime, state.intelligence);
+      const newClock = advanceClock(state.clock, learnTime);
+
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
+      }
+
+      return {
+        ...state,
+        clock: newClock,
+        cash: state.cash - BOOKBINDING_CLASS.cost,
+        mana: applyManaSpend(state.mana, BOOKBINDING_CLASS.mana),
+        bookbinding: state.bookbinding + 1,
+      };
+    }
+
+    case 'ADD_SPELL_TO_BOOK': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (!isSpellKnown(state.knownSpells, action.spellId)) return state;
+      if (!canAddToBook(state.equippedSpells, state.bookbinding)) return state;
+
+      const spell = getSpellDef(action.spellId);
+      const timeCost = calcAddToBookTime(spell.castingTime);
+      const newClock = advanceClock(state.clock, timeCost);
+
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
+      }
+
+      const newEquipped = addToBook(state.equippedSpells, action.spellId, state.bookbinding);
+      if (!newEquipped) return state;
+
+      return {
+        ...state,
+        clock: newClock,
+        equippedSpells: newEquipped,
+      };
+    }
+
+    case 'REMOVE_SPELL_FROM_BOOK': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (!state.equippedSpells.includes(action.spellId)) return state;
+
+      const spell = getSpellDef(action.spellId);
+      const timeCost = calcRemoveFromBookTime(spell.castingTime);
+      const newClock = advanceClock(state.clock, timeCost);
+
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
+      }
+
+      return {
+        ...state,
+        clock: newClock,
+        equippedSpells: removeFromBook(state.equippedSpells, action.spellId),
+      };
+    }
+
+    case 'CAST_SPELL': {
+      if (state.phase !== 'playing') return state;
+      if (!state.equippedSpells.includes(action.spellId)) return state;
+
+      const spell = getSpellDef(action.spellId);
+      if (state.mana < spell.manaCost) return state;
+
+      // Casting time snapped to :15.
+      const newClock = advanceClock(state.clock, spell.castingTime);
+
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
+      }
+
+      // Sprint 14: no effects — just costs mana and time.
+      return {
+        ...state,
+        clock: newClock,
+        mana: applyManaSpend(state.mana, spell.manaCost),
       };
     }
 

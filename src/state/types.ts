@@ -62,7 +62,9 @@ export type LocationId =
   | 'richville_furniture'
   | 'center_city_furniture'
   | 'downtown_furniture'
-  | 'university_heights_furniture';
+  | 'university_heights_furniture'
+  // Sprint 14: University
+  | 'university_heights_university';
 
 // Sprint 9: prayer buff
 export interface PrayerBuff {
@@ -153,6 +155,10 @@ export interface GameState {
 
   // ── Furniture (Sprint 13+) ──
   furniture: FurnitureItem[];  // max 10 slots
+
+  // ── Spellbook (Sprint 14+) ──
+  knownSpells: string[];       // spell IDs learned at university
+  equippedSpells: string[];    // spell IDs in spellbook (bounded by bookbinding)
 
   // ── Birthday (Sprint 11+) ──
   birthdayMonth: number;  // 1–12; set during new-run setup; used for Birthday event (Sprint 23+)

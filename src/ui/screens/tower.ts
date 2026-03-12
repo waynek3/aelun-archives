@@ -1,6 +1,7 @@
 // Wizard Tower screen — home base. Player wakes here each morning.
 // Actions: travel to any neighborhood's store, sleep (end the day).
 // Sprint 13: furniture panel with bong USE / recycle buttons.
+// Sprint 14: spellbook panel with CAST / ADD / REMOVE.
 
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
@@ -12,9 +13,12 @@ import {
   getNeighborhoodBodega,
   getNeighborhoodTemples,
   getNeighborhoodFurnitureStore,
+  getNeighborhoodUniversity,
   getLocationData,
 } from '../../data/locations';
 import { getBed } from '../../systems/furniture';
+import { getSpellDef } from '../../data/spells';
+import { canAddToBook } from '../../systems/spellbook';
 import balance from '../../data/balance.json';
 
 type Dispatch = (action: GameAction) => void;
@@ -44,6 +48,9 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
       dispatch({ type: 'CONSUME_SNACK', slotIndex });
     }),
   );
+
+  // ── Spellbook (Sprint 14) ──
+  screen.appendChild(makeSpellbookPanel(state, dispatch));
 
   // ── Furniture (Sprint 13) ──
   const furnitureMax = (balance.furniture as { maxSlots: number }).maxSlots;
@@ -96,6 +103,19 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
       () => dispatch({ type: 'TRAVEL', destination: furnitureStoreId }),
       'nav-btn',
     ));
+
+    // Sprint 14: university in this neighborhood (only university_heights has one)
+    const uniId = getNeighborhoodUniversity(neighborhood.id);
+    if (uniId) {
+      const uniData = getLocationData(uniId);
+      const uniCost = getTravelCostRaw('tower', uniId);
+      const uniClock = previewClock(state.clock, uniCost);
+      screen.appendChild(makeButton(
+        `${uniData.displayName}  \u2192  ${formatClock(uniClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: uniId }),
+        'nav-btn',
+      ));
+    }
   }
 
   screen.appendChild(makeDivider());
@@ -133,6 +153,83 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
   screen.appendChild(themeRow);
 
   container.appendChild(screen);
+}
+
+// ── Spellbook Panel (Sprint 14) ──────────────────────────────────────────────
+
+function makeSpellbookPanel(state: GameState, dispatch: Dispatch): HTMLElement {
+  const panel = document.createElement('div');
+  panel.className = 'spellbook-panel';
+
+  panel.appendChild(makeHeader(`SPELLBOOK (${state.equippedSpells.length}/${state.bookbinding})`));
+
+  if (state.knownSpells.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'inv-empty';
+    empty.textContent = '[ no spells known ]';
+    panel.appendChild(empty);
+    return panel;
+  }
+
+  // Equipped spells: CAST + REMOVE buttons.
+  for (const spellId of state.equippedSpells) {
+    const spell = getSpellDef(spellId);
+    const row = document.createElement('div');
+    row.className = 'spell-row';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'spell-name';
+    nameEl.textContent = spell.name;
+    row.appendChild(nameEl);
+
+    const castBtn = makeButton('[CAST]', () => {
+      dispatch({ type: 'CAST_SPELL', spellId });
+    }, 'spell-btn');
+    if (state.mana < spell.manaCost) castBtn.disabled = true;
+    row.appendChild(castBtn);
+
+    const removeBtn = makeButton('[REMOVE]', () => {
+      dispatch({ type: 'REMOVE_SPELL_FROM_BOOK', spellId });
+    }, 'spell-btn');
+    row.appendChild(removeBtn);
+
+    panel.appendChild(row);
+  }
+
+  // Empty slots indicator.
+  const emptySlots = state.bookbinding - state.equippedSpells.length;
+  for (let i = 0; i < emptySlots; i++) {
+    const el = document.createElement('p');
+    el.className = 'inv-empty';
+    el.textContent = '[ empty slot ]';
+    panel.appendChild(el);
+  }
+
+  // Known but not equipped spells: ADD button.
+  const unequipped = state.knownSpells.filter(id => !state.equippedSpells.includes(id));
+  if (unequipped.length > 0) {
+    panel.appendChild(makeHeader('KNOWN SPELLS'));
+    for (const spellId of unequipped) {
+      const spell = getSpellDef(spellId);
+      const row = document.createElement('div');
+      row.className = 'spell-row';
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'spell-name';
+      nameEl.textContent = spell.name;
+      row.appendChild(nameEl);
+
+      const addBtn = makeButton('[ADD]', () => {
+        dispatch({ type: 'ADD_SPELL_TO_BOOK', spellId });
+      }, 'spell-btn');
+      if (!canAddToBook(state.equippedSpells, state.bookbinding)) addBtn.disabled = true;
+      row.appendChild(addBtn);
+
+      panel.appendChild(row);
+    }
+  }
+
+  return panel;
 }
 
 // ── Furniture Panel ──────────────────────────────────────────────────────────

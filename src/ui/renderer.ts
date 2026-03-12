@@ -13,11 +13,12 @@ import { renderPassout } from './screens/passout';
 import { renderGameOver } from './screens/game-over';
 import { renderSetup } from './screens/setup';
 import { renderFurnitureStore } from './screens/furniture-store';
+import { renderUniversity } from './screens/university';
 import { getLocationType } from '../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
-type ScreenId = 'setup' | 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'scratch' | 'passout' | 'game_over' | 'none';
+type ScreenId = 'setup' | 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'university' | 'scratch' | 'passout' | 'game_over' | 'none';
 let currentScreen: ScreenId = 'none';
 
 // The last action that triggered a render — used to decide partial vs full update.
@@ -65,6 +66,7 @@ function getTargetScreen(state: GameState): ScreenId {
     if (locType === 'tower') return 'tower';
     if (locType === 'temple') return 'temple';
     if (locType === 'furniture_store') return 'furniture_store';
+    if (locType === 'university') return 'university';
     return 'bodega';  // all store-type locations use bodega screen
   }
   return 'bodega';  // fallback
@@ -108,6 +110,9 @@ export function render(
   } else if (targetScreen === 'furniture_store') {
     currentScreen = 'furniture_store';
     renderFurnitureStore(state, screen, dispatch);
+  } else if (targetScreen === 'university') {
+    currentScreen = 'university';
+    renderUniversity(state, screen, dispatch);
   } else if (targetScreen === 'passout') {
     currentScreen = 'passout';
     renderPassout(state, screen, dispatch);
