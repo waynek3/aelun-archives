@@ -41,4 +41,8 @@ export type GameAction =
   | { type: 'ADD_SPELL_TO_BOOK'; spellId: string }
   | { type: 'REMOVE_SPELL_FROM_BOOK'; spellId: string }
   // Sprint 15: godId required for affinity-category spells (favor_boost, divine_slight).
-  | { type: 'CAST_SPELL'; spellId: string; godId?: import('../state/types').GodId };
+  | { type: 'CAST_SPELL'; spellId: string; godId?: import('../state/types').GodId }
+  // Sprint 16: buy a spell scroll at a bookstore or scroll store.
+  | { type: 'BUY_SCROLL'; spellId: string }
+  // Sprint 16: use a spell scroll from inventory (slotIndex); godId required for affinity scrolls.
+  | { type: 'USE_SCROLL'; slotIndex: number; godId?: import('../state/types').GodId };

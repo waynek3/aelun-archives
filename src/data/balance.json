@@ -142,6 +142,16 @@
     "removeTimeMultiplier": 0.5
   },
 
+  "scrolls": {
+    "priceByLevel": {
+      "1": 35,
+      "2": 65,
+      "3": 120
+    },
+    "bookstoreMarkup": 1.5,
+    "storePurchaseTimeCost": 15
+  },
+
   "spells": {
     "favor_boost":   { "affinityGain": 3.0, "baseMisfireChance": 0.05 },
     "divine_slight": { "affinityLoss": 3.0, "baseMisfireChance": 0.05 },

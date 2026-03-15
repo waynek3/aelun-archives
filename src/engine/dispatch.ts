@@ -19,10 +19,10 @@ import { calcScratchTimeCost } from '../util/format';
 import { applyManaRestore } from '../systems/mana';
 import { applyChillGain } from '../systems/chill';
 import { getSnack } from '../data/food';
-import { addMultipleItems, canFitItems, removeItem } from '../systems/inventory';
+import { addMultipleItems, addItem, canFitItems, removeItem } from '../systems/inventory';
 import { applyDonation, applyAffinityDecay, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
 import { getLocationData } from '../data/locations';
-import type { FurnitureItem, InventoryItem } from '../state/types';
+import type { FurnitureItem, InventoryItem, SpellScrollItem } from '../state/types';
 import { getBed, addFurniture, removeFurniture, replaceBed } from '../systems/furniture';
 import { getFurnitureDef, getBedSleepRestore } from '../data/furniture';
 import { getSpellDef, BOOKBINDING_CLASS } from '../data/spells';
@@ -48,6 +48,93 @@ import balance from '../data/balance.json';
 const spellsBal = (balance as Record<string, unknown>).spells as Record<string, unknown> & {
   lucky_fingers: { winChanceBonus: number; durationMinutes: number; baseMisfireChance: number };
 };
+
+// Applies the category-specific effect of a spell or scroll to an already-clock-advanced,
+// already-mana-spent state. Returns the resulting state.
+function applySpellEffect(
+  state: GameState,
+  spellId: string,
+  category: string,
+  godId: import('../state/types').GodId | undefined,
+  newClock: number,
+): GameState {
+  let nextState = state;
+
+  switch (category) {
+    case 'affinity': {
+      if (!godId) break;
+
+      const affData = (spellsBal as Record<string, unknown>)[spellId] as
+        | { affinityGain?: number; affinityLoss?: number } | undefined;
+
+      const rawChange = affData?.affinityGain ?? (affData?.affinityLoss ? -(affData.affinityLoss) : 0);
+      if (rawChange === 0) break;
+
+      const opposedGod = getOpposedGod(godId);
+
+      const hasTargetBuff = hasPrayerBuff(state.prayerBuffs, godId, newClock, state.day, state.month, state.year);
+      const hasOpposedBuff = hasPrayerBuff(state.prayerBuffs, opposedGod, newClock, state.day, state.month, state.year);
+
+      const aff = balance.affinity;
+      const isStrongMonth = getGod(godId).strongMonths.includes(state.month);
+      const strongMult = isStrongMonth ? aff.strongMonthMultiplier : 1;
+
+      const gain = Math.abs(rawChange) * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMult;
+      const loss = hasOpposedBuff ? Math.abs(rawChange) * aff.prayerDebuffMultiplier : Math.abs(rawChange);
+
+      const newAffinity = { ...nextState.affinity };
+      if (rawChange > 0) {
+        newAffinity[godId] = newAffinity[godId] + gain;
+        newAffinity[opposedGod] = newAffinity[opposedGod] - loss;
+      } else {
+        newAffinity[godId] = newAffinity[godId] - gain;
+        newAffinity[opposedGod] = newAffinity[opposedGod] + loss;
+      }
+      nextState = { ...nextState, affinity: newAffinity };
+      break;
+    }
+
+    case 'chill': {
+      const chillData = (spellsBal as Record<string, unknown>)[spellId] as
+        | { chillRestore: number } | undefined;
+      if (chillData?.chillRestore) {
+        nextState = { ...nextState, chill: applyChillGain(nextState.chill, chillData.chillRestore) };
+      }
+      break;
+    }
+
+    case 'mana': {
+      const manaData = (spellsBal as Record<string, unknown>)[spellId] as
+        | { manaRestore: number } | undefined;
+      if (manaData?.manaRestore) {
+        nextState = { ...nextState, mana: applyManaRestore(nextState.mana, manaData.manaRestore, nextState.maxMana) };
+      }
+      break;
+    }
+
+    case 'luck': {
+      const luckData = (spellsBal as Record<string, unknown>)[spellId] as
+        | { durationMinutes: number } | undefined;
+      if (luckData?.durationMinutes) {
+        const expiry = addMinutesToTimestamp(newClock, state.day, state.month, state.year, luckData.durationMinutes);
+        const newBuff: LuckBuff = {
+          expiresAtClock: expiry.clock,
+          expiresOnDay: expiry.day,
+          expiresInMonth: expiry.month,
+          expiresInYear: expiry.year,
+        };
+        nextState = { ...nextState, luckBuff: newBuff };
+      }
+      break;
+    }
+
+    // 'reveal', 'travel', 'aging': no effect yet (future sprints)
+    default:
+      break;
+  }
+
+  return nextState;
+}
 
 // Returns true if the luck buff is currently active at the given timestamp.
 function isLuckBuffActive(
@@ -499,84 +586,98 @@ function applyAction(state: GameState, action: GameAction): GameState {
         rngSeed: nextSeed,
       };
 
-      switch (spell.category) {
-        case 'affinity': {
-          // Requires a target god; silently skip if none provided.
-          const godId = action.godId;
-          if (!godId) break;
+      return applySpellEffect(nextState, action.spellId, spell.category, action.godId, newClock);
+    }
 
-          const affData = (spellsBal as Record<string, unknown>)[action.spellId] as
-            | { affinityGain?: number; affinityLoss?: number } | undefined;
+    // ── Sprint 16 ─────────────────────────────────────────────────────────────
 
-          // favor_boost: positive gain on target god; divine_slight: negative.
-          const rawChange = affData?.affinityGain ?? (affData?.affinityLoss ? -(affData.affinityLoss) : 0);
-          if (rawChange === 0) break;
+    case 'BUY_SCROLL': {
+      if (state.phase !== 'playing') return state;
+      const locData = getLocationData(state.currentLocation);
+      if (locData.type !== 'university_bookstore' && locData.type !== 'spell_scroll_store') return state;
 
-          const opposedGod = getOpposedGod(godId);
+      // Can't buy a scroll for a spell already known.
+      if (isSpellKnown(state.knownSpells, action.spellId)) return state;
 
-          // Prayer buff modifiers (same as donations).
-          const hasTargetBuff = hasPrayerBuff(state.prayerBuffs, godId, newClock, state.day, state.month, state.year);
-          const hasOpposedBuff = hasPrayerBuff(state.prayerBuffs, opposedGod, newClock, state.day, state.month, state.year);
+      const spell = getSpellDef(action.spellId);
+      const scrollsBal = (balance as Record<string, unknown>).scrolls as {
+        priceByLevel: Record<string, number>;
+        bookstoreMarkup: number;
+        storePurchaseTimeCost: number;
+      };
+      const basePrice = scrollsBal.priceByLevel[String(spell.level)] ?? 50;
+      const price = locData.type === 'university_bookstore'
+        ? Math.floor(basePrice * scrollsBal.bookstoreMarkup)
+        : basePrice;
 
-          const aff = balance.affinity;
-          const isStrongMonth = getGod(godId).strongMonths.includes(state.month);
-          const strongMult = isStrongMonth ? aff.strongMonthMultiplier : 1;
+      if (state.cash < price) return state;
+      if (!canFitItems(state.inventory, 1)) return state;
 
-          const gain = Math.abs(rawChange) * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMult;
-          const loss = hasOpposedBuff ? Math.abs(rawChange) * aff.prayerDebuffMultiplier : Math.abs(rawChange);
-
-          const newAffinity = { ...nextState.affinity };
-          if (rawChange > 0) {
-            newAffinity[godId] = newAffinity[godId] + gain;
-            newAffinity[opposedGod] = newAffinity[opposedGod] - loss;
-          } else {
-            newAffinity[godId] = newAffinity[godId] - gain;
-            newAffinity[opposedGod] = newAffinity[opposedGod] + loss;
-          }
-          nextState = { ...nextState, affinity: newAffinity };
-          break;
-        }
-
-        case 'chill': {
-          const chillData = (spellsBal as Record<string, unknown>)[action.spellId] as
-            | { chillRestore: number } | undefined;
-          if (chillData?.chillRestore) {
-            nextState = { ...nextState, chill: applyChillGain(nextState.chill, chillData.chillRestore) };
-          }
-          break;
-        }
-
-        case 'mana': {
-          const manaData = (spellsBal as Record<string, unknown>)[action.spellId] as
-            | { manaRestore: number } | undefined;
-          if (manaData?.manaRestore) {
-            nextState = { ...nextState, mana: applyManaRestore(nextState.mana, manaData.manaRestore, nextState.maxMana) };
-          }
-          break;
-        }
-
-        case 'luck': {
-          const luckData = (spellsBal as Record<string, unknown>)[action.spellId] as
-            | { durationMinutes: number } | undefined;
-          if (luckData?.durationMinutes) {
-            const expiry = addMinutesToTimestamp(newClock, state.day, state.month, state.year, luckData.durationMinutes);
-            const newBuff: LuckBuff = {
-              expiresAtClock: expiry.clock,
-              expiresOnDay: expiry.day,
-              expiresInMonth: expiry.month,
-              expiresInYear: expiry.year,
-            };
-            nextState = { ...nextState, luckBuff: newBuff };
-          }
-          break;
-        }
-
-        // 'reveal', 'travel', 'aging': no effect yet (future sprints)
-        default:
-          break;
+      const newClock = advanceClock(state.clock, scrollsBal.storePurchaseTimeCost);
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
       }
 
-      return nextState;
+      const scrollItem: SpellScrollItem = {
+        type: 'spell_scroll',
+        id: `scroll_${action.spellId}`,
+        name: `Scroll of ${spell.name}`,
+        spellId: action.spellId,
+      };
+
+      const newInventory = addItem(state.inventory, scrollItem);
+      if (!newInventory) return state;
+
+      return {
+        ...state,
+        clock: newClock,
+        cash: state.cash - price,
+        inventory: newInventory,
+      };
+    }
+
+    case 'USE_SCROLL': {
+      if (state.phase !== 'playing') return state;
+      const item = state.inventory[action.slotIndex];
+      if (!item || item.type !== 'spell_scroll') return state;
+
+      const spell = getSpellDef(item.spellId);
+      if (state.mana < spell.manaCost) return state;
+
+      const newClock = advanceClock(state.clock, spell.castingTime);
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
+      }
+
+      const spellEntry = (spellsBal as Record<string, unknown>)[item.spellId] as
+        | { baseMisfireChance: number } | undefined;
+      const baseMisfireChance = spellEntry?.baseMisfireChance ?? 0.05;
+      const misfireChance = calcMisfireChance(baseMisfireChance, state.chill);
+      const [roll, nextSeed] = rng(state.rngSeed);
+
+      // Scroll is always consumed — remove it from inventory first.
+      const inventoryAfterUse = removeItem(state.inventory, action.slotIndex);
+
+      if (roll < misfireChance) {
+        const misfireCost = Math.min(state.mana, spell.manaCost * 2);
+        return {
+          ...state,
+          clock: newClock,
+          mana: applyManaSpend(state.mana, misfireCost),
+          inventory: inventoryAfterUse,
+          rngSeed: nextSeed,
+        };
+      }
+
+      const nextState: GameState = {
+        ...state,
+        clock: newClock,
+        mana: applyManaSpend(state.mana, spell.manaCost),
+        inventory: inventoryAfterUse,
+        rngSeed: nextSeed,
+      };
+
+      return applySpellEffect(nextState, item.spellId, spell.category, action.godId, newClock);
     }
 
     default:

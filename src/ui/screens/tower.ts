@@ -14,6 +14,8 @@ import {
   getNeighborhoodTemples,
   getNeighborhoodFurnitureStore,
   getNeighborhoodUniversity,
+  getNeighborhoodScrollStore,
+  getNeighborhoodBookstore,
   getLocationData,
 } from '../../data/locations';
 import { getBed } from '../../systems/furniture';
@@ -55,9 +57,11 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
 
   // ── Inventory (Sprint 7) ──
   screen.appendChild(
-    makeInventoryPanel(state.inventory, (slotIndex) => {
-      dispatch({ type: 'CONSUME_SNACK', slotIndex });
-    }),
+    makeInventoryPanel(
+      state.inventory,
+      (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
+      (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
+    ),
   );
 
   // ── Spellbook (Sprint 14) ──
@@ -124,6 +128,30 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
       screen.appendChild(makeButton(
         `${uniData.displayName}  \u2192  ${formatClock(uniClock)}`,
         () => dispatch({ type: 'TRAVEL', destination: uniId }),
+        'nav-btn',
+      ));
+    }
+
+    // Sprint 16: scroll store in this neighborhood
+    const ssId = getNeighborhoodScrollStore(neighborhood.id);
+    const ssData = getLocationData(ssId);
+    const ssCost = getTravelCostRaw('tower', ssId);
+    const ssClock = previewClock(state.clock, ssCost);
+    screen.appendChild(makeButton(
+      `${ssData.displayName}  \u2192  ${formatClock(ssClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: ssId }),
+      'nav-btn',
+    ));
+
+    // Sprint 16: university bookstore (only university_heights has one)
+    const bsId = getNeighborhoodBookstore(neighborhood.id);
+    if (bsId) {
+      const bsData = getLocationData(bsId);
+      const bsCost = getTravelCostRaw('tower', bsId);
+      const bsClock = previewClock(state.clock, bsCost);
+      screen.appendChild(makeButton(
+        `${bsData.displayName}  \u2192  ${formatClock(bsClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: bsId }),
         'nav-btn',
       ));
     }

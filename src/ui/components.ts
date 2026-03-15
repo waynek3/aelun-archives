@@ -1,9 +1,11 @@
 // Reusable DOM component builders.
 // All return HTMLElement instances; no innerHTML string injection.
 
-import type { GameState, InventoryItem } from '../state/types';
+import type { GameState, InventoryItem, GodId } from '../state/types';
 import { progressBar } from '../util/format';
 import balance from '../data/balance.json';
+import { getSpellDef } from '../data/spells';
+import { ALL_GOD_IDS, getGod } from '../data/gods';
 
 // ── Button ────────────────────────────────────────────────────────────────────
 
@@ -128,11 +130,13 @@ export function makeResultLine(text: string, className?: string): HTMLElement {
 }
 
 // ── Inventory panel ──────────────────────────────────────────────────────
-// Reusable panel showing current inventory with EAT buttons for snacks.
+// Reusable panel showing current inventory with EAT buttons for snacks
+// and USE buttons for spell scrolls.
 
 export function makeInventoryPanel(
   inventory: (InventoryItem | null)[],
   onConsume: (slotIndex: number) => void,
+  onUseScroll?: (slotIndex: number, godId?: GodId) => void,
 ): HTMLElement {
   const panel = document.createElement('div');
   panel.className = 'inventory-panel';
@@ -149,6 +153,32 @@ export function makeInventoryPanel(
         'inv-btn',
       );
       panel.appendChild(btn);
+    } else if (item && item.type === 'spell_scroll') {
+      const spell = getSpellDef(item.spellId);
+      const nameEl = document.createElement('p');
+      nameEl.className = 'inv-scroll-name';
+      nameEl.textContent = item.name;
+      panel.appendChild(nameEl);
+
+      if (onUseScroll) {
+        if (spell.category === 'affinity') {
+          // Affinity scrolls need a target god — show a row of god buttons.
+          const godRow = document.createElement('div');
+          godRow.className = 'spell-god-row';
+          const capturedIndex = i;
+          for (const godId of ALL_GOD_IDS) {
+            const godBtn = makeButton(getGod(godId).name.toUpperCase(), () => {
+              onUseScroll(capturedIndex, godId);
+            }, 'spell-god-btn');
+            godRow.appendChild(godBtn);
+          }
+          panel.appendChild(godRow);
+        } else {
+          const capturedIndex = i;
+          const useBtn = makeButton('[USE]', () => onUseScroll(capturedIndex), 'inv-btn');
+          panel.appendChild(useBtn);
+        }
+      }
     } else {
       const el = document.createElement('p');
       el.className = 'inv-empty';

@@ -6,7 +6,9 @@ import type { NeighborhoodId, LocationId, GodId } from '../state/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type LocationType = 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'university';
+export type LocationType = 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'university'
+  | 'university_bookstore'   // Sprint 16
+  | 'spell_scroll_store';    // Sprint 16
 
 export interface NeighborhoodData {
   id: NeighborhoodId;
@@ -63,6 +65,14 @@ export const LOCATIONS: LocationData[] = [
   { id: 'university_heights_furniture',   neighborhood: 'university_heights', type: 'furniture_store', displayName: 'DORM LIQUIDATORS' },
   // Sprint 14: University
   { id: 'university_heights_university', neighborhood: 'university_heights', type: 'university',       displayName: 'UNIVERSITY' },
+  // Sprint 16: University Bookstore and Spell Scroll Stores
+  { id: 'university_heights_bookstore',    neighborhood: 'university_heights', type: 'university_bookstore', displayName: 'UNIVERSITY BOOKSTORE' },
+  { id: 'the_skids_scroll_store',          neighborhood: 'the_skids',          type: 'spell_scroll_store',   displayName: 'SCROLLS & SUNDRIES' },
+  { id: 'the_burbs_scroll_store',          neighborhood: 'the_burbs',          type: 'spell_scroll_store',   displayName: 'MYSTIC PAGES' },
+  { id: 'richville_scroll_store',          neighborhood: 'richville',          type: 'spell_scroll_store',   displayName: 'ARCANE EMPORIUM' },
+  { id: 'center_city_scroll_store',        neighborhood: 'center_city',        type: 'spell_scroll_store',   displayName: 'THE SCROLL SHOP' },
+  { id: 'downtown_scroll_store',           neighborhood: 'downtown',           type: 'spell_scroll_store',   displayName: 'PARCHMENT & INK' },
+  { id: 'university_heights_scroll_store', neighborhood: 'university_heights', type: 'spell_scroll_store',   displayName: 'CAMPUS SCROLLERY' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -116,6 +126,23 @@ export function getNeighborhoodFurnitureStore(neighborhoodId: NeighborhoodId): L
 export function getNeighborhoodUniversity(neighborhoodId: NeighborhoodId): LocationId | null {
   const loc = LOCATIONS.find(
     l => l.neighborhood === neighborhoodId && l.type === 'university',
+  );
+  return loc ? loc.id : null;
+}
+
+// Returns the scroll store for a given neighborhood.
+export function getNeighborhoodScrollStore(neighborhoodId: NeighborhoodId): LocationId {
+  const loc = LOCATIONS.find(
+    l => l.neighborhood === neighborhoodId && l.type === 'spell_scroll_store',
+  );
+  if (!loc) throw new Error(`No scroll store in neighborhood: ${neighborhoodId}`);
+  return loc.id;
+}
+
+// Returns the university bookstore in a neighborhood, or null if none.
+export function getNeighborhoodBookstore(neighborhoodId: NeighborhoodId): LocationId | null {
+  const loc = LOCATIONS.find(
+    l => l.neighborhood === neighborhoodId && l.type === 'university_bookstore',
   );
   return loc ? loc.id : null;
 }

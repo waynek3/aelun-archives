@@ -1,5 +1,5 @@
-// Furniture Store screen: buy furniture for the wizard tower.
-// Sprint 13: Beds (swap upgrade), Lab Table, Bong.
+// Spell Scroll Store screen — buy one-use spell scrolls.
+// Sprint 16: one scroll store per neighborhood; standard pricing.
 
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
@@ -7,6 +7,9 @@ import { formatCash } from '../../util/format';
 import { makeButton, makeHeader, makeDivider, makeInventoryPanel } from '../components';
 import { formatClock, previewClock } from '../../engine/time';
 import { getTravelCostRaw } from '../../systems/travel';
+import { canFitItems } from '../../systems/inventory';
+import { isSpellKnown } from '../../systems/spellbook';
+import { SPELL_CATALOG } from '../../data/spells';
 import {
   getLocationData,
   getLocationNeighborhood,
@@ -18,17 +21,21 @@ import {
   getNeighborhoodScrollStore,
   getNeighborhoodBookstore,
 } from '../../data/locations';
-import { FURNITURE_CATALOG } from '../../data/furniture';
-import { getBed, hasFurnitureSlot } from '../../systems/furniture';
 import balance from '../../data/balance.json';
 
 type Dispatch = (action: GameAction) => void;
 
-export function renderFurnitureStore(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
+const scrollsBal = (balance as Record<string, unknown>).scrolls as {
+  priceByLevel: Record<string, number>;
+  bookstoreMarkup: number;
+  storePurchaseTimeCost: number;
+};
+
+export function renderSpellScrollStore(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
   container.innerHTML = '';
 
   const screen = document.createElement('div');
-  screen.className = 'screen furniture-store-screen';
+  screen.className = 'screen spell-scroll-store-screen';
 
   const locData = getLocationData(state.currentLocation);
   screen.appendChild(makeHeader(locData.displayName));
@@ -40,71 +47,46 @@ export function renderFurnitureStore(state: GameState, container: HTMLElement, d
   cashRow.textContent = `Cash: ${formatCash(state.cash)}`;
   screen.appendChild(cashRow);
 
-  // ── Tower slot count ──
-  const furnitureMax = (balance.furniture as { maxSlots: number }).maxSlots;
-  const slotInfo = document.createElement('p');
-  slotInfo.className = 'slot-info';
-  slotInfo.textContent = `Tower: ${state.furniture.length}/${furnitureMax} slots`;
-  screen.appendChild(slotInfo);
-
   screen.appendChild(makeDivider());
 
-  // ── Furniture catalog ──
-  screen.appendChild(makeHeader('FOR SALE'));
+  // ── Scroll catalog ──
+  screen.appendChild(makeHeader('SPELL SCROLLS FOR SALE'));
 
-  const currentBed = getBed(state.furniture);
-  const slotsAvailable = hasFurnitureSlot(state.furniture, furnitureMax);
+  const unknownSpells = SPELL_CATALOG.filter(spell => !isSpellKnown(state.knownSpells, spell.id));
 
-  for (const def of FURNITURE_CATALOG) {
-    const row = document.createElement('div');
-    row.className = 'furniture-store-row';
+  if (unknownSpells.length === 0) {
+    const noneEl = document.createElement('p');
+    noneEl.className = 'scroll-none';
+    noneEl.textContent = 'You know all these spells. Nothing here for you.';
+    screen.appendChild(noneEl);
+  } else {
+    const hasInventorySpace = canFitItems(state.inventory, 1);
 
-    const nameEl = document.createElement('span');
-    nameEl.className = 'furniture-store-name';
+    for (const spell of unknownSpells) {
+      const price = scrollsBal.priceByLevel[String(spell.level)] ?? 50;
+      const canAfford = state.cash >= price;
 
-    let label = `${def.name}  ${formatCash(def.cost)}`;
-    let canBuy = state.cash >= def.cost;
-    let owned = false;
+      const row = document.createElement('div');
+      row.className = 'scroll-store-row';
 
-    if (def.type === 'bed') {
-      if (currentBed && currentBed.id === def.id) {
-        label += '  (owned)';
-        canBuy = false;
-        owned = true;
-      } else if (currentBed && currentBed.quality >= def.quality) {
-        label += '  (downgrade)';
-        canBuy = false;
-      } else if (currentBed) {
-        label += '  (upgrade)';
-      }
-    } else if (def.type === 'lab_table') {
-      const hasOne = state.furniture.some(f => f.type === 'lab_table');
-      if (hasOne) {
-        label += '  (owned)';
-        canBuy = false;
-        owned = true;
-      } else if (!slotsAvailable) {
-        canBuy = false;
-      }
-    } else {
-      // bong — can buy multiples if slots available
-      if (!slotsAvailable) {
-        canBuy = false;
-      }
-    }
+      const nameEl = document.createElement('p');
+      nameEl.className = 'scroll-store-name';
+      nameEl.textContent = `${spell.name} (Lvl ${spell.level})  ${formatCash(price)}`;
+      row.appendChild(nameEl);
 
-    nameEl.textContent = label;
-    row.appendChild(nameEl);
+      const descEl = document.createElement('p');
+      descEl.className = 'scroll-store-desc';
+      descEl.textContent = spell.description;
+      row.appendChild(descEl);
 
-    if (!owned) {
-      const buyBtn = makeButton('BUY', () => {
-        dispatch({ type: 'BUY_FURNITURE', furnitureId: def.id });
-      }, 'furniture-btn');
-      if (!canBuy) buyBtn.disabled = true;
+      const buyBtn = makeButton('[BUY]', () => {
+        dispatch({ type: 'BUY_SCROLL', spellId: spell.id });
+      }, 'scroll-btn');
+      if (!canAfford || !hasInventorySpace) buyBtn.disabled = true;
       row.appendChild(buyBtn);
-    }
 
-    screen.appendChild(row);
+      screen.appendChild(row);
+    }
   }
 
   // ── Inventory panel ──
@@ -130,8 +112,9 @@ export function renderFurnitureStore(state: GameState, container: HTMLElement, d
     'nav-btn',
   ));
 
-  // Other neighborhoods' locations.
   const currentNeighborhood = getLocationNeighborhood(state.currentLocation);
+
+  // Other neighborhoods.
   for (const neighborhood of NEIGHBORHOODS) {
     if (neighborhood.id === currentNeighborhood) continue;
 
@@ -201,7 +184,7 @@ export function renderFurnitureStore(state: GameState, container: HTMLElement, d
     }
   }
 
-  // Local neighborhood locations (bodega, temples, university if any, scroll store, bookstore if any).
+  // Local neighborhood (same neighborhood — skip self, show everything else).
   const localBodega = getNeighborhoodBodega(currentNeighborhood);
   const localBodegaData = getLocationData(localBodega);
   const lbCost = getTravelCostRaw(state.currentLocation, localBodega);
@@ -223,6 +206,16 @@ export function renderFurnitureStore(state: GameState, container: HTMLElement, d
     ));
   }
 
+  const localFsId = getNeighborhoodFurnitureStore(currentNeighborhood);
+  const localFsData = getLocationData(localFsId);
+  const localFsCost = getTravelCostRaw(state.currentLocation, localFsId);
+  const localFsClock = previewClock(state.clock, localFsCost);
+  screen.appendChild(makeButton(
+    `${localFsData.displayName}  \u2192  ${formatClock(localFsClock)}`,
+    () => dispatch({ type: 'TRAVEL', destination: localFsId }),
+    'nav-btn',
+  ));
+
   const localUniId = getNeighborhoodUniversity(currentNeighborhood);
   if (localUniId) {
     const localUniData = getLocationData(localUniId);
@@ -235,16 +228,6 @@ export function renderFurnitureStore(state: GameState, container: HTMLElement, d
     ));
   }
 
-  const localSsId = getNeighborhoodScrollStore(currentNeighborhood);
-  const localSsData = getLocationData(localSsId);
-  const localSsCost = getTravelCostRaw(state.currentLocation, localSsId);
-  const localSsClock = previewClock(state.clock, localSsCost);
-  screen.appendChild(makeButton(
-    `${localSsData.displayName}  \u2192  ${formatClock(localSsClock)}`,
-    () => dispatch({ type: 'TRAVEL', destination: localSsId }),
-    'nav-btn',
-  ));
-
   const localBsId = getNeighborhoodBookstore(currentNeighborhood);
   if (localBsId) {
     const localBsData = getLocationData(localBsId);
@@ -256,6 +239,7 @@ export function renderFurnitureStore(state: GameState, container: HTMLElement, d
       'nav-btn',
     ));
   }
+  // (Self — scroll store in current neighborhood — is omitted.)
 
   container.appendChild(screen);
 }
