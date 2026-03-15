@@ -35,10 +35,30 @@ import {
   removeFromBook,
   calcAddToBookTime,
   calcRemoveFromBookTime,
+  calcMisfireChance,
 } from '../systems/spellbook';
 import { applyManaSpend } from '../systems/mana';
+import { addMinutesToTimestamp, hasPrayerBuff } from '../systems/affinity';
+import { getOpposedGod, getGod } from '../data/gods';
+import type { LuckBuff } from '../state/types';
 import { rng } from '../util/rng';
 import balance from '../data/balance.json';
+
+// ─── Spell balance reference ──────────────────────────────────────────────────
+const spellsBal = (balance as Record<string, unknown>).spells as Record<string, unknown> & {
+  lucky_fingers: { winChanceBonus: number; durationMinutes: number; baseMisfireChance: number };
+};
+
+// Returns true if the luck buff is currently active at the given timestamp.
+function isLuckBuffActive(
+  buff: LuckBuff | null,
+  clock: number, day: number, month: number, year: number,
+): boolean {
+  if (!buff) return false;
+  const toMin = (y: number, mo: number, d: number, c: number) =>
+    y * 360 * 1440 + mo * 30 * 1440 + d * 1440 + c;
+  return toMin(year, month, day, clock) < toMin(buff.expiresInYear, buff.expiresInMonth, buff.expiresOnDay, buff.expiresAtClock);
+}
 
 export type RenderFn = (state: GameState) => void;
 
@@ -112,7 +132,12 @@ function applyAction(state: GameState, action: GameAction): GameState {
         return applyPassout({ ...stateWithPurchase, clock: newClock });
       }
 
-      return startScratchSession({ ...stateWithPurchase, clock: newClock }, action.quantities);
+      // Sprint 15: pass luck buff win-chance bonus if active.
+      const luckBonus = isLuckBuffActive(stateWithPurchase.luckBuff, newClock, stateWithPurchase.day, stateWithPurchase.month, stateWithPurchase.year)
+        ? (spellsBal.lucky_fingers as { winChanceBonus: number }).winChanceBonus
+        : 0;
+
+      return startScratchSession({ ...stateWithPurchase, clock: newClock }, action.quantities, luckBonus);
     }
 
     case 'SCRATCH_CELL':
@@ -440,19 +465,118 @@ function applyAction(state: GameState, action: GameAction): GameState {
       const spell = getSpellDef(action.spellId);
       if (state.mana < spell.manaCost) return state;
 
-      // Casting time snapped to :15.
+      // Advance clock and check curfew.
       const newClock = advanceClock(state.clock, spell.castingTime);
-
       if (isCurfewBreached(newClock, state.currentLocation)) {
         return applyPassout({ ...state, clock: newClock });
       }
 
-      // Sprint 14: no effects — just costs mana and time.
-      return {
+      // ── Sprint 15: misfire check ──────────────────────────────────────────
+      // Look up per-spell balance data (may be undefined for spells without effects yet).
+      const spellEntry = (spellsBal as Record<string, unknown>)[action.spellId] as
+        | { baseMisfireChance: number } | undefined;
+      const baseMisfireChance = spellEntry?.baseMisfireChance ?? 0.05;
+
+      const misfireChance = calcMisfireChance(baseMisfireChance, state.chill);
+      let [roll, nextSeed] = rng(state.rngSeed);
+
+      if (roll < misfireChance) {
+        // MISFIRE: spell fires but drains twice the mana.
+        const misfireCost = Math.min(state.mana, spell.manaCost * 2);
+        return {
+          ...state,
+          clock: newClock,
+          mana: applyManaSpend(state.mana, misfireCost),
+          rngSeed: nextSeed,
+        };
+      }
+
+      // ── No misfire: apply spell effect by category ────────────────────────
+      let nextState: GameState = {
         ...state,
         clock: newClock,
         mana: applyManaSpend(state.mana, spell.manaCost),
+        rngSeed: nextSeed,
       };
+
+      switch (spell.category) {
+        case 'affinity': {
+          // Requires a target god; silently skip if none provided.
+          const godId = action.godId;
+          if (!godId) break;
+
+          const affData = (spellsBal as Record<string, unknown>)[action.spellId] as
+            | { affinityGain?: number; affinityLoss?: number } | undefined;
+
+          // favor_boost: positive gain on target god; divine_slight: negative.
+          const rawChange = affData?.affinityGain ?? (affData?.affinityLoss ? -(affData.affinityLoss) : 0);
+          if (rawChange === 0) break;
+
+          const opposedGod = getOpposedGod(godId);
+
+          // Prayer buff modifiers (same as donations).
+          const hasTargetBuff = hasPrayerBuff(state.prayerBuffs, godId, newClock, state.day, state.month, state.year);
+          const hasOpposedBuff = hasPrayerBuff(state.prayerBuffs, opposedGod, newClock, state.day, state.month, state.year);
+
+          const aff = balance.affinity;
+          const isStrongMonth = getGod(godId).strongMonths.includes(state.month);
+          const strongMult = isStrongMonth ? aff.strongMonthMultiplier : 1;
+
+          const gain = Math.abs(rawChange) * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMult;
+          const loss = hasOpposedBuff ? Math.abs(rawChange) * aff.prayerDebuffMultiplier : Math.abs(rawChange);
+
+          const newAffinity = { ...nextState.affinity };
+          if (rawChange > 0) {
+            newAffinity[godId] = newAffinity[godId] + gain;
+            newAffinity[opposedGod] = newAffinity[opposedGod] - loss;
+          } else {
+            newAffinity[godId] = newAffinity[godId] - gain;
+            newAffinity[opposedGod] = newAffinity[opposedGod] + loss;
+          }
+          nextState = { ...nextState, affinity: newAffinity };
+          break;
+        }
+
+        case 'chill': {
+          const chillData = (spellsBal as Record<string, unknown>)[action.spellId] as
+            | { chillRestore: number } | undefined;
+          if (chillData?.chillRestore) {
+            nextState = { ...nextState, chill: applyChillGain(nextState.chill, chillData.chillRestore) };
+          }
+          break;
+        }
+
+        case 'mana': {
+          const manaData = (spellsBal as Record<string, unknown>)[action.spellId] as
+            | { manaRestore: number } | undefined;
+          if (manaData?.manaRestore) {
+            nextState = { ...nextState, mana: applyManaRestore(nextState.mana, manaData.manaRestore, nextState.maxMana) };
+          }
+          break;
+        }
+
+        case 'luck': {
+          const luckData = (spellsBal as Record<string, unknown>)[action.spellId] as
+            | { durationMinutes: number } | undefined;
+          if (luckData?.durationMinutes) {
+            const expiry = addMinutesToTimestamp(newClock, state.day, state.month, state.year, luckData.durationMinutes);
+            const newBuff: LuckBuff = {
+              expiresAtClock: expiry.clock,
+              expiresOnDay: expiry.day,
+              expiresInMonth: expiry.month,
+              expiresInYear: expiry.year,
+            };
+            nextState = { ...nextState, luckBuff: newBuff };
+          }
+          break;
+        }
+
+        // 'reveal', 'travel', 'aging': no effect yet (future sprints)
+        default:
+          break;
+      }
+
+      return nextState;
     }
 
     default:

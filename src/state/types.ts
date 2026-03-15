@@ -75,6 +75,14 @@ export interface PrayerBuff {
   expiresInYear: number;
 }
 
+// Sprint 15: luck spell buff (from Lucky Fingers)
+export interface LuckBuff {
+  expiresAtClock: number;
+  expiresOnDay: number;
+  expiresInMonth: number;
+  expiresInYear: number;
+}
+
 // ─── Scratch Session ──────────────────────────────────────────────────────────
 
 // 0 = █ covered, 1 = ▓, 2 = ▒, 3 = ░, 4 = glyph revealed
@@ -159,6 +167,9 @@ export interface GameState {
   // ── Spellbook (Sprint 14+) ──
   knownSpells: string[];       // spell IDs learned at university
   equippedSpells: string[];    // spell IDs in spellbook (bounded by bookbinding)
+
+  // ── Spell Buffs (Sprint 15+) ──
+  luckBuff: LuckBuff | null;   // active Lucky Fingers buff; null when inactive
 
   // ── Birthday (Sprint 11+) ──
   birthdayMonth: number;  // 1–12; set during new-run setup; used for Birthday event (Sprint 23+)

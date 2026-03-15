@@ -95,6 +95,11 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
       equippedSpells: [],
     };
   },
+  // Sprint 14 → Sprint 15: add luck buff field.
+  11: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return { ...state, luckBuff: null };
+  },
 };
 
 function migrate(data: SaveData): GameState {

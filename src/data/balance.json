@@ -140,5 +140,16 @@
   "spellbook": {
     "addTimeMultiplier": 3,
     "removeTimeMultiplier": 0.5
+  },
+
+  "spells": {
+    "favor_boost":   { "affinityGain": 3.0, "baseMisfireChance": 0.05 },
+    "divine_slight": { "affinityLoss": 3.0, "baseMisfireChance": 0.05 },
+    "lucky_fingers": { "winChanceBonus": 0.10, "durationMinutes": 60, "baseMisfireChance": 0.05 },
+    "stacked_deck":  { "winChanceBonus": 0.20, "durationMinutes": 90, "baseMisfireChance": 0.08 },
+    "mellow_wave":   { "chillRestore": 20, "baseMisfireChance": 0.05 },
+    "deep_calm":     { "chillRestore": 40, "baseMisfireChance": 0.05 },
+    "mana_siphon":   { "manaRestore": 8, "baseMisfireChance": 0.05 },
+    "chillMisfireScaling": 0.005
   }
 }
