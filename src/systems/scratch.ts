@@ -13,10 +13,12 @@ import balance from '../data/balance.json';
 // ─── Ticket Generation ────────────────────────────────────────────────────────
 
 // Generate all tickets purchased in one go.
+// winChanceBonus (Sprint 15+): additive bonus to win chance from Lucky Fingers buff.
 // Returns [tickets, newSeed].
 export function generateTickets(
   quantities: Record<string, number>,
   seed: number,
+  winChanceBonus = 0,
 ): [GeneratedTicket[], number] {
   const tickets: GeneratedTicket[] = [];
   let s = seed;
@@ -24,7 +26,7 @@ export function generateTickets(
   for (const ticketType of TICKET_TYPES) {
     const qty = quantities[ticketType.id] ?? 0;
     for (let i = 0; i < qty; i++) {
-      const [ticket, nextSeed] = generateTicket(ticketType.id, s);
+      const [ticket, nextSeed] = generateTicket(ticketType.id, s, winChanceBonus);
       tickets.push(ticket);
       s = nextSeed;
     }
@@ -34,9 +36,11 @@ export function generateTickets(
 }
 
 // Generate a single ticket. Returns [ticket, newSeed].
+// winChanceBonus (Sprint 15+): additive bonus from Lucky Fingers buff.
 function generateTicket(
   typeId: string,
   seed: number,
+  winChanceBonus = 0,
 ): [GeneratedTicket, number] {
   const type = getTicketType(typeId);
   const totalCells = type.grid.rows * type.grid.cols;
@@ -45,7 +49,8 @@ function generateTicket(
   // ── Determine win or loss ──
   let r: number;
   [r, s] = rng(s);
-  const isWin = r < type.winChance;
+  const effectiveWinChance = Math.min(1, type.winChance + winChanceBonus);
+  const isWin = r < effectiveWinChance;
 
   if (isWin) {
     // ── Pick match count ──
@@ -174,10 +179,12 @@ function fillLossCells(
 // ─── Scratch Session ──────────────────────────────────────────────────────────
 
 // Create a scratch session from a set of ticket quantities and current state.
+// winChanceBonus (Sprint 15+): additive bonus from Lucky Fingers buff, default 0.
 // Returns [newState].
 export function startScratchSession(
   state: GameState,
   quantities: Record<string, number>,
+  winChanceBonus = 0,
 ): GameState {
   const totalCost = Object.entries(quantities).reduce((sum, [typeId, qty]) => {
     return sum + getTicketType(typeId).cost * qty;
@@ -186,7 +193,7 @@ export function startScratchSession(
   if (totalCost === 0) return state;
   if (state.cash < totalCost) return state;  // can't afford — caller should validate
 
-  const [tickets, newSeed] = generateTickets(quantities, state.rngSeed);
+  const [tickets, newSeed] = generateTickets(quantities, state.rngSeed, winChanceBonus);
   const numTickets = tickets.length;
   const timeCostMinutes = calcScratchTimeCost(numTickets);
 

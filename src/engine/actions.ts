@@ -40,4 +40,5 @@ export type GameAction =
   | { type: 'LEARN_BOOKBINDING' }
   | { type: 'ADD_SPELL_TO_BOOK'; spellId: string }
   | { type: 'REMOVE_SPELL_FROM_BOOK'; spellId: string }
-  | { type: 'CAST_SPELL'; spellId: string };
+  // Sprint 15: godId required for affinity-category spells (favor_boost, divine_slight).
+  | { type: 'CAST_SPELL'; spellId: string; godId?: import('../state/types').GodId };

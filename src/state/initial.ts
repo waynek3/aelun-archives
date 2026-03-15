@@ -1,7 +1,7 @@
 import type { GameState } from './types';
 import balance from '../data/balance.json';
 
-export const SAVE_VERSION = 11;
+export const SAVE_VERSION = 12;
 
 export function createInitialState(): GameState {
   return {
@@ -34,6 +34,8 @@ export function createInitialState(): GameState {
     // Sprint 14: spellbook
     knownSpells: [],
     equippedSpells: [],
+    // Sprint 15: spell buffs
+    luckBuff: null,
     // Sprint 11: birthday month (set by player during setup)
     birthdayMonth: 1,
     // Sprint 9: god affinity

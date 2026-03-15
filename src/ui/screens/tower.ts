@@ -19,7 +19,18 @@ import {
 import { getBed } from '../../systems/furniture';
 import { getSpellDef } from '../../data/spells';
 import { canAddToBook } from '../../systems/spellbook';
+import { ALL_GOD_IDS, getGod } from '../../data/gods';
 import balance from '../../data/balance.json';
+
+// Sprint 15: reuse the same timestamp comparison for luck buff display.
+function isLuckBuffActiveNow(state: GameState): boolean {
+  const b = state.luckBuff;
+  if (!b) return false;
+  const toMin = (y: number, mo: number, d: number, c: number) =>
+    y * 360 * 1440 + mo * 30 * 1440 + d * 1440 + c;
+  return toMin(state.year, state.month, state.day, state.clock)
+    < toMin(b.expiresInYear, b.expiresInMonth, b.expiresOnDay, b.expiresAtClock);
+}
 
 type Dispatch = (action: GameAction) => void;
 
@@ -174,6 +185,8 @@ function makeSpellbookPanel(state: GameState, dispatch: Dispatch): HTMLElement {
   // Equipped spells: CAST + REMOVE buttons.
   for (const spellId of state.equippedSpells) {
     const spell = getSpellDef(spellId);
+    const canCast = state.mana >= spell.manaCost;
+
     const row = document.createElement('div');
     row.className = 'spell-row';
 
@@ -182,18 +195,52 @@ function makeSpellbookPanel(state: GameState, dispatch: Dispatch): HTMLElement {
     nameEl.textContent = spell.name;
     row.appendChild(nameEl);
 
-    const castBtn = makeButton('[CAST]', () => {
-      dispatch({ type: 'CAST_SPELL', spellId });
-    }, 'spell-btn');
-    if (state.mana < spell.manaCost) castBtn.disabled = true;
-    row.appendChild(castBtn);
+    if (spell.category === 'affinity') {
+      // Sprint 15: affinity spells need a target god. Show 10 small god buttons.
+      panel.appendChild(row);  // append name row first
 
+      const godRow = document.createElement('div');
+      godRow.className = 'spell-god-row';
+      for (const godId of ALL_GOD_IDS) {
+        const godBtn = makeButton(getGod(godId).name.toUpperCase(), () => {
+          dispatch({ type: 'CAST_SPELL', spellId, godId });
+        }, 'spell-god-btn');
+        if (!canCast) godBtn.disabled = true;
+        godRow.appendChild(godBtn);
+      }
+      panel.appendChild(godRow);
+    } else {
+      // Sprint 15: luck spells show an ACTIVE indicator when the buff is running.
+      if (spell.category === 'luck' && isLuckBuffActiveNow(state)) {
+        const activeEl = document.createElement('span');
+        activeEl.className = 'spell-buff-active';
+        activeEl.textContent = ' \u221e ACTIVE';
+        nameEl.appendChild(activeEl);
+      }
+
+      const castBtn = makeButton('[CAST]', () => {
+        dispatch({ type: 'CAST_SPELL', spellId });
+      }, 'spell-btn');
+      if (!canCast) castBtn.disabled = true;
+      row.appendChild(castBtn);
+
+      const removeBtn = makeButton('[REMOVE]', () => {
+        dispatch({ type: 'REMOVE_SPELL_FROM_BOOK', spellId });
+      }, 'spell-btn');
+      row.appendChild(removeBtn);
+
+      panel.appendChild(row);
+      continue;
+    }
+
+    // Affinity spells: add REMOVE on a separate row.
+    const removeRow = document.createElement('div');
+    removeRow.className = 'spell-row';
     const removeBtn = makeButton('[REMOVE]', () => {
       dispatch({ type: 'REMOVE_SPELL_FROM_BOOK', spellId });
     }, 'spell-btn');
-    row.appendChild(removeBtn);
-
-    panel.appendChild(row);
+    removeRow.appendChild(removeBtn);
+    panel.appendChild(removeRow);
   }
 
   // Empty slots indicator.

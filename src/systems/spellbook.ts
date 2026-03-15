@@ -98,3 +98,18 @@ export function calcAddToBookTime(castingTime: number): number {
 export function calcRemoveFromBookTime(castingTime: number): number {
   return Math.max(15, snapToQuarter(Math.ceil(castingTime * spellbookBal.removeTimeMultiplier)));
 }
+
+// ─── Misfire (Sprint 15) ─────────────────────────────────────────────────────
+
+const spellsBal = (balance as Record<string, unknown>).spells as {
+  chillMisfireScaling: number;
+};
+
+// Returns the effective misfire chance for a spell, factoring in Chill level.
+// Formula: baseMisfireChance + max(0, 50 − chill) × chillMisfireScaling
+// At chill=0:  base + 0.25 (e.g. 5% base → 30% chance)
+// At chill≥50: just the base chance.
+export function calcMisfireChance(baseMisfireChance: number, chill: number): number {
+  const chillPenalty = Math.max(0, 50 - chill) * spellsBal.chillMisfireScaling;
+  return Math.min(1, baseMisfireChance + chillPenalty);
+}
