@@ -175,6 +175,10 @@ export interface GameState {
   relaxationRate: number;     // passive chill restore rate
   restingRelaxation: number;  // baseline chill target
 
+  // ── Hidden Addiction Stats (Sprint 17+) ──
+  addictionNeed: number;         // cumulative craving; grows with scratch frequency
+  addictionSatisfaction: number; // cumulative satisfaction from scratching
+
   // ── God Affinity (Sprint 9+) ──
   affinity: Record<GodId, number>;    // affinity score per god, starts at 0
   prayerBuffs: PrayerBuff[];          // active timed prayer buffs

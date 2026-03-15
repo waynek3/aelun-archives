@@ -42,6 +42,7 @@ import { addMinutesToTimestamp, hasPrayerBuff } from '../systems/affinity';
 import { getOpposedGod, getGod } from '../data/gods';
 import type { LuckBuff } from '../state/types';
 import { rng } from '../util/rng';
+import { growNeed, gainSatisfaction, computeRestingRelaxation } from '../systems/addiction';
 import balance from '../data/balance.json';
 
 // ─── Spell balance reference ──────────────────────────────────────────────────
@@ -211,6 +212,14 @@ function applyAction(state: GameState, action: GameAction): GameState {
       const totalTickets = Object.values(action.quantities).reduce((a, b) => a + b, 0);
       if (totalTickets === 0) return stateWithPurchase;
 
+      // Sprint 17: grow addiction need with each ticket purchase (frequency-driven).
+      const newNeed = growNeed(stateWithPurchase.addictionNeed, totalTickets);
+      stateWithPurchase = {
+        ...stateWithPurchase,
+        addictionNeed: newNeed,
+        restingRelaxation: computeRestingRelaxation(newNeed),
+      };
+
       // Sprint 2: advance clock by scratch session time before creating session.
       const timeCost = calcScratchTimeCost(totalTickets);
       const newClock = advanceClock(stateWithPurchase.clock, timeCost);
@@ -233,8 +242,14 @@ function applyAction(state: GameState, action: GameAction): GameState {
     case 'ADVANCE_TICKET':
       return advanceTicket(state);
 
-    case 'FINISH_SESSION':
-      return finishSession(state);
+    case 'FINISH_SESSION': {
+      // Sprint 17: gain satisfaction based on session volume before clearing session.
+      const sess = state.scratchSession;
+      if (!sess) return finishSession(state);
+      const numTickets = sess.tickets.length;
+      const newSatisfaction = gainSatisfaction(state.addictionSatisfaction, numTickets);
+      return finishSession({ ...state, addictionSatisfaction: newSatisfaction });
+    }
 
     case 'SET_THEME': {
       saveTheme(action.scheme);
