@@ -24,13 +24,23 @@ export interface FurnitureItem {
 // Sprint 7: food quality descriptors
 export type FoodDescriptor = 'greasy' | 'salty' | 'sugary' | 'bland' | 'healthy' | 'gourmet';
 
-// Sprint 7: inventory items
-export interface InventoryItem {
-  type: 'snack';          // extensible for potions/scrolls in future sprints
-  id: string;             // references definition in food.ts (or potions.ts, etc.)
-  name: string;           // display name, e.g. "Greasy Burrito"
-  descriptor: FoodDescriptor;  // quality descriptor (snacks only for now)
+// Sprint 7: inventory items — discriminated union (Sprint 16: extended with spell scrolls)
+export interface SnackItem {
+  type: 'snack';
+  id: string;
+  name: string;
+  descriptor: FoodDescriptor;
 }
+
+// Sprint 16: spell scrolls — one-use casting of a spell the wizard doesn't know
+export interface SpellScrollItem {
+  type: 'spell_scroll';
+  id: string;        // e.g. 'scroll_lucky_fingers'
+  name: string;      // e.g. 'Scroll of Lucky Fingers'
+  spellId: string;   // which spell this scroll casts
+}
+
+export type InventoryItem = SnackItem | SpellScrollItem;
 
 // Sprint 2+: location and neighborhood tracking
 export type NeighborhoodId =
@@ -64,7 +74,15 @@ export type LocationId =
   | 'downtown_furniture'
   | 'university_heights_furniture'
   // Sprint 14: University
-  | 'university_heights_university';
+  | 'university_heights_university'
+  // Sprint 16: University Bookstore and Spell Scroll Stores
+  | 'university_heights_bookstore'
+  | 'the_skids_scroll_store'
+  | 'the_burbs_scroll_store'
+  | 'richville_scroll_store'
+  | 'center_city_scroll_store'
+  | 'downtown_scroll_store'
+  | 'university_heights_scroll_store';
 
 // Sprint 9: prayer buff
 export interface PrayerBuff {

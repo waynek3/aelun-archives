@@ -17,6 +17,10 @@ import {
   NEIGHBORHOODS,
   getNeighborhoodBodega,
   getNeighborhoodTemples,
+  getNeighborhoodFurnitureStore,
+  getNeighborhoodUniversity,
+  getNeighborhoodScrollStore,
+  getNeighborhoodBookstore,
 } from '../../data/locations';
 
 type Dispatch = (action: GameAction) => void;
@@ -162,9 +166,11 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
   // ── Inventory panel (Sprint 7) ──
   screen.appendChild(makeDivider());
   screen.appendChild(
-    makeInventoryPanel(state.inventory, (slotIndex) => {
-      dispatch({ type: 'CONSUME_SNACK', slotIndex });
-    }),
+    makeInventoryPanel(
+      state.inventory,
+      (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
+      (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
+    ),
   );
 
   // ── Travel section ──
@@ -181,7 +187,7 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
   );
   screen.appendChild(returnBtn);
 
-  // Other neighborhoods' bodegas and temples (skip the current neighborhood's bodega).
+  // Other neighborhoods' bodegas, temples, and stores (skip the current neighborhood's bodega).
   const currentNeighborhood = getLocationNeighborhood(state.currentLocation);
   for (const neighborhood of NEIGHBORHOODS) {
     if (neighborhood.id === currentNeighborhood) continue;
@@ -196,7 +202,6 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
     );
     screen.appendChild(btn);
 
-    // Sprint 9: temples in this neighborhood
     const temples = getNeighborhoodTemples(neighborhood.id);
     for (const temple of temples) {
       const tCost = getTravelCostRaw(state.currentLocation, temple.id);
@@ -207,9 +212,53 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
         'nav-btn',
       ));
     }
+
+    const fsId = getNeighborhoodFurnitureStore(neighborhood.id);
+    const fsData = getLocationData(fsId);
+    const fsCost = getTravelCostRaw(state.currentLocation, fsId);
+    const fsClock = previewClock(state.clock, fsCost);
+    screen.appendChild(makeButton(
+      `${fsData.displayName}  \u2192  ${formatClock(fsClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: fsId }),
+      'nav-btn',
+    ));
+
+    const uniId = getNeighborhoodUniversity(neighborhood.id);
+    if (uniId) {
+      const uniData = getLocationData(uniId);
+      const uniCost = getTravelCostRaw(state.currentLocation, uniId);
+      const uniClock = previewClock(state.clock, uniCost);
+      screen.appendChild(makeButton(
+        `${uniData.displayName}  \u2192  ${formatClock(uniClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: uniId }),
+        'nav-btn',
+      ));
+    }
+
+    const ssId = getNeighborhoodScrollStore(neighborhood.id);
+    const ssData = getLocationData(ssId);
+    const ssCost = getTravelCostRaw(state.currentLocation, ssId);
+    const ssClock = previewClock(state.clock, ssCost);
+    screen.appendChild(makeButton(
+      `${ssData.displayName}  \u2192  ${formatClock(ssClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: ssId }),
+      'nav-btn',
+    ));
+
+    const bsId = getNeighborhoodBookstore(neighborhood.id);
+    if (bsId) {
+      const bsData = getLocationData(bsId);
+      const bsCost = getTravelCostRaw(state.currentLocation, bsId);
+      const bsClock = previewClock(state.clock, bsCost);
+      screen.appendChild(makeButton(
+        `${bsData.displayName}  \u2192  ${formatClock(bsClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: bsId }),
+        'nav-btn',
+      ));
+    }
   }
 
-  // Sprint 9: temples in the current neighborhood (accessible from local bodega)
+  // Local neighborhood locations (temples, furniture store, university if any, scroll store, bookstore if any).
   const localTemples = getNeighborhoodTemples(currentNeighborhood);
   for (const temple of localTemples) {
     const tCost = getTravelCostRaw(state.currentLocation, temple.id);
@@ -217,6 +266,50 @@ export function renderBodega(state: GameState, container: HTMLElement, dispatch:
     screen.appendChild(makeButton(
       `${temple.displayName}  \u2192  ${formatClock(tClock)}`,
       () => dispatch({ type: 'TRAVEL', destination: temple.id }),
+      'nav-btn',
+    ));
+  }
+
+  const localFsId = getNeighborhoodFurnitureStore(currentNeighborhood);
+  const localFsData = getLocationData(localFsId);
+  const localFsCost = getTravelCostRaw(state.currentLocation, localFsId);
+  const localFsClock = previewClock(state.clock, localFsCost);
+  screen.appendChild(makeButton(
+    `${localFsData.displayName}  \u2192  ${formatClock(localFsClock)}`,
+    () => dispatch({ type: 'TRAVEL', destination: localFsId }),
+    'nav-btn',
+  ));
+
+  const localUniId = getNeighborhoodUniversity(currentNeighborhood);
+  if (localUniId) {
+    const localUniData = getLocationData(localUniId);
+    const localUniCost = getTravelCostRaw(state.currentLocation, localUniId);
+    const localUniClock = previewClock(state.clock, localUniCost);
+    screen.appendChild(makeButton(
+      `${localUniData.displayName}  \u2192  ${formatClock(localUniClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: localUniId }),
+      'nav-btn',
+    ));
+  }
+
+  const localSsId = getNeighborhoodScrollStore(currentNeighborhood);
+  const localSsData = getLocationData(localSsId);
+  const localSsCost = getTravelCostRaw(state.currentLocation, localSsId);
+  const localSsClock = previewClock(state.clock, localSsCost);
+  screen.appendChild(makeButton(
+    `${localSsData.displayName}  \u2192  ${formatClock(localSsClock)}`,
+    () => dispatch({ type: 'TRAVEL', destination: localSsId }),
+    'nav-btn',
+  ));
+
+  const localBsId = getNeighborhoodBookstore(currentNeighborhood);
+  if (localBsId) {
+    const localBsData = getLocationData(localBsId);
+    const localBsCost = getTravelCostRaw(state.currentLocation, localBsId);
+    const localBsClock = previewClock(state.clock, localBsCost);
+    screen.appendChild(makeButton(
+      `${localBsData.displayName}  \u2192  ${formatClock(localBsClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: localBsId }),
       'nav-btn',
     ));
   }

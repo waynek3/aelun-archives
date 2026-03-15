@@ -12,6 +12,10 @@ import {
   getNeighborhoodTemples,
   NEIGHBORHOODS,
   getNeighborhoodBodega,
+  getNeighborhoodFurnitureStore,
+  getNeighborhoodUniversity,
+  getNeighborhoodScrollStore,
+  getNeighborhoodBookstore,
 } from '../../data/locations';
 import { getGod } from '../../data/gods';
 import balance from '../../data/balance.json';
@@ -114,9 +118,11 @@ export function renderTemple(state: GameState, container: HTMLElement, dispatch:
   // ── Inventory ──
   screen.appendChild(makeDivider());
   screen.appendChild(
-    makeInventoryPanel(state.inventory, (slotIndex) => {
-      dispatch({ type: 'CONSUME_SNACK', slotIndex });
-    }),
+    makeInventoryPanel(
+      state.inventory,
+      (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
+      (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
+    ),
   );
 
   // ── Travel ──
@@ -132,7 +138,7 @@ export function renderTemple(state: GameState, container: HTMLElement, dispatch:
     'nav-btn',
   ));
 
-  // All neighborhoods: bodegas + temples (skip current location)
+  // All neighborhoods: bodegas + temples + stores (skip current location)
   for (const neighborhood of NEIGHBORHOODS) {
     const nbLabel = document.createElement('p');
     nbLabel.className = 'neighborhood-label';
@@ -159,6 +165,54 @@ export function renderTemple(state: GameState, container: HTMLElement, dispatch:
       screen.appendChild(makeButton(
         `${temple.displayName}  \u2192  ${formatClock(tClock)}`,
         () => dispatch({ type: 'TRAVEL', destination: temple.id }),
+        'nav-btn',
+      ));
+    }
+
+    // Furniture store
+    const fsId = getNeighborhoodFurnitureStore(neighborhood.id);
+    const fsData = getLocationData(fsId);
+    const fsCost = getTravelCostRaw(state.currentLocation, fsId);
+    const fsClock = previewClock(state.clock, fsCost);
+    screen.appendChild(makeButton(
+      `${fsData.displayName}  \u2192  ${formatClock(fsClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: fsId }),
+      'nav-btn',
+    ));
+
+    // University (only university_heights has one)
+    const uniId = getNeighborhoodUniversity(neighborhood.id);
+    if (uniId) {
+      const uniData = getLocationData(uniId);
+      const uniCost = getTravelCostRaw(state.currentLocation, uniId);
+      const uniClock = previewClock(state.clock, uniCost);
+      screen.appendChild(makeButton(
+        `${uniData.displayName}  \u2192  ${formatClock(uniClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: uniId }),
+        'nav-btn',
+      ));
+    }
+
+    // Scroll store
+    const ssId = getNeighborhoodScrollStore(neighborhood.id);
+    const ssData = getLocationData(ssId);
+    const ssCost = getTravelCostRaw(state.currentLocation, ssId);
+    const ssClock = previewClock(state.clock, ssCost);
+    screen.appendChild(makeButton(
+      `${ssData.displayName}  \u2192  ${formatClock(ssClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: ssId }),
+      'nav-btn',
+    ));
+
+    // University bookstore (only university_heights has one)
+    const bsId = getNeighborhoodBookstore(neighborhood.id);
+    if (bsId) {
+      const bsData = getLocationData(bsId);
+      const bsCost = getTravelCostRaw(state.currentLocation, bsId);
+      const bsClock = previewClock(state.clock, bsCost);
+      screen.appendChild(makeButton(
+        `${bsData.displayName}  \u2192  ${formatClock(bsClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: bsId }),
         'nav-btn',
       ));
     }
