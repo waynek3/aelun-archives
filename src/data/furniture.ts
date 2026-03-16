@@ -16,6 +16,7 @@ const furnitureBalance = balance.furniture as {
   beds: Record<string, { cost: number; sleepMana: number; sleepChill: number }>;
   lab_table: { cost: number };
   bong: { cost: number; breakChance: number };
+  crystal_ball: { cost: number };
 };
 
 export const FURNITURE_CATALOG: FurnitureDef[] = [
@@ -24,6 +25,7 @@ export const FURNITURE_CATALOG: FurnitureDef[] = [
   { id: 'bed_deluxe',   type: 'bed',       name: 'Luxury Bed',     cost: furnitureBalance.beds.bed_deluxe.cost,   quality: 3 },
   { id: 'lab_table',    type: 'lab_table', name: 'Lab Table',      cost: furnitureBalance.lab_table.cost,         quality: 1 },
   { id: 'bong',         type: 'bong',      name: 'Glass Bong',     cost: furnitureBalance.bong.cost,              quality: 1 },
+  { id: 'crystal_ball', type: 'crystal_ball', name: 'Crystal Ball', cost: furnitureBalance.crystal_ball.cost,     quality: 1 },
 ];
 
 export function getFurnitureDef(id: string): FurnitureDef {

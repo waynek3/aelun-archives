@@ -120,11 +120,23 @@ export const SPELL_CATALOG: SpellDef[] = [
     learningTime: 30,
     learningMana: 8,
   },
-  // Reveal (Crystal Ball prep — Sprint 19)
+  // Reveal — Crystal Ball spells (Sprint 19)
+  {
+    id: 'true_sight',
+    name: 'True Sight',
+    description: 'The Crystal Ball shows how chill you really are.',
+    category: 'reveal',
+    level: 1,
+    manaCost: 4,
+    castingTime: 15,
+    learningCost: 35,
+    learningTime: 30,
+    learningMana: 6,
+  },
   {
     id: 'inner_eye',
     name: 'Inner Eye',
-    description: 'See what the Crystal Ball wants to show you.',
+    description: 'The Crystal Ball reveals the depth of your need.',
     category: 'reveal',
     level: 2,
     manaCost: 8,
@@ -132,6 +144,18 @@ export const SPELL_CATALOG: SpellDef[] = [
     learningCost: 60,
     learningTime: 45,
     learningMana: 12,
+  },
+  {
+    id: 'vital_scan',
+    name: 'Vital Scan',
+    description: 'The Crystal Ball peers into your body and counts the years.',
+    category: 'reveal',
+    level: 2,
+    manaCost: 10,
+    castingTime: 15,
+    learningCost: 75,
+    learningTime: 60,
+    learningMana: 14,
   },
   // Travel
   {

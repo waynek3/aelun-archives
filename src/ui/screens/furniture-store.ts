@@ -77,8 +77,8 @@ export function renderFurnitureStore(state: GameState, container: HTMLElement, d
       } else if (currentBed) {
         label += '  (upgrade)';
       }
-    } else if (def.type === 'lab_table') {
-      const hasOne = state.furniture.some(f => f.type === 'lab_table');
+    } else if (def.type === 'lab_table' || def.type === 'crystal_ball') {
+      const hasOne = state.furniture.some(f => f.type === def.type);
       if (hasOne) {
         label += '  (owned)';
         canBuy = false;

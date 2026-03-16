@@ -11,8 +11,8 @@ export type StrengthId = 'weak' | 'mid' | 'strong';
 
 export type ColorScheme = 'blue' | 'green' | 'orange';
 
-// Sprint 13: furniture types
-export type FurnitureType = 'bed' | 'lab_table' | 'bong';
+// Sprint 13: furniture types (Sprint 19: crystal_ball)
+export type FurnitureType = 'bed' | 'lab_table' | 'bong' | 'crystal_ball';
 
 export interface FurnitureItem {
   type: FurnitureType;
@@ -178,6 +178,12 @@ export interface GameState {
   // ── Hidden Addiction Stats (Sprint 17+) ──
   addictionNeed: number;         // cumulative craving; grows with scratch frequency
   addictionSatisfaction: number; // cumulative satisfaction from scratching
+
+  // ── Age Health (Sprint 18 stub — aging system not yet implemented) ──
+  ageHealthScore: number;  // composite health; determines death age; starts at 100
+
+  // ── Crystal Ball (Sprint 19) ──
+  crystalBallReveal: { stat: string; label: string; value: number } | null;  // transient; cleared on next action
 
   // ── God Affinity (Sprint 9+) ──
   affinity: Record<GodId, number>;    // affinity score per god, starts at 0

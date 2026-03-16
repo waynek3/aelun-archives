@@ -45,4 +45,6 @@ export type GameAction =
   // Sprint 16: buy a spell scroll at a bookstore or scroll store.
   | { type: 'BUY_SCROLL'; spellId: string }
   // Sprint 16: use a spell scroll from inventory (slotIndex); godId required for affinity scrolls.
-  | { type: 'USE_SCROLL'; slotIndex: number; godId?: import('../state/types').GodId };
+  | { type: 'USE_SCROLL'; slotIndex: number; godId?: import('../state/types').GodId }
+  // Sprint 19: use the Crystal Ball to reveal a hidden stat (requires knowing the matching reveal spell).
+  | { type: 'USE_CRYSTAL_BALL'; revealType: 'addiction' | 'chill' | 'ageHealth' };

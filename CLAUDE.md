@@ -15,7 +15,7 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 ## Implementation Notes (for sprint continuity)
 
 ### Save System
-- Current `SAVE_VERSION`: 10 (as of Sprint 13)
+- Current `SAVE_VERSION`: 14 (as of Sprint 19)
 - Migrations are in `src/state/save.ts`, keyed by source version (e.g. `3:` migrates v3→v4)
 - Every sprint that adds fields to `GameState` must bump `SAVE_VERSION` in `src/state/initial.ts` and add a migration
 
@@ -88,7 +88,20 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 - Furniture store screen in `src/ui/screens/furniture-store.ts`
 - Tower screen shows furniture panel with USE (bong) and RECYCLE buttons; sleep gated on having a bed
 - Tower starts with one basic Bed ("Dusty Mattress", quality 1)
-- No Crystal Ball furniture yet (Sprint 19), no Wizard Projects via Lab Table yet (Sprint 20)
+- No Wizard Projects via Lab Table yet (Sprint 20)
+
+### Crystal Ball & Hidden Stats (Sprint 19)
+- Current `SAVE_VERSION`: 14
+- `crystalBallReveal: { stat: string; label: string; value: number } | null` — transient field on GameState, cleared on every action in `dispatch.ts`
+- `ageHealthScore: number` added to GameState (starts at 100, stub for Sprint 18 aging system)
+- Crystal Ball is singleton furniture (`crystal_ball` type), sold at all furniture stores
+- `USE_CRYSTAL_BALL` action takes `revealType: 'addiction' | 'chill' | 'ageHealth'`
+- Reveal spells are gate-checked via `knownSpells` (not `equippedSpells`) — learning the spell is the gate
+- Three reveal spells: `true_sight` (L1, reveals Chill), `inner_eye` (L2, reveals Addiction), `vital_scan` (L2, reveals Age Health)
+- Mana cost from `balance.crystalBall.revealManaCost` (flat, per use); no time cost (instant)
+- Crystal Ball panel in tower shows [GAZE] buttons per known reveal spell, with result display
+- Pure function `hasCrystalBall()` in `src/systems/furniture.ts`
+- No Crystal Ball effects on scratchers or other systems yet
 
 ## Stack
 

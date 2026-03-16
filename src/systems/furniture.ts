@@ -45,6 +45,11 @@ export function hasLabTable(furniture: FurnitureItem[]): boolean {
   return furniture.some(f => f.type === 'lab_table');
 }
 
+// Returns true if a crystal ball is installed.
+export function hasCrystalBall(furniture: FurnitureItem[]): boolean {
+  return furniture.some(f => f.type === 'crystal_ball');
+}
+
 // Replace existing bed(s) with a new bed. Used when buying a bed upgrade.
 export function replaceBed(furniture: FurnitureItem[], newBed: FurnitureItem): FurnitureItem[] {
   return [...furniture.filter(f => f.type !== 'bed'), newBed];

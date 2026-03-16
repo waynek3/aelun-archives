@@ -105,6 +105,11 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
     const state = s as Record<string, unknown>;
     return { ...state, addictionNeed: 0, addictionSatisfaction: 0 };
   },
+  // Sprint 17 → Sprint 19: add age health score stub and crystal ball reveal.
+  13: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return { ...state, ageHealthScore: 100, crystalBallReveal: null };
+  },
 };
 
 function migrate(data: SaveData): GameState {
