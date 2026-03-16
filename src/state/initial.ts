@@ -1,7 +1,7 @@
 import type { GameState } from './types';
 import balance from '../data/balance.json';
 
-export const SAVE_VERSION = 13;
+export const SAVE_VERSION = 14;
 
 export function createInitialState(): GameState {
   return {
@@ -32,6 +32,10 @@ export function createInitialState(): GameState {
     // Sprint 17: hidden addiction stats
     addictionNeed: 0,
     addictionSatisfaction: 0,
+    // Sprint 18 stub: age health score
+    ageHealthScore: balance.starting.ageHealthScore,
+    // Sprint 19: crystal ball reveal (transient)
+    crystalBallReveal: null,
     // Sprint 13: furniture (start with one basic bed)
     furniture: [{ type: 'bed' as const, id: 'bed_basic', name: 'Dusty Mattress', quality: 1 }],
     // Sprint 14: spellbook

@@ -114,7 +114,12 @@
     "bong": {
       "cost": 50,
       "breakChance": 0.10
-    }
+    },
+    "crystal_ball": { "cost": 300 }
+  },
+
+  "crystalBall": {
+    "revealManaCost": 6
   },
 
   "stats": {
@@ -160,6 +165,9 @@
     "mellow_wave":   { "chillRestore": 20, "baseMisfireChance": 0.05 },
     "deep_calm":     { "chillRestore": 40, "baseMisfireChance": 0.05 },
     "mana_siphon":   { "manaRestore": 8, "baseMisfireChance": 0.05 },
+    "inner_eye":     { "reveals": "addiction", "baseMisfireChance": 0.05 },
+    "true_sight":    { "reveals": "chill",     "baseMisfireChance": 0.05 },
+    "vital_scan":    { "reveals": "ageHealth", "baseMisfireChance": 0.05 },
     "chillMisfireScaling": 0.005
   }
 }

@@ -23,7 +23,7 @@ import { addMultipleItems, addItem, canFitItems, removeItem } from '../systems/i
 import { applyDonation, applyAffinityDecay, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
 import { getLocationData } from '../data/locations';
 import type { FurnitureItem, InventoryItem, SpellScrollItem } from '../state/types';
-import { getBed, addFurniture, removeFurniture, replaceBed } from '../systems/furniture';
+import { getBed, addFurniture, removeFurniture, replaceBed, hasCrystalBall } from '../systems/furniture';
 import { getFurnitureDef, getBedSleepRestore } from '../data/furniture';
 import { getSpellDef, BOOKBINDING_CLASS } from '../data/spells';
 import {
@@ -171,6 +171,11 @@ export function dispatch(action: GameAction): void {
 // ─── Action Handlers ──────────────────────────────────────────────────────────
 
 function applyAction(state: GameState, action: GameAction): GameState {
+  // Sprint 19: clear transient Crystal Ball reveal on every action.
+  if (state.crystalBallReveal !== null) {
+    state = { ...state, crystalBallReveal: null };
+  }
+
   switch (action.type) {
     case 'BUY_TICKETS': {
       // Sprint 7: combined ticket + snack purchase.
@@ -693,6 +698,54 @@ function applyAction(state: GameState, action: GameAction): GameState {
       };
 
       return applySpellEffect(nextState, item.spellId, spell.category, action.godId, newClock);
+    }
+
+    // ── Sprint 19 ─────────────────────────────────────────────────────────────
+
+    case 'USE_CRYSTAL_BALL': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (!hasCrystalBall(state.furniture)) return state;
+
+      // Map revealType to required spell.
+      const revealSpellMap: Record<string, string> = {
+        addiction: 'inner_eye',
+        chill: 'true_sight',
+        ageHealth: 'vital_scan',
+      };
+      const requiredSpell = revealSpellMap[action.revealType];
+      if (!requiredSpell) return state;
+
+      // Reveal spells use knownSpells (not equippedSpells) — learning is the gate.
+      if (!isSpellKnown(state.knownSpells, requiredSpell)) return state;
+
+      const crystalBal = (balance as Record<string, unknown>).crystalBall as { revealManaCost: number };
+      if (state.mana < crystalBal.revealManaCost) return state;
+
+      // Compute the revealed value.
+      let label: string;
+      let value: number;
+      switch (action.revealType) {
+        case 'addiction':
+          label = 'Addiction Level';
+          value = Math.floor(state.addictionNeed);
+          break;
+        case 'chill':
+          label = 'True Chill';
+          value = Math.round(state.chill);
+          break;
+        case 'ageHealth':
+          label = 'Age Health Score';
+          value = Math.round(state.ageHealthScore);
+          break;
+        default:
+          return state;
+      }
+
+      return {
+        ...state,
+        mana: applyManaSpend(state.mana, crystalBal.revealManaCost),
+        crystalBallReveal: { stat: action.revealType, label, value },
+      };
     }
 
     default:

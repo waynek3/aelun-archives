@@ -350,6 +350,21 @@ function makeFurniturePanel(
       row.appendChild(useBtn);
     }
 
+    // Crystal Ball: reveal buttons (Sprint 19)
+    if (item.type === 'crystal_ball') {
+      panel.appendChild(row);
+      panel.appendChild(makeCrystalBallPanel(state, dispatch));
+      // RECYCLE button on its own row for crystal ball
+      const recycleRow = document.createElement('div');
+      recycleRow.className = 'furniture-row';
+      const recycleBtn = makeButton('[RECYCLE]', () => {
+        dispatch({ type: 'RECYCLE_FURNITURE', furnitureIndex: i });
+      }, 'furniture-btn');
+      recycleRow.appendChild(recycleBtn);
+      panel.appendChild(recycleRow);
+      continue;
+    }
+
     // All items: RECYCLE button
     const recycleBtn = makeButton('[RECYCLE]', () => {
       dispatch({ type: 'RECYCLE_FURNITURE', furnitureIndex: i });
@@ -357,6 +372,67 @@ function makeFurniturePanel(
     row.appendChild(recycleBtn);
 
     panel.appendChild(row);
+  }
+
+  return panel;
+}
+
+// ── Crystal Ball Panel (Sprint 19) ──────────────────────────────────────────
+
+const CRYSTAL_BALL_REVEALS: Array<{
+  revealType: 'addiction' | 'chill' | 'ageHealth';
+  label: string;
+  requiredSpell: string;
+  spellName: string;
+}> = [
+  { revealType: 'chill',     label: 'True Chill',        requiredSpell: 'true_sight', spellName: 'True Sight' },
+  { revealType: 'addiction',  label: 'Addiction Level',   requiredSpell: 'inner_eye',  spellName: 'Inner Eye' },
+  { revealType: 'ageHealth',  label: 'Age Health Score',  requiredSpell: 'vital_scan', spellName: 'Vital Scan' },
+];
+
+function makeCrystalBallPanel(state: GameState, dispatch: Dispatch): HTMLElement {
+  const panel = document.createElement('div');
+  panel.className = 'crystal-ball-panel';
+
+  const crystalBal = (balance as Record<string, unknown>).crystalBall as { revealManaCost: number };
+  const manaCost = crystalBal.revealManaCost;
+  const hasAnySpell = CRYSTAL_BALL_REVEALS.some(r => state.knownSpells.includes(r.requiredSpell));
+
+  if (!hasAnySpell) {
+    const dark = document.createElement('p');
+    dark.className = 'inv-empty';
+    dark.textContent = 'The ball is dark. You lack the sight.';
+    panel.appendChild(dark);
+    return panel;
+  }
+
+  // Show reveal result if present.
+  if (state.crystalBallReveal) {
+    const resultEl = document.createElement('p');
+    resultEl.className = 'crystal-reveal';
+    resultEl.textContent = `\u2727 ${state.crystalBallReveal.label}: ${state.crystalBallReveal.value} \u2727`;
+    panel.appendChild(resultEl);
+  }
+
+  // Show one button per known reveal spell.
+  for (const reveal of CRYSTAL_BALL_REVEALS) {
+    const known = state.knownSpells.includes(reveal.requiredSpell);
+    if (!known) {
+      const unknown = document.createElement('p');
+      unknown.className = 'inv-empty';
+      unknown.textContent = `??? (requires ${reveal.spellName})`;
+      panel.appendChild(unknown);
+      continue;
+    }
+
+    const canAfford = state.mana >= manaCost;
+    const btn = makeButton(
+      `[${reveal.label.toUpperCase()}]  ${manaCost} mana`,
+      () => dispatch({ type: 'USE_CRYSTAL_BALL', revealType: reveal.revealType }),
+      'furniture-btn',
+    );
+    if (!canAfford) btn.disabled = true;
+    panel.appendChild(btn);
   }
 
   return panel;
