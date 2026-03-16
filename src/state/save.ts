@@ -100,6 +100,11 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
     const state = s as Record<string, unknown>;
     return { ...state, luckBuff: null };
   },
+  // Sprint 16 → Sprint 17: add hidden addiction stats.
+  12: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return { ...state, addictionNeed: 0, addictionSatisfaction: 0 };
+  },
 };
 
 function migrate(data: SaveData): GameState {
