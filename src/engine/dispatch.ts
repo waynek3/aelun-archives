@@ -23,7 +23,8 @@ import { addMultipleItems, addItem, canFitItems, removeItem } from '../systems/i
 import { applyDonation, applyAffinityDecay, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
 import { getLocationData } from '../data/locations';
 import type { FurnitureItem, InventoryItem, SpellScrollItem } from '../state/types';
-import { getBed, addFurniture, removeFurniture, replaceBed, hasCrystalBall } from '../systems/furniture';
+import { getBed, addFurniture, removeFurniture, replaceBed, hasCrystalBall, hasLabTable } from '../systems/furniture';
+import { startProject, workOnProject, cancelProject, collectProject, isProjectComplete } from '../systems/projects';
 import { getFurnitureDef, getBedSleepRestore } from '../data/furniture';
 import { getSpellDef, BOOKBINDING_CLASS } from '../data/spells';
 import {
@@ -746,6 +747,44 @@ function applyAction(state: GameState, action: GameAction): GameState {
         mana: applyManaSpend(state.mana, crystalBal.revealManaCost),
         crystalBallReveal: { stat: action.revealType, label, value },
       };
+    }
+
+    // ── Sprint 20 ─────────────────────────────────────────────────────────────
+
+    case 'START_PROJECT': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (!hasLabTable(state.furniture)) return state;
+      if (state.activeProject) return state;
+      const result = startProject(state, action.projectId);
+      return result ?? state;
+    }
+
+    case 'WORK_ON_PROJECT': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (!state.activeProject) return state;
+      if (action.duration <= 0 || action.duration % 15 !== 0) return state;
+
+      // Advance clock and check curfew.
+      const newClock = advanceClock(state.clock, action.duration);
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
+      }
+
+      return workOnProject({ ...state, clock: newClock }, action.duration);
+    }
+
+    case 'CANCEL_PROJECT': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (!state.activeProject) return state;
+      return cancelProject(state);
+    }
+
+    case 'COLLECT_PROJECT': {
+      if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (!state.activeProject) return state;
+      if (!isProjectComplete(state.activeProject)) return state;
+      const result = collectProject(state);
+      return result ?? state;
     }
 
     default:

@@ -40,7 +40,28 @@ export interface SpellScrollItem {
   spellId: string;   // which spell this scroll casts
 }
 
-export type InventoryItem = SnackItem | SpellScrollItem;
+// Sprint 20: potion items (crafted via Wizard Projects)
+export interface PotionItem {
+  type: 'potion';
+  id: string;        // e.g. 'longevity_potion'
+  name: string;      // e.g. 'Longevity Potion'
+}
+
+// Sprint 20: monument items (crafted via Wizard Projects, donated at temples in Sprint 21)
+export interface MonumentItem {
+  type: 'monument';
+  id: string;        // e.g. 'monument_small'
+  name: string;
+  size: 'small' | 'medium' | 'large';
+}
+
+export type InventoryItem = SnackItem | SpellScrollItem | PotionItem | MonumentItem;
+
+// Sprint 20: active wizard project state
+export interface ProjectState {
+  projectId: string;    // e.g. 'longevity_potion'
+  progress: number;     // work units accumulated
+}
 
 // Sprint 2+: location and neighborhood tracking
 export type NeighborhoodId =
@@ -201,6 +222,9 @@ export interface GameState {
 
   // ── Birthday (Sprint 11+) ──
   birthdayMonth: number;  // 1–12; set during new-run setup; used for Birthday event (Sprint 23+)
+
+  // ── Wizard Projects (Sprint 20+) ──
+  activeProject: ProjectState | null;  // one project at a time; null = no project
 
   // ── Scratch session (active during 'scratching' phase) ──
   scratchSession: ScratchSessionState | null;

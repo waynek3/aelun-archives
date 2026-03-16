@@ -1,7 +1,7 @@
 import type { GameState } from './types';
 import balance from '../data/balance.json';
 
-export const SAVE_VERSION = 14;
+export const SAVE_VERSION = 15;
 
 export function createInitialState(): GameState {
   return {
@@ -51,6 +51,8 @@ export function createInitialState(): GameState {
       azorius: 0, ara: 0, finhorn: 0, beroan: 0, sofiel: 0,
     },
     prayerBuffs: [],
+    // Sprint 20: wizard projects
+    activeProject: null,
     // Scratch session
     scratchSession: null,
     totalTicketsScratched: 0,

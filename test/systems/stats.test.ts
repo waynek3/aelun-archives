@@ -4,8 +4,8 @@ import balance from '../../src/data/balance.json';
 
 describe('Sprint 8: Player Stats', () => {
   describe('SAVE_VERSION', () => {
-    it('is 13', () => {
-      expect(SAVE_VERSION).toBe(13);
+    it('is 15', () => {
+      expect(SAVE_VERSION).toBe(15);
     });
   });
 

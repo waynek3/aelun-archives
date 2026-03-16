@@ -110,6 +110,11 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
     const state = s as Record<string, unknown>;
     return { ...state, ageHealthScore: 100, crystalBallReveal: null };
   },
+  // Sprint 19 → Sprint 20: add wizard projects.
+  14: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return { ...state, activeProject: null };
+  },
 };
 
 function migrate(data: SaveData): GameState {
