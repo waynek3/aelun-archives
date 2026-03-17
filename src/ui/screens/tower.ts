@@ -22,6 +22,10 @@ import { getBed } from '../../systems/furniture';
 import { getSpellDef } from '../../data/spells';
 import { canAddToBook } from '../../systems/spellbook';
 import { ALL_GOD_IDS, getGod } from '../../data/gods';
+import { PROJECTS, getProjectDef } from '../../data/projects';
+import { getProjectProgress, isProjectComplete } from '../../systems/projects';
+import { freeSlots } from '../../systems/inventory';
+import { progressBar } from '../../util/format';
 import balance from '../../data/balance.json';
 
 // Sprint 15: reuse the same timestamp comparison for luck buff display.
@@ -335,12 +339,23 @@ function makeFurniturePanel(
     const nameEl = document.createElement('span');
     nameEl.className = 'furniture-name';
 
-    if (item.type === 'lab_table') {
-      nameEl.textContent = `${item.name}  (Gathering dust...)`;
-    } else {
-      nameEl.textContent = item.name;
-    }
+    nameEl.textContent = item.name;
     row.appendChild(nameEl);
+
+    // Lab Table: project panel (Sprint 20)
+    if (item.type === 'lab_table') {
+      panel.appendChild(row);
+      panel.appendChild(makeProjectPanel(state, dispatch));
+      // RECYCLE button on its own row for lab table
+      const recycleRow = document.createElement('div');
+      recycleRow.className = 'furniture-row';
+      const recycleBtn = makeButton('[RECYCLE]', () => {
+        dispatch({ type: 'RECYCLE_FURNITURE', furnitureIndex: i });
+      }, 'furniture-btn');
+      recycleRow.appendChild(recycleBtn);
+      panel.appendChild(recycleRow);
+      continue;
+    }
 
     // Bong: USE button
     if (item.type === 'bong') {
@@ -434,6 +449,104 @@ function makeCrystalBallPanel(state: GameState, dispatch: Dispatch): HTMLElement
     if (!canAfford) btn.disabled = true;
     panel.appendChild(btn);
   }
+
+  return panel;
+}
+
+// ── Project Panel (Sprint 20) ───────────────────────────────────────────────
+
+const projectsBal = (balance as any).projects as {
+  durationOptions: number[];
+  lowChillThreshold: number;
+};
+
+function makeProjectPanel(state: GameState, dispatch: Dispatch): HTMLElement {
+  const panel = document.createElement('div');
+  panel.className = 'project-panel';
+
+  const project = state.activeProject;
+
+  // No active project: show project selection
+  if (!project) {
+    const prompt = document.createElement('p');
+    prompt.className = 'inv-empty';
+    prompt.textContent = 'Choose a project:';
+    panel.appendChild(prompt);
+
+    for (const def of PROJECTS) {
+      const btn = makeButton(
+        `${def.name}  (${def.description})`,
+        () => dispatch({ type: 'START_PROJECT', projectId: def.id }),
+        'furniture-btn',
+      );
+      panel.appendChild(btn);
+    }
+
+    return panel;
+  }
+
+  // Active project
+  const def = getProjectDef(project.projectId);
+  if (!def) return panel;
+
+  const progress = getProjectProgress(project);
+  const complete = isProjectComplete(project);
+
+  // Project name + progress bar
+  const nameEl = document.createElement('p');
+  nameEl.className = 'project-name';
+  nameEl.textContent = def.name;
+  panel.appendChild(nameEl);
+
+  const barEl = document.createElement('p');
+  barEl.className = 'project-bar';
+  barEl.textContent = `[${progressBar(progress, 1, 20)}]`;
+  panel.appendChild(barEl);
+
+  if (complete) {
+    // Project is done — collect or waiting for inventory space
+    const hasFreeSlot = freeSlots(state.inventory) > 0;
+    if (hasFreeSlot) {
+      const collectBtn = makeButton(
+        `[COLLECT ${def.producesItem.name.toUpperCase()}]`,
+        () => dispatch({ type: 'COLLECT_PROJECT' }),
+        'furniture-btn',
+      );
+      panel.appendChild(collectBtn);
+    } else {
+      const warning = document.createElement('p');
+      warning.className = 'inv-warning';
+      warning.textContent = '! Inventory full — free a slot to collect !';
+      panel.appendChild(warning);
+    }
+  } else {
+    // Low chill warning
+    if (state.chill < projectsBal.lowChillThreshold) {
+      const warning = document.createElement('p');
+      warning.className = 'inv-warning';
+      warning.textContent = '! Low chill — progress will be reduced !';
+      panel.appendChild(warning);
+    }
+
+    // Work buttons with duration options
+    for (const dur of projectsBal.durationOptions) {
+      const arrivalClock = previewClock(state.clock, dur);
+      const btn = makeButton(
+        `[WORK ${dur}m]  \u2192  ${formatClock(arrivalClock)}`,
+        () => dispatch({ type: 'WORK_ON_PROJECT', duration: dur }),
+        'furniture-btn',
+      );
+      panel.appendChild(btn);
+    }
+  }
+
+  // Cancel button (always available while project active)
+  const cancelBtn = makeButton(
+    '[CANCEL PROJECT]',
+    () => dispatch({ type: 'CANCEL_PROJECT' }),
+    'furniture-btn',
+  );
+  panel.appendChild(cancelBtn);
 
   return panel;
 }

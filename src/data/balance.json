@@ -157,6 +157,21 @@
     "storePurchaseTimeCost": 15
   },
 
+  "projects": {
+    "chillCostPerQuarter": 5,
+    "lowChillThreshold": 30,
+    "lowChillProgressMultiplier": 0.5,
+    "baseProgressPerQuarter": 1,
+    "durationOptions": [15, 30, 45, 60],
+    "definitions": {
+      "longevity_potion":  { "requiredProgress": 8 },
+      "luck_potion":       { "requiredProgress": 6 },
+      "monument_small":    { "requiredProgress": 10 },
+      "monument_medium":   { "requiredProgress": 25 },
+      "monument_large":    { "requiredProgress": 50 }
+    }
+  },
+
   "spells": {
     "favor_boost":   { "affinityGain": 3.0, "baseMisfireChance": 0.05 },
     "divine_slight": { "affinityLoss": 3.0, "baseMisfireChance": 0.05 },

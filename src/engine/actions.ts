@@ -47,4 +47,9 @@ export type GameAction =
   // Sprint 16: use a spell scroll from inventory (slotIndex); godId required for affinity scrolls.
   | { type: 'USE_SCROLL'; slotIndex: number; godId?: import('../state/types').GodId }
   // Sprint 19: use the Crystal Ball to reveal a hidden stat (requires knowing the matching reveal spell).
-  | { type: 'USE_CRYSTAL_BALL'; revealType: 'addiction' | 'chill' | 'ageHealth' };
+  | { type: 'USE_CRYSTAL_BALL'; revealType: 'addiction' | 'chill' | 'ageHealth' }
+  // Sprint 20: wizard project actions (Lab Table).
+  | { type: 'START_PROJECT'; projectId: string }
+  | { type: 'WORK_ON_PROJECT'; duration: number }   // minutes, must be :15 increment
+  | { type: 'CANCEL_PROJECT' }
+  | { type: 'COLLECT_PROJECT' };                     // pick up completed item when inventory was full
