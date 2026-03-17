@@ -1,121 +1,190 @@
-# Sprint 18: Aging System — Implementation Plan
+# Sprint 22: Dad's House — Implementation Plan
 
-## What Sprint 18 Delivers
-Per `sprints.md`: "Add the aging system. Wizard ages in real calendar time. Intelligence degrades slowly with age. Addiction susceptibility increases with age. Death age is determined by hidden Age Health Score (food quality, lifestyle). On death, show the legacy screen."
+## Summary
 
-## What's In Scope
-1. **Age tracking** — wizard has a starting age, ages as game calendar years pass
-2. **Intelligence decay** — degrades slowly with age (`balance.aging.intelligenceDecayPerYear`)
-3. **Addiction susceptibility** — increases with age (`balance.aging.addictionSusceptibilityPerYear`)
-4. **Age Health Score** — hidden stat, starts at 100, modified by food quality (greasy/salty/sugary = bad, healthy/gourmet = good)
-5. **Death age** — computed from ageHealthScore: `baseDeathAge + ageHealthScore * healthScoreDeathAgeBonus`
-6. **Death check** — when wizard's age reaches deathAge, game ends
-7. **Basic legacy screen** — shown on death (Sprint 26 fleshes it out later)
-
-## What's NOT In Scope
-- Slow Aging Potions (Sprint 20 — Wizard Projects)
-- Crystal Ball reveal of ageHealthScore (Sprint 19)
-- Full legacy screen details (Sprint 26)
-- Random Events affecting ageHealthScore (Sprint 23)
-- Longevity Potion (Sprint 20)
+Add Dad's House as a new location type in Richville. The player can visit Dad to take out a loan (one at a time), repay loans voluntarily, and manage the spellbook-as-collateral mechanic. Interest accrues monthly on rent day. A `dadAlive` flag enables the future "Dad Dies" Random Event (Sprint 23) that converts the location to Dad's Grave (visiting grants mana, reduces chill).
 
 ---
 
-## Implementation Steps
+## Design Decisions (from user input)
 
-### Step 1: Add balance values for aging/food health
-**File:** `src/data/balance.json`
-- The `aging` section already exists with correct values
-- Add `healthImpact` values per food descriptor under `snacks`:
-  ```json
-  "snacks": {
-    "chillRestore": { ... },
-    "healthImpact": {
-      "greasy": -1,
-      "salty": -1,
-      "sugary": -1,
-      "bland": 0,
-      "healthy": 1,
-      "gourmet": 1
-    }
-  }
+- **Repayment**: Voluntary — player visits Dad's House and chooses to repay any amount. Interest accrues monthly on rent day. No forced due date, no game-over on default. Debt just grows.
+- **Loan count**: One loan at a time. Must repay current loan before taking another.
+- **Collateral**: Large loans lock spellbook access (no add/remove/cast equipped spells) until repaid.
+
+---
+
+## Step-by-step Plan
+
+### Step 1: State & Types (`src/state/types.ts`)
+
+Add to `LocationId` union:
+```
+| 'richville_dads_house'   // Sprint 22
+```
+
+Add loan state fields to `GameState`:
+```typescript
+// ── Dad's House & Loans (Sprint 22+) ──
+dadAlive: boolean;                  // true until "Dad Dies" event (Sprint 23)
+loan: {
+  principal: number;                // remaining principal owed
+  interestRate: number;             // monthly rate (decimal, e.g. 0.10 = 10%)
+  collateral: boolean;              // true if spellbook is held as collateral
+} | null;                           // null = no active loan
+```
+
+### Step 2: Balance Config (`src/data/balance.json`)
+
+Add `dadsHouse` section:
+```json
+"dadsHouse": {
+  "loanAmounts": [50, 100, 200, 500],
+  "collateralThreshold": 200,
+  "repaymentAmounts": [25, 50, 100, 250, 500],
+  "baseInterestRate": 0.15,
+  "fameInterestReduction": 0.002,
+  "minInterestRate": 0.05,
+  "baseLoanCap": 200,
+  "fameCapBonus": 5,
+  "maxLoanCap": 1000,
+  "visitTimeCost": 15,
+  "graveManaRestore": 8,
+  "graveChillLoss": 10
+}
+```
+
+Interest rate formula: `max(minInterestRate, baseInterestRate - wizardFame * fameInterestReduction)`
+Loan cap formula: `min(maxLoanCap, baseLoanCap + wizardFame * fameCapBonus)`
+
+### Step 3: Location Data (`src/data/locations.ts`)
+
+- Add `'dads_house'` to `LocationType`
+- Add location entry:
+  ```typescript
+  { id: 'richville_dads_house', neighborhood: 'richville', type: 'dads_house', displayName: "DAD'S HOUSE" }
   ```
+- Add helper: `getNeighborhoodDadsHouse(neighborhoodId): LocationId | null` (returns the location only for richville)
+- Keep one location ID; check `state.dadAlive` in screen renderer to show either Dad's House UI or Dad's Grave UI.
 
-### Step 2: Add aging fields to GameState
-**File:** `src/state/types.ts`
-- Add `Phase` value `'legacy'` (for death screen)
-- Add fields to `GameState`:
-  - `startingAge: number` — age at game start (from balance, e.g. 22)
-  - `ageHealthScore: number` — hidden stat tracking lifestyle impact on death age
-  - `deathAge: number` — computed from ageHealthScore
+### Step 4: Loan System (`src/systems/loan.ts`)
 
-### Step 3: Update initial state
-**File:** `src/state/initial.ts`
-- Bump `SAVE_VERSION` to 14
-- Initialize new fields:
-  - `startingAge: balance.starting.startingAge` (add to balance.json starting section, e.g. 22)
-  - `ageHealthScore: balance.starting.ageHealthScore` (already 100 in balance)
-  - `deathAge`: computed from initial ageHealthScore using the formula
+Pure functions:
+```typescript
+calculateLoanCap(wizardFame: number): number
+calculateInterestRate(wizardFame: number): number
+takeLoan(state: GameState, amount: number): GameState | null  // null = invalid
+repayLoan(state: GameState, amount: number): GameState | null
+accrueInterest(state: GameState): GameState  // called on rent day
+isSpellbookLocked(state: GameState): boolean  // true if collateral loan active
+```
 
-### Step 4: Add save migration
-**File:** `src/state/save.ts`
-- Add migration `13:` → adds `startingAge`, `ageHealthScore`, `deathAge` fields to old saves
+### Step 5: Actions (`src/engine/actions.ts`)
 
-### Step 5: Create aging system
-**File:** `src/systems/aging.ts` (NEW)
-- Pure functions:
-  - `getCurrentAge(startingAge, startYear, currentYear)` — returns current wizard age
-  - `computeDeathAge(ageHealthScore)` — `baseDeathAge + ageHealthScore * healthScoreDeathAgeBonus`
-  - `applyYearlyAging(state)` — called on year rollover: decay intelligence, increase addiction susceptibility
-  - `applyFoodHealthImpact(ageHealthScore, descriptor)` — modifies ageHealthScore when eating
-  - `checkDeath(state)` — returns true if current age >= deathAge
+Add:
+```typescript
+// Sprint 22: Dad's House loan actions.
+| { type: 'TAKE_LOAN'; amount: number }
+| { type: 'REPAY_LOAN'; amount: number }
+| { type: 'VISIT_GRAVE' }    // mana up, chill down
+```
 
-### Step 6: Wire food health impact into CONSUME_SNACK
-**File:** `src/engine/dispatch.ts`
-- In the `CONSUME_SNACK` handler, after applying chill restore, also apply `applyFoodHealthImpact()` to ageHealthScore and recompute deathAge
+### Step 6: Dispatch (`src/engine/dispatch.ts`)
 
-### Step 7: Wire yearly aging into SLEEP action
-**File:** `src/engine/dispatch.ts`
-- In the `SLEEP` handler (and passout `WAKE_UP`), after `advanceDay()`, check if the year rolled over
-- If year changed: apply `applyYearlyAging()` (intelligence decay + addiction susceptibility)
-- After any day advance, run `checkDeath()` — if dead, set `phase: 'legacy'`
+Add handlers for:
+- `TAKE_LOAN`: validate at dads_house, dadAlive, no existing loan, amount <= cap, amount <= available amounts. Create loan, add cash, check collateral threshold, lock spellbook if needed. Advance clock by visitTimeCost.
+- `REPAY_LOAN`: validate at dads_house, dadAlive, has active loan. Deduct cash (min of repay amount and remaining principal). If fully repaid, clear loan and unlock spellbook.
+- `VISIT_GRAVE`: validate at dads_house, !dadAlive. Apply mana restore and chill loss. Advance clock by visitTimeCost.
 
-### Step 8: Create basic legacy screen
-**File:** `src/ui/screens/legacy.ts` (NEW)
-- Basic death screen showing:
-  - "You lived to age X"
-  - Days survived
-  - Best single win
-  - Total tickets scratched
-  - Final cash
-  - "New Game" button
-- Minimal for now — Sprint 26 fleshes it out
+Modify rent processing: In `checkRent()` (or in the SLEEP/WAKE_UP handlers after checkRent), call `accrueInterest()` on rent day to compound interest onto principal.
 
-### Step 9: Wire legacy screen into renderer
-**File:** `src/ui/renderer.ts`
-- Add case for `phase === 'legacy'` to render the legacy screen
+Add spellbook lock guards: In `CAST_SPELL`, `ADD_SPELL_TO_BOOK`, `REMOVE_SPELL_FROM_BOOK` handlers, check `isSpellbookLocked(state)` and return state unchanged if locked.
 
-### Step 10: Wire addiction susceptibility modifier
-**File:** `src/systems/addiction.ts`
-- Modify `growNeed()` to accept an age susceptibility modifier
-- Or: apply the modifier in dispatch when calling `growNeed()`
-- The aging system provides a multiplier: `1 + (yearsOld * addictionSusceptibilityPerYear)`
+### Step 7: Save Migration (`src/state/save.ts`, `src/state/initial.ts`)
 
-### Step 11: Add tests
-**File:** `test/systems/aging.test.ts` (NEW)
-- Test `getCurrentAge()` computation
-- Test `computeDeathAge()` formula
-- Test `applyYearlyAging()` intelligence decay
-- Test `applyFoodHealthImpact()` with each descriptor
-- Test `checkDeath()` boundary conditions
+- Bump `SAVE_VERSION` from 15 to 16
+- Add migration `15:` that adds `dadAlive: true, loan: null`
+- Update `createInitialState()` with `dadAlive: true, loan: null`
+
+### Step 8: Dad's House Screen (`src/ui/screens/dads-house.ts`)
+
+New file following the temple screen pattern.
+
+**When dadAlive = true (Dad's House):**
+- Header: "DAD'S HOUSE"
+- Subtitle: "Your father lives here. He is disappointed in you."
+- Cash display
+- If no active loan:
+  - TAKE OUT LOAN section
+  - Show available loan amounts (up to loan cap), each as a button: `BORROW $X (Y% monthly)`
+  - Note: amounts above collateral threshold show `[SPELLBOOK COLLATERAL]`
+- If active loan:
+  - OUTSTANDING LOAN section showing principal remaining
+  - If collateral: warning `Dad is holding your spellbook.`
+  - REPAY section with repayment amount buttons (capped at principal and cash)
+- Inventory panel
+- Travel section (standard pattern)
+
+**When dadAlive = false (Dad's Grave):**
+- Header: "DAD'S GRAVE"
+- Subtitle: "He's gone. You feel something."
+- [VISIT GRAVE] button — restores mana, reduces chill
+- Travel section
+
+### Step 9: Renderer (`src/ui/renderer.ts`)
+
+- Add `'dads_house'` to `ScreenId` type
+- Import `renderDadsHouse`
+- Add routing: `if (locType === 'dads_house') return 'dads_house';`
+- Add render case for `dads_house`
+
+### Step 10: Travel Buttons (all location screens)
+
+Add Dad's House to the travel destination lists on all screens (temple, bodega, furniture-store, university, bookstore, scroll-store, tower). Only show for richville neighborhood. Use `getNeighborhoodDadsHouse()` helper, following the same pattern as university/bookstore (null check).
+
+### Step 11: Tests (`test/systems/loan.test.ts`)
+
+Test:
+- Loan cap scales with wizard fame
+- Interest rate scales with wizard fame
+- Taking a loan adds cash, creates loan state
+- Repaying reduces principal, clears loan when zero
+- Interest accrual on rent day
+- Collateral threshold triggers spellbook lock
+- Spellbook unlock on full repayment
+- Cannot take second loan while one is active
+- Cannot borrow above cap
+
+### Step 12: Build & Verify
+
+- Run `npm run build` to verify no type errors
+- Run `npm test` to verify no regressions
 
 ---
 
-## Key Design Decisions
+## Files Modified
 
-1. **Starting age**: 22 (wizard lost his scholarship — college age). Stored in balance.json.
-2. **Age computation**: `startingAge + (currentYear - 1)` since game starts at year 1.
-3. **Yearly aging trigger**: On day advancing from year N to year N+1 (during sleep or passout wake).
-4. **Death check location**: After every day advance (sleep and passout), since that's when calendar progresses.
-5. **Food health impact**: Applied instantly on snack consumption, same as chill restore.
-6. **Addiction susceptibility**: Applied as a multiplier on need growth, not as a separate stat field. The multiplier is computed from current age on the fly.
+| File | Change |
+|------|--------|
+| `src/state/types.ts` | Add `LocationId`, loan fields to `GameState` |
+| `src/state/initial.ts` | Bump SAVE_VERSION, add initial loan fields |
+| `src/state/save.ts` | Add migration 15→16 |
+| `src/data/balance.json` | Add `dadsHouse` section |
+| `src/data/locations.ts` | Add `dads_house` type, location entry, helper |
+| `src/engine/actions.ts` | Add `TAKE_LOAN`, `REPAY_LOAN`, `VISIT_GRAVE` |
+| `src/engine/dispatch.ts` | Handle new actions, spellbook lock, interest accrual |
+| `src/systems/loan.ts` | **NEW** — loan pure functions |
+| `src/ui/screens/dads-house.ts` | **NEW** — Dad's House / Grave screen |
+| `src/ui/renderer.ts` | Route to dads_house screen |
+| All location screens | Add Dad's House to travel sections |
+| `src/systems/rent.ts` | Call interest accrual on rent day |
+| `test/systems/loan.test.ts` | **NEW** — loan system tests |
+
+---
+
+## What is NOT in scope (future sprints)
+
+- Random Event trigger logic for "Dad Dies" (Sprint 23 — we only add the `dadAlive` flag and grave rendering)
+- Bong break Random Event (Sprint 23)
+- Any other Random Events (Sprint 23)
+- Loan Shark (Sprint 23 Random Event)
