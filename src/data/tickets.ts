@@ -25,7 +25,7 @@ export const TICKET_TYPES: TicketType[] = [
     cost: 1,
     grid: { rows: 3, cols: 3 },  // 9 cells
     winChance: 0.20,
-    payoutTable:  [2,   5,   12,  30,   75,  200,  500],
+    payoutTable:  [2,   3,    5,  12,   30,   75,  200],
     matchWeights: [70,  15,   8,   4,    2,  0.8,  0.2],
   },
   {
@@ -34,7 +34,7 @@ export const TICKET_TYPES: TicketType[] = [
     cost: 2,
     grid: { rows: 3, cols: 3 },  // 9 cells
     winChance: 0.22,
-    payoutTable:  [4,   10,  25,  60,  150,  400, 1000],
+    payoutTable:  [4,    6,  10,  22,   55,  135,  340],
     matchWeights: [70,  15,   8,   4,    2,  0.8,  0.2],
   },
   {
@@ -43,7 +43,7 @@ export const TICKET_TYPES: TicketType[] = [
     cost: 5,
     grid: { rows: 3, cols: 5 },  // 15 cells
     winChance: 0.25,
-    payoutTable:  [10,  25,  60, 150,  350,  900, 2500],
+    payoutTable:  [10,  12,  16,  30,   65,  155,  390],
     matchWeights: [55,  20,  12,   7,    4,    1.5, 0.5],
   },
   {
@@ -52,7 +52,7 @@ export const TICKET_TYPES: TicketType[] = [
     cost: 10,
     grid: { rows: 4, cols: 4 },  // 16 cells
     winChance: 0.28,
-    payoutTable:  [20,  50, 120, 300,  700, 1800, 5000],
+    payoutTable:  [20,  22,  28,  52,  117,  282,  715],
     matchWeights: [50,  22,  14,   8,    4,    1.5, 0.5],
   },
   {
@@ -61,7 +61,7 @@ export const TICKET_TYPES: TicketType[] = [
     cost: 20,
     grid: { rows: 4, cols: 5 },  // 20 cells
     winChance: 0.32,
-    payoutTable:  [40, 100, 250, 600, 1500, 4000, 10000],
+    payoutTable:  [40,  42,  45,  80,  175,  415, 1050],
     matchWeights: [45,  23,  16,   9,    5,    1.5,  0.5],
   },
 ];

@@ -172,6 +172,12 @@
     }
   },
 
+  "monumentDonation": {
+    "small":  { "affinityGain": 6,  "opposedLoss": 3  },
+    "medium": { "affinityGain": 14, "opposedLoss": 7  },
+    "large":  { "affinityGain": 28, "opposedLoss": 14 }
+  },
+
   "spells": {
     "favor_boost":   { "affinityGain": 3.0, "baseMisfireChance": 0.05 },
     "divine_slight": { "affinityLoss": 3.0, "baseMisfireChance": 0.05 },
