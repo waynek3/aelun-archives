@@ -104,6 +104,38 @@ export function applyDonation(
   return result;
 }
 
+// ─── Monument Donation (Sprint 21) ──────────────────────────────────────────
+
+// Apply a monument donation and return updated affinity record.
+// Monuments give fixed affinity gains (larger than cash donations) based on size.
+// Prayer buffs and strong month multipliers apply the same way as cash donations.
+export function applyMonumentDonation(
+  affinity: Record<GodId, number>,
+  godId: GodId,
+  size: 'small' | 'medium' | 'large',
+  buffs: PrayerBuff[],
+  clock: number, day: number, month: number, year: number,
+): Record<GodId, number> {
+  const monBal = (balance as Record<string, unknown>).monumentDonation as
+    Record<string, { affinityGain: number; opposedLoss: number }>;
+  const { affinityGain: baseGain, opposedLoss: baseLoss } = monBal[size];
+
+  const opposedGod = getOpposedGod(godId);
+  const hasTargetBuff = hasPrayerBuff(buffs, godId, clock, day, month, year);
+  const hasOpposedBuff = hasPrayerBuff(buffs, opposedGod, clock, day, month, year);
+
+  const isStrongMonth = getGod(godId).strongMonths.includes(month);
+  const strongMultiplier = isStrongMonth ? aff.strongMonthMultiplier : 1;
+
+  const gain = baseGain * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMultiplier;
+  const loss = hasOpposedBuff ? baseLoss * aff.prayerDebuffMultiplier : baseLoss;
+
+  const result = { ...affinity };
+  result[godId] = result[godId] + gain;
+  result[opposedGod] = result[opposedGod] - loss;
+  return result;
+}
+
 // ─── Passive Decay (Sprint 12) ───────────────────────────────────────────────
 
 // Apply daily passive decay to all god affinities.

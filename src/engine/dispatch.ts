@@ -20,7 +20,7 @@ import { applyManaRestore } from '../systems/mana';
 import { applyChillGain } from '../systems/chill';
 import { getSnack } from '../data/food';
 import { addMultipleItems, addItem, canFitItems, removeItem } from '../systems/inventory';
-import { applyDonation, applyAffinityDecay, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
+import { applyDonation, applyMonumentDonation, applyAffinityDecay, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
 import { getLocationData } from '../data/locations';
 import type { FurnitureItem, InventoryItem, SpellScrollItem } from '../state/types';
 import { getBed, addFurniture, removeFurniture, replaceBed, hasCrystalBall, hasLabTable } from '../systems/furniture';
@@ -785,6 +785,23 @@ function applyAction(state: GameState, action: GameAction): GameState {
       if (!isProjectComplete(state.activeProject)) return state;
       const result = collectProject(state);
       return result ?? state;
+    }
+
+    case 'DONATE_MONUMENT': {
+      if (state.phase !== 'playing') return state;
+      const locData = getLocationData(state.currentLocation);
+      if (locData.type !== 'temple' || !locData.godId) return state;
+      const item = state.inventory[action.slotIndex];
+      if (!item || item.type !== 'monument') return state;
+      const newAffinity = applyMonumentDonation(
+        state.affinity,
+        locData.godId,
+        item.size,
+        state.prayerBuffs,
+        state.clock, state.day, state.month, state.year,
+      );
+      const newInventory = removeItem(state.inventory, action.slotIndex);
+      return { ...state, affinity: newAffinity, inventory: newInventory };
     }
 
     default:

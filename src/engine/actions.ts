@@ -52,4 +52,6 @@ export type GameAction =
   | { type: 'START_PROJECT'; projectId: string }
   | { type: 'WORK_ON_PROJECT'; duration: number }   // minutes, must be :15 increment
   | { type: 'CANCEL_PROJECT' }
-  | { type: 'COLLECT_PROJECT' };                     // pick up completed item when inventory was full
+  | { type: 'COLLECT_PROJECT' }                      // pick up completed item when inventory was full
+  // Sprint 21: donate a monument from inventory to the current temple.
+  | { type: 'DONATE_MONUMENT'; slotIndex: number };

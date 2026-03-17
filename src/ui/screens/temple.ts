@@ -60,6 +60,42 @@ export function renderTemple(state: GameState, container: HTMLElement, dispatch:
   screen.appendChild(cashLine);
   screen.appendChild(makeDivider());
 
+  // ── Monument Donation ──
+  screen.appendChild(makeHeader('MONUMENT DONATION'));
+  const monNote = document.createElement('p');
+  monNote.className = 'temple-note';
+  monNote.textContent = 'Consecrate a crafted monument. Greater than any cash gift.';
+  screen.appendChild(monNote);
+
+  const monuments = state.inventory
+    .map((item, i) => ({ item, i }))
+    .filter(({ item }) => item !== null && item.type === 'monument');
+
+  if (monuments.length === 0) {
+    const noMon = document.createElement('p');
+    noMon.className = 'temple-note';
+    noMon.textContent = 'No monuments in inventory.';
+    screen.appendChild(noMon);
+  } else {
+    const sizeLabel: Record<string, string> = {
+      small: 'Small (moderate)',
+      medium: 'Medium (significant)',
+      large: 'Large (major)',
+    };
+    for (const { item, i } of monuments) {
+      if (!item || item.type !== 'monument') continue;
+      const label = `${sizeLabel[item.size] ?? item.size} Monument`;
+      const btn = makeButton(
+        `DONATE  \u2192  ${label}`,
+        () => dispatch({ type: 'DONATE_MONUMENT', slotIndex: i }),
+        'temple-btn',
+      );
+      screen.appendChild(btn);
+    }
+  }
+
+  screen.appendChild(makeDivider());
+
   // ── Private Donation ──
   screen.appendChild(makeHeader('PRIVATE DONATION'));
   const privNote = document.createElement('p');
