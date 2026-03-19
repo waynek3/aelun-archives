@@ -54,4 +54,11 @@ export type GameAction =
   | { type: 'CANCEL_PROJECT' }
   | { type: 'COLLECT_PROJECT' }                      // pick up completed item when inventory was full
   // Sprint 21: donate a monument from inventory to the current temple.
-  | { type: 'DONATE_MONUMENT'; slotIndex: number };
+  | { type: 'DONATE_MONUMENT'; slotIndex: number }
+  // Sprint 22: Dad's House loan actions.
+  | { type: 'TAKE_LOAN'; amount: number }
+  | { type: 'REPAY_LOAN'; amount: number }
+  | { type: 'VISIT_GRAVE' }
+  // Sprint 23: random event actions.
+  | { type: 'RESOLVE_EVENT'; choiceIndex: number }
+  | { type: 'DISMISS_EVENT' };

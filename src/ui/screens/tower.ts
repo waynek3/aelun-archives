@@ -16,6 +16,7 @@ import {
   getNeighborhoodUniversity,
   getNeighborhoodScrollStore,
   getNeighborhoodBookstore,
+  getNeighborhoodDadsHouse,
   getLocationData,
 } from '../../data/locations';
 import { getBed } from '../../systems/furniture';
@@ -156,6 +157,20 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
       screen.appendChild(makeButton(
         `${bsData.displayName}  \u2192  ${formatClock(bsClock)}`,
         () => dispatch({ type: 'TRAVEL', destination: bsId }),
+        'nav-btn',
+      ));
+    }
+
+    // Dad's House (Richville only)
+    const dhId = getNeighborhoodDadsHouse(neighborhood.id);
+    if (dhId && dhId !== state.currentLocation) {
+      const dhData = getLocationData(dhId);
+      const dhCost = getTravelCostRaw('tower', dhId);
+      const dhClock = previewClock(state.clock, dhCost);
+      const dhLabel = state.dadAlive ? dhData.displayName : "DAD'S GRAVE";
+      screen.appendChild(makeButton(
+        `${dhLabel}  \u2192  ${formatClock(dhClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: dhId }),
         'nav-btn',
       ));
     }

@@ -44,6 +44,10 @@ import { getOpposedGod, getGod } from '../data/gods';
 import type { LuckBuff } from '../state/types';
 import { rng } from '../util/rng';
 import { growNeed, gainSatisfaction, computeRestingRelaxation } from '../systems/addiction';
+import { takeLoan, repayLoan, accrueInterest, isSpellbookLocked } from '../systems/loan';
+import { getLocationType } from '../data/locations';
+import { checkForEvent, createActiveEvent, resolveEvent, applyLoanSharkInterest, collectLoanSharkDebt } from '../systems/events';
+import { RANDOM_EVENTS } from '../data/events';
 import balance from '../data/balance.json';
 
 // ─── Spell balance reference ──────────────────────────────────────────────────
@@ -165,6 +169,28 @@ export function getState(): GameState {
 
 export function dispatch(action: GameAction): void {
   _state = applyAction(_state, action);
+
+  // Sprint 23: check for random event triggers after most actions.
+  // Skip event checks during event resolution, setup, game over, and scratch phase.
+  if (
+    _state.phase === 'playing' &&
+    action.type !== 'RESOLVE_EVENT' &&
+    action.type !== 'DISMISS_EVENT' &&
+    action.type !== 'NEW_GAME' &&
+    action.type !== 'SET_THEME' &&
+    action.type !== 'SET_BIRTHDAY'
+  ) {
+    const result = checkForEvent(_state, action);
+    if (result) {
+      _state = {
+        ..._state,
+        phase: 'event',
+        activeEvent: createActiveEvent(result.event),
+        rngSeed: result.rngSeed,
+      };
+    }
+  }
+
   saveGame(_state);
   _render(_state);
 }
@@ -283,7 +309,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       if (!bed) return state;
       const bedRestore = getBedSleepRestore(bed.id);
       const cal = advanceDay(state.day, state.month, state.year);
-      const nextState: GameState = {
+      let nextState: GameState = {
         ...state,
         clock: balance.dayCycle.wakeTime,
         lastPassoutPenalty: null,
@@ -292,6 +318,16 @@ function applyAction(state: GameState, action: GameAction): GameState {
         affinity: applyAffinityDecay(state.affinity, 1),
         ...cal,
       };
+      // Sprint 22: accrue loan interest on rent day (before rent check).
+      if (nextState.day === balance.rent.dueDay) {
+        nextState = accrueInterest(nextState);
+      }
+      // Sprint 23: accrue loan shark interest daily.
+      nextState = applyLoanSharkInterest(nextState);
+      // Sprint 23: collect loan shark debt on rent day (before rent check).
+      if (nextState.day === balance.rent.dueDay) {
+        nextState = collectLoanSharkDebt(nextState);
+      }
       return checkRent(nextState);
     }
 
@@ -437,16 +473,27 @@ function applyAction(state: GameState, action: GameAction): GameState {
       const bongBalance = (balance.furniture as { bong: { breakChance: number } }).bong;
       const chillRestore = (balance.chill as { bongRestoreAmount: number }).bongRestoreAmount;
 
-      // Roll for break.
-      const [roll, nextSeed] = rng(state.rngSeed);
-      const broke = roll < bongBalance.breakChance;
-
-      return {
+      // Restore chill first.
+      let nextState: GameState = {
         ...state,
         chill: applyChillGain(state.chill, chillRestore),
-        furniture: broke ? removeFurniture(state.furniture, action.furnitureIndex) : state.furniture,
-        rngSeed: nextSeed,
       };
+
+      // Roll for break — triggers bong_breaks event instead of silent removal.
+      const [roll, nextSeed] = rng(nextState.rngSeed);
+      nextState = { ...nextState, rngSeed: nextSeed };
+
+      if (roll < bongBalance.breakChance) {
+        // Trigger bong_breaks event.
+        const bongEvent = RANDOM_EVENTS.find(e => e.id === 'bong_breaks')!;
+        nextState = {
+          ...nextState,
+          phase: 'event',
+          activeEvent: createActiveEvent(bongEvent),
+        };
+      }
+
+      return nextState;
     }
 
     case 'RECYCLE_FURNITURE': {
@@ -526,6 +573,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
 
     case 'ADD_SPELL_TO_BOOK': {
       if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (isSpellbookLocked(state)) return state;  // Sprint 22: collateral lock
       if (!isSpellKnown(state.knownSpells, action.spellId)) return state;
       if (!canAddToBook(state.equippedSpells, state.bookbinding)) return state;
 
@@ -549,6 +597,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
 
     case 'REMOVE_SPELL_FROM_BOOK': {
       if (state.phase !== 'playing' || state.currentLocation !== 'tower') return state;
+      if (isSpellbookLocked(state)) return state;  // Sprint 22: collateral lock
       if (!state.equippedSpells.includes(action.spellId)) return state;
 
       const spell = getSpellDef(action.spellId);
@@ -568,6 +617,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
 
     case 'CAST_SPELL': {
       if (state.phase !== 'playing') return state;
+      if (isSpellbookLocked(state)) return state;  // Sprint 22: collateral lock
       if (!state.equippedSpells.includes(action.spellId)) return state;
 
       const spell = getSpellDef(action.spellId);
@@ -802,6 +852,71 @@ function applyAction(state: GameState, action: GameAction): GameState {
       );
       const newInventory = removeItem(state.inventory, action.slotIndex);
       return { ...state, affinity: newAffinity, inventory: newInventory };
+    }
+
+    // ── Sprint 22 ─────────────────────────────────────────────────────────────
+
+    case 'TAKE_LOAN': {
+      if (state.phase !== 'playing') return state;
+      if (getLocationType(state.currentLocation) !== 'dads_house') return state;
+      if (!state.dadAlive) return state;
+      const result = takeLoan(state, action.amount);
+      if (!result) return state;
+      const dadBal = balance.dadsHouse as { visitTimeCost: number };
+      const newClock = advanceClock(result.clock, dadBal.visitTimeCost);
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...result, clock: newClock });
+      }
+      return { ...result, clock: newClock };
+    }
+
+    case 'REPAY_LOAN': {
+      if (state.phase !== 'playing') return state;
+      if (getLocationType(state.currentLocation) !== 'dads_house') return state;
+      if (!state.dadAlive) return state;
+      const result = repayLoan(state, action.amount);
+      return result ?? state;
+    }
+
+    case 'VISIT_GRAVE': {
+      if (state.phase !== 'playing') return state;
+      if (getLocationType(state.currentLocation) !== 'dads_house') return state;
+      if (state.dadAlive) return state;
+      const dadBal = balance.dadsHouse as { visitTimeCost: number; graveManaRestore: number; graveChillLoss: number };
+      const newClock = advanceClock(state.clock, dadBal.visitTimeCost);
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        return applyPassout({ ...state, clock: newClock });
+      }
+      return {
+        ...state,
+        clock: newClock,
+        mana: applyManaRestore(state.mana, dadBal.graveManaRestore, state.maxMana),
+        chill: Math.max(0, state.chill - dadBal.graveChillLoss),
+      };
+    }
+
+    // ── Sprint 23 ─────────────────────────────────────────────────────────────
+
+    case 'RESOLVE_EVENT': {
+      if (state.phase !== 'event' || !state.activeEvent) return state;
+      if (state.activeEvent.resolved) return state;
+      let nextState = resolveEvent(state, action.choiceIndex);
+      // Track event trigger count.
+      const eventId = state.activeEvent.eventId;
+      const count = (nextState.eventsTriggered[eventId] ?? 0) + 1;
+      nextState = {
+        ...nextState,
+        eventsTriggered: { ...nextState.eventsTriggered, [eventId]: count },
+        notableEvents: count === 1 && !nextState.notableEvents.includes(eventId)
+          ? [...nextState.notableEvents, eventId]
+          : nextState.notableEvents,
+      };
+      return nextState;
+    }
+
+    case 'DISMISS_EVENT': {
+      if (!state.activeEvent || !state.activeEvent.resolved) return state;
+      return { ...state, phase: 'playing', activeEvent: null };
     }
 
     default:

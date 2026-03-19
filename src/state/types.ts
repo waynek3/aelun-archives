@@ -103,7 +103,9 @@ export type LocationId =
   | 'richville_scroll_store'
   | 'center_city_scroll_store'
   | 'downtown_scroll_store'
-  | 'university_heights_scroll_store';
+  | 'university_heights_scroll_store'
+  // Sprint 22: Dad's House
+  | 'richville_dads_house';
 
 // Sprint 9: prayer buff
 export interface PrayerBuff {
@@ -159,7 +161,24 @@ export interface ScratchSessionState {
 
 // ─── Game State ───────────────────────────────────────────────────────────────
 
-export type Phase = 'setup' | 'playing' | 'scratching' | 'passedout' | 'game_over';
+export type Phase = 'setup' | 'playing' | 'scratching' | 'passedout' | 'game_over' | 'event';
+
+// Sprint 22: loan state
+export interface LoanState {
+  principal: number;
+  interestRate: number;
+  collateral: boolean;  // true if spellbook held as collateral
+}
+
+// Sprint 23: active random event
+export interface ActiveEvent {
+  eventId: string;
+  flavor: string;
+  choices: { label: string }[];
+  resolved: boolean;
+  outcomeText: string | null;
+  choiceIndex: number | null;
+}
 
 export interface GameState {
   // ── Core ──
@@ -225,6 +244,18 @@ export interface GameState {
 
   // ── Wizard Projects (Sprint 20+) ──
   activeProject: ProjectState | null;  // one project at a time; null = no project
+
+  // ── Dad's House & Loans (Sprint 22+) ──
+  dadAlive: boolean;           // false after "Dad Dies" event
+  loan: LoanState | null;     // active loan from Dad; null = no loan
+
+  // ── Random Events (Sprint 23+) ──
+  activeEvent: ActiveEvent | null;
+  eventsTriggered: Record<string, number>;  // event id → trigger count
+  notableEvents: string[];                   // for legacy screen
+  loanSharkDebt: number;                     // Loan Shark event debt
+  loanSharkInterestRate: number;             // interest on loan shark debt
+  lastBirthdayYear: number;                  // track last birthday event year
 
   // ── Scratch session (active during 'scratching' phase) ──
   scratchSession: ScratchSessionState | null;

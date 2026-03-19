@@ -115,6 +115,21 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
     const state = s as Record<string, unknown>;
     return { ...state, activeProject: null };
   },
+  // Sprint 20 → Sprint 22+23: add Dad's House loans and random events.
+  15: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return {
+      ...state,
+      dadAlive: true,
+      loan: null,
+      activeEvent: null,
+      eventsTriggered: {},
+      notableEvents: [],
+      loanSharkDebt: 0,
+      loanSharkInterestRate: 0,
+      lastBirthdayYear: 0,
+    };
+  },
 };
 
 function migrate(data: SaveData): GameState {
