@@ -20,6 +20,7 @@ import {
   getNeighborhoodUniversity,
   getNeighborhoodScrollStore,
   getNeighborhoodBookstore,
+  getNeighborhoodDadsHouse,
 } from '../../data/locations';
 import balance from '../../data/balance.json';
 
@@ -189,6 +190,20 @@ export function renderUniversityBookstore(state: GameState, container: HTMLEleme
         'nav-btn',
       ));
     }
+
+    // Dad's House (Richville only)
+    const dhId = getNeighborhoodDadsHouse(neighborhood.id);
+    if (dhId && dhId !== state.currentLocation) {
+      const dhData = getLocationData(dhId);
+      const dhCost = getTravelCostRaw(state.currentLocation, dhId);
+      const dhClock = previewClock(state.clock, dhCost);
+      const dhLabel = state.dadAlive ? dhData.displayName : "DAD'S GRAVE";
+      screen.appendChild(makeButton(
+        `${dhLabel}  \u2192  ${formatClock(dhClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: dhId }),
+        'nav-btn',
+      ));
+    }
   }
 
   // Local neighborhood (University Heights — show everything except self).
@@ -244,6 +259,19 @@ export function renderUniversityBookstore(state: GameState, container: HTMLEleme
     () => dispatch({ type: 'TRAVEL', destination: localSsId }),
     'nav-btn',
   ));
+  // Dad's House (Richville only)
+  const localDhId = getNeighborhoodDadsHouse(currentNeighborhood);
+  if (localDhId && localDhId !== state.currentLocation) {
+    const localDhData = getLocationData(localDhId);
+    const localDhCost = getTravelCostRaw(state.currentLocation, localDhId);
+    const localDhClock = previewClock(state.clock, localDhCost);
+    const localDhLabel = state.dadAlive ? localDhData.displayName : "DAD'S GRAVE";
+    screen.appendChild(makeButton(
+      `${localDhLabel}  \u2192  ${formatClock(localDhClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: localDhId }),
+      'nav-btn',
+    ));
+  }
   // (Self — bookstore — is omitted.)
 
   container.appendChild(screen);

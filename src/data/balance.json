@@ -190,5 +190,107 @@
     "true_sight":    { "reveals": "chill",     "baseMisfireChance": 0.05 },
     "vital_scan":    { "reveals": "ageHealth", "baseMisfireChance": 0.05 },
     "chillMisfireScaling": 0.005
+  },
+
+  "dadsHouse": {
+    "loanAmounts": [50, 100, 200, 500],
+    "collateralThreshold": 200,
+    "baseInterestRate": 0.15,
+    "fameInterestReduction": 0.002,
+    "minInterestRate": 0.05,
+    "baseLoanCap": 200,
+    "fameCapBonus": 5,
+    "maxLoanCap": 1000,
+    "visitTimeCost": 15,
+    "graveManaRestore": 8,
+    "graveChillLoss": 10
+  },
+
+  "randomEvents": {
+    "birthday": {
+      "baseProbability": 1.0,
+      "celebrateChillGain": 10,
+      "buySomethingCost": 25,
+      "buySomethingChillGain": 20,
+      "contemplateManaGain": 5
+    },
+    "dad_dies": {
+      "baseProbability": 0.005,
+      "minYear": 3,
+      "grieveChillLoss": 20,
+      "grieveManaGain": 10,
+      "inheritanceCash": 200,
+      "dismissChillGain": 5
+    },
+    "bong_breaks": {
+      "mournChillLoss": 15,
+      "fixChance": 0.3,
+      "fixSuccessChillGain": 10,
+      "fixFailChillLoss": 8,
+      "throwOutChillGain": 5
+    },
+    "suspicious_clerk": {
+      "baseProbability": 0.08,
+      "actNaturalChillGain": 5,
+      "leaveChillLoss": 5,
+      "smoothTalkFameReq": 5,
+      "smoothTalkChillGain": 10
+    },
+    "fellow_scratcher": {
+      "baseProbability": 0.08,
+      "chatChillGain": 5,
+      "ignoreCashFind": 10,
+      "shareTipAffinityGain": 1.0
+    },
+    "temple_judgment": {
+      "baseProbability": 0.10,
+      "confessAffinityGain": 2.0,
+      "denyChillLoss": 10,
+      "denyAffinityLoss": 1.0,
+      "laughFameGain": 1
+    },
+    "campus_encounter": {
+      "baseProbability": 0.10,
+      "bragFameGain": 3,
+      "chatChillGain": 8,
+      "chatFameGain": 1
+    },
+    "loan_shark": {
+      "baseProbability": 0.06,
+      "loanAmount": 300,
+      "interestRate": 0.25,
+      "declineChillGain": 3,
+      "intimidateChillLoss": 10
+    },
+    "storm_warning": {
+      "baseProbability": 0.10,
+      "pushThroughExtraMinutes": 15,
+      "pushThroughChillLoss": 10,
+      "shelterExtraMinutes": 30,
+      "shelterChillGain": 5
+    },
+    "winning_ticket": {
+      "baseProbability": 0.06,
+      "cheerChillGain": 8,
+      "envyChillLoss": 5,
+      "envyAddictionGain": 0.5,
+      "hustleCashGain": 15
+    },
+    "wizard_fame_moment": {
+      "baseProbability": 0.08,
+      "minFame": 10,
+      "embraceFameGain": 5,
+      "embraceChillGain": 5,
+      "denyFameLoss": 2,
+      "exploitCashGain": 50,
+      "exploitFameLoss": 3
+    },
+    "bad_batch": {
+      "baseProbability": 0.06,
+      "scratchAnywayOddsModifier": -0.15,
+      "scratchAnywayChillLoss": 5,
+      "swapTicketsTimeCost": 15,
+      "leaveChillLoss": 8
+    }
   }
 }

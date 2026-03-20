@@ -8,7 +8,8 @@ import type { NeighborhoodId, LocationId, GodId } from '../state/types';
 
 export type LocationType = 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'university'
   | 'university_bookstore'   // Sprint 16
-  | 'spell_scroll_store';    // Sprint 16
+  | 'spell_scroll_store'     // Sprint 16
+  | 'dads_house';            // Sprint 22
 
 export interface NeighborhoodData {
   id: NeighborhoodId;
@@ -73,6 +74,8 @@ export const LOCATIONS: LocationData[] = [
   { id: 'center_city_scroll_store',        neighborhood: 'center_city',        type: 'spell_scroll_store',   displayName: 'THE SCROLL SHOP' },
   { id: 'downtown_scroll_store',           neighborhood: 'downtown',           type: 'spell_scroll_store',   displayName: 'PARCHMENT & INK' },
   { id: 'university_heights_scroll_store', neighborhood: 'university_heights', type: 'spell_scroll_store',   displayName: 'CAMPUS SCROLLERY' },
+  // Sprint 22: Dad's House
+  { id: 'richville_dads_house',            neighborhood: 'richville',          type: 'dads_house',           displayName: "DAD'S HOUSE" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -143,6 +146,14 @@ export function getNeighborhoodScrollStore(neighborhoodId: NeighborhoodId): Loca
 export function getNeighborhoodBookstore(neighborhoodId: NeighborhoodId): LocationId | null {
   const loc = LOCATIONS.find(
     l => l.neighborhood === neighborhoodId && l.type === 'university_bookstore',
+  );
+  return loc ? loc.id : null;
+}
+
+// Returns Dad's House location, or null if not in Richville.
+export function getNeighborhoodDadsHouse(neighborhoodId: NeighborhoodId): LocationId | null {
+  const loc = LOCATIONS.find(
+    l => l.neighborhood === neighborhoodId && l.type === 'dads_house',
   );
   return loc ? loc.id : null;
 }

@@ -16,13 +16,15 @@ import { renderFurnitureStore } from './screens/furniture-store';
 import { renderUniversity } from './screens/university';
 import { renderSpellScrollStore } from './screens/spell-scroll-store';
 import { renderUniversityBookstore } from './screens/university-bookstore';
+import { renderDadsHouse } from './screens/dads-house';
+import { renderEvent } from './screens/event';
 import { getLocationType } from '../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
 type ScreenId = 'setup' | 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'university'
-  | 'university_bookstore' | 'spell_scroll_store'
-  | 'scratch' | 'passout' | 'game_over' | 'none';
+  | 'university_bookstore' | 'spell_scroll_store' | 'dads_house'
+  | 'scratch' | 'passout' | 'game_over' | 'event' | 'none';
 let currentScreen: ScreenId = 'none';
 
 // The last action that triggered a render — used to decide partial vs full update.
@@ -64,6 +66,7 @@ function getTargetScreen(state: GameState): ScreenId {
   if (state.phase === 'setup') return 'setup';
   if (state.phase === 'game_over') return 'game_over';
   if (state.phase === 'passedout') return 'passout';
+  if (state.phase === 'event' && state.activeEvent !== null) return 'event';
   if (state.phase === 'scratching' && state.scratchSession !== null) return 'scratch';
   if (state.phase === 'playing') {
     const locType = getLocationType(state.currentLocation);
@@ -73,6 +76,7 @@ function getTargetScreen(state: GameState): ScreenId {
     if (locType === 'university') return 'university';
     if (locType === 'university_bookstore') return 'university_bookstore';
     if (locType === 'spell_scroll_store') return 'spell_scroll_store';
+    if (locType === 'dads_house') return 'dads_house';
     return 'bodega';  // all store-type locations use bodega screen
   }
   return 'bodega';  // fallback
@@ -125,6 +129,12 @@ export function render(
   } else if (targetScreen === 'spell_scroll_store') {
     currentScreen = 'spell_scroll_store';
     renderSpellScrollStore(state, screen, dispatch);
+  } else if (targetScreen === 'dads_house') {
+    currentScreen = 'dads_house';
+    renderDadsHouse(state, screen, dispatch);
+  } else if (targetScreen === 'event') {
+    currentScreen = 'event';
+    renderEvent(state, screen, dispatch);
   } else if (targetScreen === 'passout') {
     currentScreen = 'passout';
     renderPassout(state, screen, dispatch);
