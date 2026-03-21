@@ -21,7 +21,7 @@ import { applyChillGain } from '../systems/chill';
 import { getSnack } from '../data/food';
 import { addMultipleItems, addItem, canFitItems, removeItem } from '../systems/inventory';
 import { applyDonation, applyMonumentDonation, applyAffinityDecay, createPrayerBuff, pruneExpiredBuffs } from '../systems/affinity';
-import { getLocationData } from '../data/locations';
+import { getLocationData, getNeighborhoodDominantGods } from '../data/locations';
 import type { FurnitureItem, InventoryItem, SpellScrollItem } from '../state/types';
 import { getBed, addFurniture, removeFurniture, replaceBed, hasCrystalBall, hasLabTable } from '../systems/furniture';
 import { startProject, workOnProject, cancelProject, collectProject, isProjectComplete } from '../systems/projects';
@@ -265,7 +265,10 @@ function applyAction(state: GameState, action: GameAction): GameState {
         ? (spellsBal.lucky_fingers as { winChanceBonus: number }).winChanceBonus
         : 0;
 
-      return startScratchSession({ ...stateWithPurchase, clock: newClock }, action.quantities, luckBonus);
+      // Sprint 24: pass neighborhood dominant gods to bias symbol frequency.
+      const dominantGods = getNeighborhoodDominantGods(stateWithPurchase.currentNeighborhood);
+
+      return startScratchSession({ ...stateWithPurchase, clock: newClock }, action.quantities, luckBonus, dominantGods);
     }
 
     case 'SCRATCH_CELL':
@@ -377,6 +380,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
         affinity: applyDonation(
           state.affinity, godId, action.amount, false,
           state.prayerBuffs, state.clock, state.day, state.month, state.year,
+          getNeighborhoodDominantGods(state.currentNeighborhood),
         ),
       };
     }
@@ -393,6 +397,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
         affinity: applyDonation(
           state.affinity, godId, action.amount, true,
           state.prayerBuffs, state.clock, state.day, state.month, state.year,
+          getNeighborhoodDominantGods(state.currentNeighborhood),
         ),
         wizardFame: state.wizardFame + balance.affinity.publicDonationFameGain,
       };
@@ -849,6 +854,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
         item.size,
         state.prayerBuffs,
         state.clock, state.day, state.month, state.year,
+        getNeighborhoodDominantGods(state.currentNeighborhood),
       );
       const newInventory = removeItem(state.inventory, action.slotIndex);
       return { ...state, affinity: newAffinity, inventory: newInventory };
