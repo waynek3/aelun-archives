@@ -105,7 +105,9 @@ export type LocationId =
   | 'downtown_scroll_store'
   | 'university_heights_scroll_store'
   // Sprint 22: Dad's House
-  | 'richville_dads_house';
+  | 'richville_dads_house'
+  // Sprint 25: University Bar
+  | 'university_heights_bar';
 
 // Sprint 9: prayer buff
 export interface PrayerBuff {

@@ -211,6 +211,15 @@
     "symbolWeightBonus": 3
   },
 
+  "bar": {
+    "drinks": {
+      "draft_beer":   { "cost": 3,  "timeMinutes": 15, "chillRestore": 12, "manaReduction": 3  },
+      "house_wine":   { "cost": 5,  "timeMinutes": 15, "chillRestore": 18, "manaReduction": 5  },
+      "wizards_brew": { "cost": 9,  "timeMinutes": 30, "chillRestore": 30, "manaReduction": 10 },
+      "the_special":  { "cost": 14, "timeMinutes": 30, "chillRestore": 40, "manaReduction": 15 }
+    }
+  },
+
   "randomEvents": {
     "birthday": {
       "baseProbability": 1.0,

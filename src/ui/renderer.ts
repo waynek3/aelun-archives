@@ -18,12 +18,13 @@ import { renderSpellScrollStore } from './screens/spell-scroll-store';
 import { renderUniversityBookstore } from './screens/university-bookstore';
 import { renderDadsHouse } from './screens/dads-house';
 import { renderEvent } from './screens/event';
+import { renderBar } from './screens/bar';
 import { getLocationType } from '../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
 type ScreenId = 'setup' | 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'university'
-  | 'university_bookstore' | 'spell_scroll_store' | 'dads_house'
+  | 'university_bookstore' | 'spell_scroll_store' | 'dads_house' | 'university_bar'
   | 'scratch' | 'passout' | 'game_over' | 'event' | 'none';
 let currentScreen: ScreenId = 'none';
 
@@ -77,6 +78,7 @@ function getTargetScreen(state: GameState): ScreenId {
     if (locType === 'university_bookstore') return 'university_bookstore';
     if (locType === 'spell_scroll_store') return 'spell_scroll_store';
     if (locType === 'dads_house') return 'dads_house';
+    if (locType === 'university_bar') return 'university_bar';
     return 'bodega';  // all store-type locations use bodega screen
   }
   return 'bodega';  // fallback
@@ -132,6 +134,9 @@ export function render(
   } else if (targetScreen === 'dads_house') {
     currentScreen = 'dads_house';
     renderDadsHouse(state, screen, dispatch);
+  } else if (targetScreen === 'university_bar') {
+    currentScreen = 'university_bar';
+    renderBar(state, screen, dispatch);
   } else if (targetScreen === 'event') {
     currentScreen = 'event';
     renderEvent(state, screen, dispatch);
