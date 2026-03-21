@@ -75,6 +75,7 @@ export function createPrayerBuff(
 // Apply a donation and return updated affinity record.
 // gain/loss formula: amount * scaleFactor * donationTypeMultiplier
 // Prayer buff on target god doubles gain; prayer buff on opposed god halves loss.
+// Sprint 24: dominantGods boosts gain when the target god is locally strong.
 export function applyDonation(
   affinity: Record<GodId, number>,
   godId: GodId,
@@ -82,6 +83,7 @@ export function applyDonation(
   isPublic: boolean,
   buffs: PrayerBuff[],
   clock: number, day: number, month: number, year: number,
+  dominantGods: GodId[] = [],
 ): Record<GodId, number> {
   const multiplier = isPublic ? aff.publicDonationMultiplier : aff.privateDonationMultiplier;
   const baseChange = donationAmount * aff.scaleFactor * multiplier;
@@ -95,7 +97,12 @@ export function applyDonation(
   // Sprint 11: strong month doubles gain (but not loss) for the target god.
   const isStrongMonth = getGod(godId).strongMonths.includes(month);
   const strongMultiplier = isStrongMonth ? aff.strongMonthMultiplier : 1;
-  const gain = baseChange * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMultiplier;
+
+  // Sprint 24: neighborhood god strength boosts gain (but not loss).
+  const nbStrength = (balance as Record<string, unknown>).neighborhoodGodStrength as { affinityGainMultiplier: number };
+  const neighborhoodMultiplier = dominantGods.includes(godId) ? nbStrength.affinityGainMultiplier : 1;
+
+  const gain = baseChange * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMultiplier * neighborhoodMultiplier;
   const loss = hasOpposedBuff ? baseChange * aff.prayerDebuffMultiplier : baseChange;
 
   const result = { ...affinity };
@@ -109,12 +116,14 @@ export function applyDonation(
 // Apply a monument donation and return updated affinity record.
 // Monuments give fixed affinity gains (larger than cash donations) based on size.
 // Prayer buffs and strong month multipliers apply the same way as cash donations.
+// Sprint 24: dominantGods boosts gain when the target god is locally strong.
 export function applyMonumentDonation(
   affinity: Record<GodId, number>,
   godId: GodId,
   size: 'small' | 'medium' | 'large',
   buffs: PrayerBuff[],
   clock: number, day: number, month: number, year: number,
+  dominantGods: GodId[] = [],
 ): Record<GodId, number> {
   const monBal = (balance as Record<string, unknown>).monumentDonation as
     Record<string, { affinityGain: number; opposedLoss: number }>;
@@ -127,7 +136,11 @@ export function applyMonumentDonation(
   const isStrongMonth = getGod(godId).strongMonths.includes(month);
   const strongMultiplier = isStrongMonth ? aff.strongMonthMultiplier : 1;
 
-  const gain = baseGain * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMultiplier;
+  // Sprint 24: neighborhood god strength boosts gain (but not loss).
+  const nbStrength = (balance as Record<string, unknown>).neighborhoodGodStrength as { affinityGainMultiplier: number };
+  const neighborhoodMultiplier = dominantGods.includes(godId) ? nbStrength.affinityGainMultiplier : 1;
+
+  const gain = baseGain * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMultiplier * neighborhoodMultiplier;
   const loss = hasOpposedBuff ? baseLoss * aff.prayerDebuffMultiplier : baseLoss;
 
   const result = { ...affinity };

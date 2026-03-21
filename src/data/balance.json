@@ -206,6 +206,11 @@
     "graveChillLoss": 10
   },
 
+  "neighborhoodGodStrength": {
+    "affinityGainMultiplier": 1.5,
+    "symbolWeightBonus": 3
+  },
+
   "randomEvents": {
     "birthday": {
       "baseProbability": 1.0,

@@ -25,6 +25,25 @@ export interface LocationData {
   godId?: GodId;  // Sprint 9: which god this temple is dedicated to
 }
 
+// ─── Neighborhood God Assignments (Sprint 24) ────────────────────────────────
+
+// Each neighborhood has 1–2 locally dominant gods.
+// Being in a neighborhood where a god is strong:
+//   • increases affinity gain rate for donations at that god's temple
+//   • boosts frequency of that god's symbols on scratchers purchased there
+export const NEIGHBORHOOD_GODS: Record<NeighborhoodId, GodId[]> = {
+  the_skids:          ['gul', 'finhorn'],
+  the_burbs:          ['klossa', 'ara'],
+  richville:          ['skarhol', 'sofiel'],
+  center_city:        ['beroan', 'azorius'],
+  downtown:           ['marena'],
+  university_heights: ['mesin'],
+};
+
+export function getNeighborhoodDominantGods(id: NeighborhoodId): GodId[] {
+  return NEIGHBORHOOD_GODS[id];
+}
+
 // ─── Neighborhood Table ───────────────────────────────────────────────────────
 
 export const NEIGHBORHOODS: NeighborhoodData[] = [
