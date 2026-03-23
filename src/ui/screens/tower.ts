@@ -17,6 +17,7 @@ import {
   getNeighborhoodScrollStore,
   getNeighborhoodBookstore,
   getNeighborhoodDadsHouse,
+  getNeighborhoodBar,
   getLocationData,
 } from '../../data/locations';
 import { getBed } from '../../systems/furniture';
@@ -171,6 +172,19 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
       screen.appendChild(makeButton(
         `${dhLabel}  \u2192  ${formatClock(dhClock)}`,
         () => dispatch({ type: 'TRAVEL', destination: dhId }),
+        'nav-btn',
+      ));
+    }
+
+    // Sprint 25: University Bar (University Heights only)
+    const barId = getNeighborhoodBar(neighborhood.id);
+    if (barId) {
+      const barData = getLocationData(barId);
+      const barCost = getTravelCostRaw('tower', barId);
+      const barClock = previewClock(state.clock, barCost);
+      screen.appendChild(makeButton(
+        `${barData.displayName}  \u2192  ${formatClock(barClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: barId }),
         'nav-btn',
       ));
     }

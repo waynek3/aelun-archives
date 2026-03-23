@@ -106,7 +106,7 @@ export const RANDOM_EVENTS: RandomEventDef[] = [
     id: 'campus_encounter',
     name: 'Campus Encounter',
     flavor: 'Someone recognizes you from your scholarship days.',
-    validLocationTypes: ['university', 'university_bookstore'],
+    validLocationTypes: ['university', 'university_bookstore', 'university_bar'],
     triggerOn: 'action',
     oneTime: false,
     baseProbability: 0.10,

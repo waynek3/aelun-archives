@@ -48,6 +48,7 @@ import { takeLoan, repayLoan, accrueInterest, isSpellbookLocked } from '../syste
 import { getLocationType } from '../data/locations';
 import { checkForEvent, createActiveEvent, resolveEvent, applyLoanSharkInterest, collectLoanSharkDebt } from '../systems/events';
 import { RANDOM_EVENTS } from '../data/events';
+import { getDrink } from '../data/drinks';
 import balance from '../data/balance.json';
 
 // ─── Spell balance reference ──────────────────────────────────────────────────
@@ -754,6 +755,50 @@ function applyAction(state: GameState, action: GameAction): GameState {
       };
 
       return applySpellEffect(nextState, item.spellId, spell.category, action.godId, newClock);
+    }
+
+    // ── Sprint 25 ─────────────────────────────────────────────────────────────
+
+    case 'ORDER_DRINK': {
+      if (state.phase !== 'playing') return state;
+      const locType = getLocationType(state.currentLocation);
+      if (locType !== 'university_bar') return state;
+
+      const drink = getDrink(action.drinkId);
+
+      const snackIds = action.snacks ?? [];
+      const snackCost = snackIds.reduce((sum, id) => sum + getSnack(id).cost, 0);
+      const totalCost = drink.cost + snackCost;
+
+      if (state.cash < totalCost) return state;
+      if (snackIds.length > 0 && !canFitItems(state.inventory, snackIds.length)) return state;
+
+      // Advance clock by drink time (already a :15 increment per balance.json).
+      const newClock = advanceClock(state.clock, drink.timeMinutes);
+
+      if (isCurfewBreached(newClock, state.currentLocation)) {
+        // Apply pre-drink state changes before passout.
+        return applyPassout({ ...state, clock: newClock, cash: state.cash - totalCost });
+      }
+
+      // Add snacks to inventory.
+      let newInventory = state.inventory;
+      if (snackIds.length > 0) {
+        const items: InventoryItem[] = snackIds.map(id => {
+          const def = getSnack(id);
+          return { type: 'snack' as const, id: def.id, name: def.name, descriptor: def.descriptor };
+        });
+        newInventory = addMultipleItems(state.inventory, items) ?? state.inventory;
+      }
+
+      return {
+        ...state,
+        clock: newClock,
+        cash: state.cash - totalCost,
+        chill: applyChillGain(state.chill, drink.chillRestore),
+        mana: applyManaSpend(state.mana, drink.manaReduction),
+        inventory: newInventory,
+      };
     }
 
     // ── Sprint 19 ─────────────────────────────────────────────────────────────

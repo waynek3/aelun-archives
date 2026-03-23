@@ -48,6 +48,8 @@ export type GameAction =
   | { type: 'USE_SCROLL'; slotIndex: number; godId?: import('../state/types').GodId }
   // Sprint 19: use the Crystal Ball to reveal a hidden stat (requires knowing the matching reveal spell).
   | { type: 'USE_CRYSTAL_BALL'; revealType: 'addiction' | 'chill' | 'ageHealth' }
+  // Sprint 25: order a drink at the University Bar; snacks optionally purchased alongside.
+  | { type: 'ORDER_DRINK'; drinkId: string; snacks?: string[] }
   // Sprint 20: wizard project actions (Lab Table).
   | { type: 'START_PROJECT'; projectId: string }
   | { type: 'WORK_ON_PROJECT'; duration: number }   // minutes, must be :15 increment

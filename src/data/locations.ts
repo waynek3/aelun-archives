@@ -9,7 +9,8 @@ import type { NeighborhoodId, LocationId, GodId } from '../state/types';
 export type LocationType = 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'university'
   | 'university_bookstore'   // Sprint 16
   | 'spell_scroll_store'     // Sprint 16
-  | 'dads_house';            // Sprint 22
+  | 'dads_house'             // Sprint 22
+  | 'university_bar';        // Sprint 25
 
 export interface NeighborhoodData {
   id: NeighborhoodId;
@@ -95,6 +96,8 @@ export const LOCATIONS: LocationData[] = [
   { id: 'university_heights_scroll_store', neighborhood: 'university_heights', type: 'spell_scroll_store',   displayName: 'CAMPUS SCROLLERY' },
   // Sprint 22: Dad's House
   { id: 'richville_dads_house',            neighborhood: 'richville',          type: 'dads_house',           displayName: "DAD'S HOUSE" },
+  // Sprint 25: University Bar
+  { id: 'university_heights_bar',          neighborhood: 'university_heights', type: 'university_bar',       displayName: 'THE WIZARD BAR' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -165,6 +168,14 @@ export function getNeighborhoodScrollStore(neighborhoodId: NeighborhoodId): Loca
 export function getNeighborhoodBookstore(neighborhoodId: NeighborhoodId): LocationId | null {
   const loc = LOCATIONS.find(
     l => l.neighborhood === neighborhoodId && l.type === 'university_bookstore',
+  );
+  return loc ? loc.id : null;
+}
+
+// Returns the University Bar in a neighborhood, or null if none.
+export function getNeighborhoodBar(neighborhoodId: NeighborhoodId): LocationId | null {
+  const loc = LOCATIONS.find(
+    l => l.neighborhood === neighborhoodId && l.type === 'university_bar',
   );
   return loc ? loc.id : null;
 }

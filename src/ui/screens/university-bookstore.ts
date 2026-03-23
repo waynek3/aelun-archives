@@ -21,6 +21,7 @@ import {
   getNeighborhoodScrollStore,
   getNeighborhoodBookstore,
   getNeighborhoodDadsHouse,
+  getNeighborhoodBar,
 } from '../../data/locations';
 import balance from '../../data/balance.json';
 
@@ -204,6 +205,19 @@ export function renderUniversityBookstore(state: GameState, container: HTMLEleme
         'nav-btn',
       ));
     }
+
+    // Sprint 25: University Bar (University Heights only)
+    const barId = getNeighborhoodBar(neighborhood.id);
+    if (barId) {
+      const barData = getLocationData(barId);
+      const barCost = getTravelCostRaw(state.currentLocation, barId);
+      const barClock = previewClock(state.clock, barCost);
+      screen.appendChild(makeButton(
+        `${barData.displayName}  \u2192  ${formatClock(barClock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: barId }),
+        'nav-btn',
+      ));
+    }
   }
 
   // Local neighborhood (University Heights — show everything except self).
@@ -269,6 +283,19 @@ export function renderUniversityBookstore(state: GameState, container: HTMLEleme
     screen.appendChild(makeButton(
       `${localDhLabel}  \u2192  ${formatClock(localDhClock)}`,
       () => dispatch({ type: 'TRAVEL', destination: localDhId }),
+      'nav-btn',
+    ));
+  }
+
+  // Sprint 25: University Bar (University Heights only)
+  const localBarId = getNeighborhoodBar(currentNeighborhood);
+  if (localBarId && localBarId !== state.currentLocation) {
+    const localBarData = getLocationData(localBarId);
+    const localBarCost = getTravelCostRaw(state.currentLocation, localBarId);
+    const localBarClock = previewClock(state.clock, localBarCost);
+    screen.appendChild(makeButton(
+      `${localBarData.displayName}  \u2192  ${formatClock(localBarClock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: localBarId }),
       'nav-btn',
     ));
   }
