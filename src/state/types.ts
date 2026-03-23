@@ -214,6 +214,7 @@ export interface GameState {
   intelligence: number;       // learning speed at university; degrades with age
   bookbinding: number;        // spellbook capacity
   wizardFame: number;         // unlocks, loan caps, event chances
+  peakWizardFame: number;     // Sprint 26: highest wizardFame reached this run
   relaxationRate: number;     // passive chill restore rate
   restingRelaxation: number;  // baseline chill target
 

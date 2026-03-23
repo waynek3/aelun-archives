@@ -169,7 +169,14 @@ export function getState(): GameState {
 }
 
 export function dispatch(action: GameAction): void {
-  _state = applyAction(_state, action);
+  let _next = applyAction(_state, action);
+
+  // Sprint 26: track highest wizardFame reached this run.
+  if (_next.wizardFame > _next.peakWizardFame) {
+    _next = { ..._next, peakWizardFame: _next.wizardFame };
+  }
+
+  _state = _next;
 
   // Sprint 23: check for random event triggers after most actions.
   // Skip event checks during event resolution, setup, game over, and scratch phase.

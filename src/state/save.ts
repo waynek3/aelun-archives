@@ -130,6 +130,11 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
       lastBirthdayYear: 0,
     };
   },
+  // Sprint 26: add peakWizardFame tracking.
+  16: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return { ...state, peakWizardFame: 0 };
+  },
 };
 
 function migrate(data: SaveData): GameState {
