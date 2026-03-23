@@ -1,7 +1,7 @@
 import type { GameState } from './types';
 import balance from '../data/balance.json';
 
-export const SAVE_VERSION = 16;
+export const SAVE_VERSION = 17;
 
 export function createInitialState(): GameState {
   return {
@@ -27,6 +27,7 @@ export function createInitialState(): GameState {
     intelligence: balance.starting.intelligence,
     bookbinding: balance.starting.bookbinding,
     wizardFame: balance.starting.wizardFame,
+    peakWizardFame: 0,  // Sprint 26: starts at 0, updated via dispatch post-processing
     relaxationRate: balance.starting.relaxationRate,
     restingRelaxation: balance.starting.restingRelaxation,
     // Sprint 17: hidden addiction stats
