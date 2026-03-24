@@ -33,7 +33,7 @@ export function renderSetup(state: GameState, container: HTMLElement, dispatch: 
   // state is needed for the dispatch closure; not used for display here.
   void state;
 
-  container.innerHTML = '';
+  container.replaceChildren();
 
   const screen = document.createElement('div');
   screen.className = 'screen setup-screen';

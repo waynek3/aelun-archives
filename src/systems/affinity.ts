@@ -4,16 +4,12 @@
 
 import type { GodId, PrayerBuff } from '../state/types';
 import { getOpposedGod, getGod } from '../data/gods';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
+import { toTotalMinutes, MINUTES_PER_DAY, DAYS_PER_MONTH, MONTHS_PER_YEAR } from '../engine/time';
 
-const aff = balance.affinity;
+const aff = bal.affinity;
 
 // ─── Timestamp Math ──────────────────────────────────────────────────────────
-
-// Convert game timestamp to total minutes for comparison.
-function toTotalMinutes(year: number, month: number, day: number, clock: number): number {
-  return year * 360 * 1440 + month * 30 * 1440 + day * 1440 + clock;
-}
 
 // Add minutes to a game timestamp, handling day/month/year rollover.
 export function addMinutesToTimestamp(
@@ -23,11 +19,11 @@ export function addMinutesToTimestamp(
   let d = day;
   let m = month;
   let y = year;
-  while (c >= 1440) {
-    c -= 1440;
+  while (c >= MINUTES_PER_DAY) {
+    c -= MINUTES_PER_DAY;
     d++;
-    if (d > 30) { d = 1; m++; }
-    if (m > 12) { m = 1; y++; }
+    if (d > DAYS_PER_MONTH) { d = 1; m++; }
+    if (m > MONTHS_PER_YEAR) { m = 1; y++; }
   }
   return { clock: c, day: d, month: m, year: y };
 }
@@ -99,8 +95,7 @@ export function applyDonation(
   const strongMultiplier = isStrongMonth ? aff.strongMonthMultiplier : 1;
 
   // Sprint 24: neighborhood god strength boosts gain (but not loss).
-  const nbStrength = (balance as Record<string, unknown>).neighborhoodGodStrength as { affinityGainMultiplier: number };
-  const neighborhoodMultiplier = dominantGods.includes(godId) ? nbStrength.affinityGainMultiplier : 1;
+  const neighborhoodMultiplier = dominantGods.includes(godId) ? bal.neighborhoodGodStrength.affinityGainMultiplier : 1;
 
   const gain = baseChange * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMultiplier * neighborhoodMultiplier;
   const loss = hasOpposedBuff ? baseChange * aff.prayerDebuffMultiplier : baseChange;
@@ -125,9 +120,7 @@ export function applyMonumentDonation(
   clock: number, day: number, month: number, year: number,
   dominantGods: GodId[] = [],
 ): Record<GodId, number> {
-  const monBal = (balance as Record<string, unknown>).monumentDonation as
-    Record<string, { affinityGain: number; opposedLoss: number }>;
-  const { affinityGain: baseGain, opposedLoss: baseLoss } = monBal[size];
+  const { affinityGain: baseGain, opposedLoss: baseLoss } = bal.monumentDonation[size];
 
   const opposedGod = getOpposedGod(godId);
   const hasTargetBuff = hasPrayerBuff(buffs, godId, clock, day, month, year);
@@ -137,8 +130,7 @@ export function applyMonumentDonation(
   const strongMultiplier = isStrongMonth ? aff.strongMonthMultiplier : 1;
 
   // Sprint 24: neighborhood god strength boosts gain (but not loss).
-  const nbStrength = (balance as Record<string, unknown>).neighborhoodGodStrength as { affinityGainMultiplier: number };
-  const neighborhoodMultiplier = dominantGods.includes(godId) ? nbStrength.affinityGainMultiplier : 1;
+  const neighborhoodMultiplier = dominantGods.includes(godId) ? bal.neighborhoodGodStrength.affinityGainMultiplier : 1;
 
   const gain = baseGain * (hasTargetBuff ? aff.prayerBuffMultiplier : 1) * strongMultiplier * neighborhoodMultiplier;
   const loss = hasOpposedBuff ? baseLoss * aff.prayerDebuffMultiplier : baseLoss;

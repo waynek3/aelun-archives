@@ -46,6 +46,6 @@ export function renderEvent(state: GameState, container: HTMLElement, dispatch: 
     ));
   }
 
-  container.innerHTML = '';
+  container.replaceChildren();
   container.appendChild(screen);
 }

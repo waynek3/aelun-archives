@@ -23,7 +23,7 @@ export function weightedRandom(
   seed: number,
 ): [index: number, nextSeed: number] {
   const total = weights.reduce((a, b) => a + b, 0);
-  let [r, nextSeed] = rng(seed);
+  let [r, nextSeed] = rng(seed); // eslint-disable-line prefer-const
   r *= total;
   let acc = 0;
   for (let i = 0; i < weights.length; i++) {

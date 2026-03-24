@@ -13,9 +13,7 @@ import { removeFurniture } from './furniture';
 import { growNeed } from './addiction';
 import { getGod } from '../data/gods';
 import { advanceClock } from '../engine/time';
-import balance from '../data/balance.json';
-
-const evtBal = (balance as Record<string, unknown>).randomEvents as Record<string, Record<string, number>>;
+import { bal } from '../data/balance-types';
 
 // ─── Trigger Checking ────────────────────────────────────────────────────────
 
@@ -65,7 +63,7 @@ export function checkForEvent(
     // Dad Dies: require dadAlive and minimum year.
     if (def.id === 'dad_dies') {
       if (!state.dadAlive) return false;
-      const minYear = evtBal.dad_dies?.minYear ?? 3;
+      const minYear = bal.randomEvents.dad_dies?.minYear ?? 3;
       if (state.year < minYear) return false;
     }
 
@@ -137,7 +135,7 @@ export function resolveEvent(state: GameState, choiceIndex: number): GameState {
 // ─── Per-Event Resolution ────────────────────────────────────────────────────
 
 function resolveBirthday(state: GameState, choice: number): GameState {
-  const bal = evtBal.birthday;
+  const eb = bal.randomEvents.birthday;
   // Show which god is strong this month.
   const strongGods = ['mesin', 'gul', 'klossa', 'skarhol', 'marena', 'azorius', 'ara', 'finhorn', 'beroan', 'sofiel']
     .filter(id => getGod(id as GodId).strongMonths.includes(state.month));
@@ -148,24 +146,24 @@ function resolveBirthday(state: GameState, choice: number): GameState {
 
   switch (choice) {
     case 0: // Celebrate alone
-      nextState = { ...nextState, chill: applyChillGain(nextState.chill, bal.celebrateChillGain) };
+      nextState = { ...nextState, chill: applyChillGain(nextState.chill, eb.celebrateChillGain) };
       outcomeText = `You eat cake alone. Chill restored. ${godName} is strong this month.`;
       break;
     case 1: // Buy something
-      if (nextState.cash >= bal.buySomethingCost) {
+      if (nextState.cash >= eb.buySomethingCost) {
         nextState = {
           ...nextState,
-          cash: nextState.cash - bal.buySomethingCost,
-          chill: applyChillGain(nextState.chill, bal.buySomethingChillGain),
+          cash: nextState.cash - eb.buySomethingCost,
+          chill: applyChillGain(nextState.chill, eb.buySomethingChillGain),
         };
-        outcomeText = `You treated yourself. -$${bal.buySomethingCost}. ${godName} is strong this month.`;
+        outcomeText = `You treated yourself. -$${eb.buySomethingCost}. ${godName} is strong this month.`;
       } else {
-        nextState = { ...nextState, chill: applyChillGain(nextState.chill, bal.celebrateChillGain) };
+        nextState = { ...nextState, chill: applyChillGain(nextState.chill, eb.celebrateChillGain) };
         outcomeText = `Can't afford it. You celebrate alone instead. ${godName} is strong this month.`;
       }
       break;
     case 2: // Contemplate mortality
-      nextState = { ...nextState, mana: applyManaRestore(nextState.mana, bal.contemplateManaGain, nextState.maxMana) };
+      nextState = { ...nextState, mana: applyManaRestore(nextState.mana, eb.contemplateManaGain, nextState.maxMana) };
       outcomeText = `You stare into the void. Mana restored. ${godName} is strong this month.`;
       break;
     default:
@@ -176,7 +174,7 @@ function resolveBirthday(state: GameState, choice: number): GameState {
 }
 
 function resolveDadDies(state: GameState, choice: number): GameState {
-  const bal = evtBal.dad_dies;
+  const eb = bal.randomEvents.dad_dies;
   let outcomeText: string;
   let nextState = { ...state, dadAlive: false };
 
@@ -184,17 +182,17 @@ function resolveDadDies(state: GameState, choice: number): GameState {
     case 0: // Grieve
       nextState = {
         ...nextState,
-        chill: Math.max(0, nextState.chill - bal.grieveChillLoss),
-        mana: applyManaRestore(nextState.mana, bal.grieveManaGain, nextState.maxMana),
+        chill: Math.max(0, nextState.chill - eb.grieveChillLoss),
+        mana: applyManaRestore(nextState.mana, eb.grieveManaGain, nextState.maxMana),
       };
       outcomeText = 'You let yourself feel it. The magic stirs.';
       break;
     case 1: // Check the will
-      nextState = { ...nextState, cash: nextState.cash + bal.inheritanceCash };
-      outcomeText = `He left you $${bal.inheritanceCash}. Typical.`;
+      nextState = { ...nextState, cash: nextState.cash + eb.inheritanceCash };
+      outcomeText = `He left you $${eb.inheritanceCash}. Typical.`;
       break;
     case 2: // Already dead to me
-      nextState = { ...nextState, chill: applyChillGain(nextState.chill, bal.dismissChillGain) };
+      nextState = { ...nextState, chill: applyChillGain(nextState.chill, eb.dismissChillGain) };
       outcomeText = "You shrug it off. You've been doing that your whole life.";
       break;
     default:
@@ -205,7 +203,7 @@ function resolveDadDies(state: GameState, choice: number): GameState {
 }
 
 function resolveBongBreaks(state: GameState, choice: number): GameState {
-  const bal = evtBal.bong_breaks;
+  const eb = bal.randomEvents.bong_breaks;
   let outcomeText: string;
   let nextState = state;
 
@@ -216,7 +214,7 @@ function resolveBongBreaks(state: GameState, choice: number): GameState {
     case 0: // Mourn it
       nextState = {
         ...nextState,
-        chill: Math.max(0, nextState.chill - bal.mournChillLoss),
+        chill: Math.max(0, nextState.chill - eb.mournChillLoss),
         furniture: bongIdx >= 0 ? removeFurniture(nextState.furniture, bongIdx) : nextState.furniture,
       };
       outcomeText = 'Gone but not forgotten. Your chill drops.';
@@ -224,13 +222,13 @@ function resolveBongBreaks(state: GameState, choice: number): GameState {
     case 1: { // Try to fix it
       const [roll, nextSeed] = rng(nextState.rngSeed);
       nextState = { ...nextState, rngSeed: nextSeed };
-      if (roll < bal.fixChance) {
-        nextState = { ...nextState, chill: applyChillGain(nextState.chill, bal.fixSuccessChillGain) };
+      if (roll < eb.fixChance) {
+        nextState = { ...nextState, chill: applyChillGain(nextState.chill, eb.fixSuccessChillGain) };
         outcomeText = "You managed to fix it! It's not pretty, but it works.";
       } else {
         nextState = {
           ...nextState,
-          chill: Math.max(0, nextState.chill - bal.fixFailChillLoss),
+          chill: Math.max(0, nextState.chill - eb.fixFailChillLoss),
           furniture: bongIdx >= 0 ? removeFurniture(nextState.furniture, bongIdx) : nextState.furniture,
         };
         outcomeText = 'The repair failed. It shatters completely.';
@@ -240,7 +238,7 @@ function resolveBongBreaks(state: GameState, choice: number): GameState {
     case 2: // Throw it out
       nextState = {
         ...nextState,
-        chill: applyChillGain(nextState.chill, bal.throwOutChillGain),
+        chill: applyChillGain(nextState.chill, eb.throwOutChillGain),
         furniture: bongIdx >= 0 ? removeFurniture(nextState.furniture, bongIdx) : nextState.furniture,
       };
       outcomeText = 'You toss it. Somehow that feels right.';
@@ -253,25 +251,25 @@ function resolveBongBreaks(state: GameState, choice: number): GameState {
 }
 
 function resolveSuspiciousClerk(state: GameState, choice: number): GameState {
-  const bal = evtBal.suspicious_clerk;
+  const eb = bal.randomEvents.suspicious_clerk;
   let outcomeText: string;
   let nextState = state;
 
   switch (choice) {
     case 0: // Act natural
-      nextState = { ...nextState, chill: applyChillGain(nextState.chill, bal.actNaturalChillGain) };
+      nextState = { ...nextState, chill: applyChillGain(nextState.chill, eb.actNaturalChillGain) };
       outcomeText = 'You play it cool. The clerk loses interest.';
       break;
     case 1: // Leave
-      nextState = { ...nextState, chill: Math.max(0, nextState.chill - bal.leaveChillLoss) };
+      nextState = { ...nextState, chill: Math.max(0, nextState.chill - eb.leaveChillLoss) };
       outcomeText = 'You leave. The paranoia lingers.';
       break;
     case 2: // Smooth talk
-      if (state.wizardFame >= bal.smoothTalkFameReq) {
-        nextState = { ...nextState, chill: applyChillGain(nextState.chill, bal.smoothTalkChillGain) };
+      if (state.wizardFame >= eb.smoothTalkFameReq) {
+        nextState = { ...nextState, chill: applyChillGain(nextState.chill, eb.smoothTalkChillGain) };
         outcomeText = 'You charm the clerk. They even give you a discount smile.';
       } else {
-        nextState = { ...nextState, chill: Math.max(0, nextState.chill - bal.leaveChillLoss) };
+        nextState = { ...nextState, chill: Math.max(0, nextState.chill - eb.leaveChillLoss) };
         outcomeText = "The clerk isn't buying it. Awkward.";
       }
       break;
@@ -283,18 +281,18 @@ function resolveSuspiciousClerk(state: GameState, choice: number): GameState {
 }
 
 function resolveFellowScratcher(state: GameState, choice: number): GameState {
-  const bal = evtBal.fellow_scratcher;
+  const eb = bal.randomEvents.fellow_scratcher;
   let outcomeText: string;
   let nextState = state;
 
   switch (choice) {
     case 0: // Chat
-      nextState = { ...nextState, chill: applyChillGain(nextState.chill, bal.chatChillGain) };
+      nextState = { ...nextState, chill: applyChillGain(nextState.chill, eb.chatChillGain) };
       outcomeText = 'You swap stories. Feels good to not be the only one.';
       break;
     case 1: // Ignore
-      nextState = { ...nextState, cash: nextState.cash + bal.ignoreCashFind };
-      outcomeText = `You look away and find $${bal.ignoreCashFind} on the ground. Nice.`;
+      nextState = { ...nextState, cash: nextState.cash + eb.ignoreCashFind };
+      outcomeText = `You look away and find $${eb.ignoreCashFind} on the ground. Nice.`;
       break;
     case 2: { // Share tips
       // Pick a random god to boost affinity.
@@ -305,7 +303,7 @@ function resolveFellowScratcher(state: GameState, choice: number): GameState {
       const godId = gods[godIdx];
       const godName = getGod(godId).name;
       const newAffinity = { ...nextState.affinity };
-      newAffinity[godId] = newAffinity[godId] + bal.shareTipAffinityGain;
+      newAffinity[godId] = newAffinity[godId] + eb.shareTipAffinityGain;
       nextState = { ...nextState, affinity: newAffinity };
       outcomeText = `You share a tip about ${godName}'s symbols. Good karma.`;
       break;
@@ -318,7 +316,7 @@ function resolveFellowScratcher(state: GameState, choice: number): GameState {
 }
 
 function resolveTempleJudgment(state: GameState, choice: number): GameState {
-  const bal = evtBal.temple_judgment;
+  const eb = bal.randomEvents.temple_judgment;
   let outcomeText: string;
   let nextState = state;
 
@@ -330,24 +328,26 @@ function resolveTempleJudgment(state: GameState, choice: number): GameState {
   const godName = getGod(godId).name;
 
   switch (choice) {
-    case 0: // Confess
+    case 0: { // Confess
       const newAff = { ...nextState.affinity };
-      newAff[godId] = newAff[godId] + bal.confessAffinityGain;
+      newAff[godId] = newAff[godId] + eb.confessAffinityGain;
       nextState = { ...nextState, affinity: newAff };
       outcomeText = `You confess. ${godName} approves.`;
       break;
-    case 1: // Deny
+    }
+    case 1: { // Deny
       const newAff2 = { ...nextState.affinity };
-      newAff2[godId] = newAff2[godId] - bal.denyAffinityLoss;
+      newAff2[godId] = newAff2[godId] - eb.denyAffinityLoss;
       nextState = {
         ...nextState,
-        chill: Math.max(0, nextState.chill - bal.denyChillLoss),
+        chill: Math.max(0, nextState.chill - eb.denyChillLoss),
         affinity: newAff2,
       };
       outcomeText = `You deny it. ${godName} is not amused.`;
       break;
+    }
     case 2: // Laugh
-      nextState = { ...nextState, wizardFame: nextState.wizardFame + bal.laughFameGain };
+      nextState = { ...nextState, wizardFame: nextState.wizardFame + eb.laughFameGain };
       outcomeText = 'You laugh. A nearby pilgrim is impressed by your confidence.';
       break;
     default:
@@ -358,13 +358,13 @@ function resolveTempleJudgment(state: GameState, choice: number): GameState {
 }
 
 function resolveCampusEncounter(state: GameState, choice: number): GameState {
-  const bal = evtBal.campus_encounter;
+  const eb = bal.randomEvents.campus_encounter;
   let outcomeText: string;
   let nextState = state;
 
   switch (choice) {
     case 0: // Brag
-      nextState = { ...nextState, wizardFame: nextState.wizardFame + bal.bragFameGain };
+      nextState = { ...nextState, wizardFame: nextState.wizardFame + eb.bragFameGain };
       outcomeText = "You embellish wildly. They're impressed.";
       break;
     case 1: // Hide
@@ -373,8 +373,8 @@ function resolveCampusEncounter(state: GameState, choice: number): GameState {
     case 2: // Catch up
       nextState = {
         ...nextState,
-        chill: applyChillGain(nextState.chill, bal.chatChillGain),
-        wizardFame: nextState.wizardFame + bal.chatFameGain,
+        chill: applyChillGain(nextState.chill, eb.chatChillGain),
+        wizardFame: nextState.wizardFame + eb.chatFameGain,
       };
       outcomeText = 'You catch up. It feels almost normal.';
       break;
@@ -386,7 +386,7 @@ function resolveCampusEncounter(state: GameState, choice: number): GameState {
 }
 
 function resolveLoanShark(state: GameState, choice: number): GameState {
-  const bal = evtBal.loan_shark;
+  const eb = bal.randomEvents.loan_shark;
   let outcomeText: string;
   let nextState = state;
 
@@ -394,18 +394,18 @@ function resolveLoanShark(state: GameState, choice: number): GameState {
     case 0: // Take the money
       nextState = {
         ...nextState,
-        cash: nextState.cash + bal.loanAmount,
-        loanSharkDebt: bal.loanAmount,
-        loanSharkInterestRate: bal.interestRate,
+        cash: nextState.cash + eb.loanAmount,
+        loanSharkDebt: eb.loanAmount,
+        loanSharkInterestRate: eb.interestRate,
       };
-      outcomeText = `You take $${bal.loanAmount}. The coat smiles. You owe them.`;
+      outcomeText = `You take $${eb.loanAmount}. The coat smiles. You owe them.`;
       break;
     case 1: // Decline
-      nextState = { ...nextState, chill: applyChillGain(nextState.chill, bal.declineChillGain) };
+      nextState = { ...nextState, chill: applyChillGain(nextState.chill, eb.declineChillGain) };
       outcomeText = "You decline. They shrug and walk away.";
       break;
     case 2: // Tell them off
-      nextState = { ...nextState, chill: Math.max(0, nextState.chill - bal.intimidateChillLoss) };
+      nextState = { ...nextState, chill: Math.max(0, nextState.chill - eb.intimidateChillLoss) };
       outcomeText = 'They lean in close. You regret that immediately.';
       break;
     default:
@@ -416,7 +416,7 @@ function resolveLoanShark(state: GameState, choice: number): GameState {
 }
 
 function resolveStormWarning(state: GameState, choice: number): GameState {
-  const bal = evtBal.storm_warning;
+  const eb = bal.randomEvents.storm_warning;
   let outcomeText: string;
   let nextState = state;
 
@@ -424,16 +424,16 @@ function resolveStormWarning(state: GameState, choice: number): GameState {
     case 0: // Push through
       nextState = {
         ...nextState,
-        clock: advanceClock(nextState.clock, bal.pushThroughExtraMinutes),
-        chill: Math.max(0, nextState.chill - bal.pushThroughChillLoss),
+        clock: advanceClock(nextState.clock, eb.pushThroughExtraMinutes),
+        chill: Math.max(0, nextState.chill - eb.pushThroughChillLoss),
       };
       outcomeText = 'You push through the storm. Soaked and rattled.';
       break;
     case 1: // Find shelter
       nextState = {
         ...nextState,
-        clock: advanceClock(nextState.clock, bal.shelterExtraMinutes),
-        chill: applyChillGain(nextState.chill, bal.shelterChillGain),
+        clock: advanceClock(nextState.clock, eb.shelterExtraMinutes),
+        chill: applyChillGain(nextState.chill, eb.shelterChillGain),
       };
       outcomeText = 'You wait it out under an awning. Not bad, actually.';
       break;
@@ -449,26 +449,26 @@ function resolveStormWarning(state: GameState, choice: number): GameState {
 }
 
 function resolveWinningTicket(state: GameState, choice: number): GameState {
-  const bal = evtBal.winning_ticket;
+  const eb = bal.randomEvents.winning_ticket;
   let outcomeText: string;
   let nextState = state;
 
   switch (choice) {
     case 0: // Cheer
-      nextState = { ...nextState, chill: applyChillGain(nextState.chill, bal.cheerChillGain) };
+      nextState = { ...nextState, chill: applyChillGain(nextState.chill, eb.cheerChillGain) };
       outcomeText = "You cheer. They buy you a coffee. Life's alright.";
       break;
     case 1: // Seethe
       nextState = {
         ...nextState,
-        chill: Math.max(0, nextState.chill - bal.envyChillLoss),
+        chill: Math.max(0, nextState.chill - eb.envyChillLoss),
         addictionNeed: growNeed(nextState.addictionNeed, 1),
       };
       outcomeText = 'The jealousy burns. You need to scratch.';
       break;
     case 2: // Ask for cut
-      nextState = { ...nextState, cash: nextState.cash + bal.hustleCashGain };
-      outcomeText = `They laugh but toss you $${bal.hustleCashGain}. Not bad.`;
+      nextState = { ...nextState, cash: nextState.cash + eb.hustleCashGain };
+      outcomeText = `They laugh but toss you $${eb.hustleCashGain}. Not bad.`;
       break;
     default:
       outcomeText = 'The winner walks away.';
@@ -478,7 +478,7 @@ function resolveWinningTicket(state: GameState, choice: number): GameState {
 }
 
 function resolveWizardFameMoment(state: GameState, choice: number): GameState {
-  const bal = evtBal.wizard_fame_moment;
+  const eb = bal.randomEvents.wizard_fame_moment;
   let outcomeText: string;
   let nextState = state;
 
@@ -486,22 +486,22 @@ function resolveWizardFameMoment(state: GameState, choice: number): GameState {
     case 0: // Embrace
       nextState = {
         ...nextState,
-        wizardFame: nextState.wizardFame + bal.embraceFameGain,
-        chill: applyChillGain(nextState.chill, bal.embraceChillGain),
+        wizardFame: nextState.wizardFame + eb.embraceFameGain,
+        chill: applyChillGain(nextState.chill, eb.embraceChillGain),
       };
       outcomeText = 'You wave. They wave back. Celebrity vibes.';
       break;
     case 1: // Deny
-      nextState = { ...nextState, wizardFame: Math.max(0, nextState.wizardFame - bal.denyFameLoss) };
+      nextState = { ...nextState, wizardFame: Math.max(0, nextState.wizardFame - eb.denyFameLoss) };
       outcomeText = '"Wrong wizard." They look confused.';
       break;
     case 2: // Exploit
       nextState = {
         ...nextState,
-        cash: nextState.cash + bal.exploitCashGain,
-        wizardFame: Math.max(0, nextState.wizardFame - bal.exploitFameLoss),
+        cash: nextState.cash + eb.exploitCashGain,
+        wizardFame: Math.max(0, nextState.wizardFame - eb.exploitFameLoss),
       };
-      outcomeText = `You sign autographs for $${bal.exploitCashGain}. Fame fades.`;
+      outcomeText = `You sign autographs for $${eb.exploitCashGain}. Fame fades.`;
       break;
     default:
       outcomeText = 'They walk away.';
@@ -511,7 +511,7 @@ function resolveWizardFameMoment(state: GameState, choice: number): GameState {
 }
 
 function resolveBadBatch(state: GameState, choice: number): GameState {
-  const bal = evtBal.bad_batch;
+  const bb = bal.randomEvents.bad_batch;
   let outcomeText: string;
   let nextState = state;
 
@@ -519,15 +519,15 @@ function resolveBadBatch(state: GameState, choice: number): GameState {
     case 0: // Scratch anyway
       // The odds modifier would need to be applied to the next scratch session.
       // For now, apply chill loss. The modifier is stored transiently via the event system.
-      nextState = { ...nextState, chill: Math.max(0, nextState.chill - bal.scratchAnywayChillLoss) };
+      nextState = { ...nextState, chill: Math.max(0, nextState.chill - bb.scratchAnywayChillLoss) };
       outcomeText = 'You scratch them. They feel wrong in your hands.';
       break;
     case 1: // Swap tickets
-      nextState = { ...nextState, clock: advanceClock(nextState.clock, bal.swapTicketsTimeCost) };
+      nextState = { ...nextState, clock: advanceClock(nextState.clock, bb.swapTicketsTimeCost) };
       outcomeText = 'The clerk swaps them out. Took a while.';
       break;
     case 2: // Leave
-      nextState = { ...nextState, chill: Math.max(0, nextState.chill - bal.leaveChillLoss) };
+      nextState = { ...nextState, chill: Math.max(0, nextState.chill - bb.leaveChillLoss) };
       outcomeText = 'You leave empty-handed. The paranoia lingers.';
       break;
     default:

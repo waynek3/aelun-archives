@@ -39,7 +39,7 @@ function capitalize(s: string): string {
 }
 
 export function renderGameOver(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   const screen = document.createElement('div');
   screen.className = 'screen game-over-screen';

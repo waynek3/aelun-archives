@@ -1,7 +1,7 @@
 // Spell definitions — the full spell catalog.
 // Sprint 14: metadata only; spell effects are wired in Sprint 15.
 
-import balance from './balance.json';
+import { bal } from './balance-types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -205,14 +205,10 @@ export function getSpellsByCategory(category: SpellCategory): SpellDef[] {
 // Bookbinding is learned at the university like a spell, but it's a skill.
 // Cost/time/mana come from balance.json → university section.
 
-const universityBal = (balance as Record<string, unknown>).university as {
-  bookbindingCost: number;
-  bookbindingTime: number;
-  bookbindingMana: number;
-} | undefined;
+const universityBal = bal.university;
 
 export const BOOKBINDING_CLASS = {
-  cost: universityBal?.bookbindingCost ?? 75,
-  baseTime: universityBal?.bookbindingTime ?? 30,
-  mana: universityBal?.bookbindingMana ?? 8,
+  cost: universityBal.bookbindingCost,
+  baseTime: universityBal.bookbindingTime,
+  mana: universityBal.bookbindingMana,
 };

@@ -21,22 +21,18 @@ import {
   getLocationData,
   getLocationNeighborhood,
 } from '../../data/locations';
-import balance from '../../data/balance.json';
+import { bal } from '../../data/balance-types';
 
 type Dispatch = (action: GameAction) => void;
 
-const uniBal = (balance as Record<string, unknown>).university as {
-  openTime: number;
-  closeTime: number;
-  classesPerDay: number;
-};
+const uniBal = bal.university;
 
 export function renderUniversity(
   state: GameState,
   container: HTMLElement,
   dispatch: Dispatch,
 ): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   const screen = document.createElement('div');
   screen.className = 'screen university-screen';

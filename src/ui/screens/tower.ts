@@ -28,7 +28,7 @@ import { PROJECTS, getProjectDef } from '../../data/projects';
 import { getProjectProgress, isProjectComplete } from '../../systems/projects';
 import { freeSlots } from '../../systems/inventory';
 import { progressBar } from '../../util/format';
-import balance from '../../data/balance.json';
+import { bal } from '../../data/balance-types';
 
 // Sprint 15: reuse the same timestamp comparison for luck buff display.
 function isLuckBuffActiveNow(state: GameState): boolean {
@@ -43,7 +43,7 @@ function isLuckBuffActiveNow(state: GameState): boolean {
 type Dispatch = (action: GameAction) => void;
 
 export function renderTower(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   const screen = document.createElement('div');
   screen.className = 'screen tower-screen';
@@ -74,7 +74,7 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
   screen.appendChild(makeSpellbookPanel(state, dispatch));
 
   // ── Furniture (Sprint 13) ──
-  const furnitureMax = (balance.furniture as { maxSlots: number }).maxSlots;
+  const furnitureMax = bal.furniture.maxSlots;
   screen.appendChild(makeFurniturePanel(state, furnitureMax, dispatch));
 
   screen.appendChild(makeDivider());
@@ -438,7 +438,7 @@ function makeCrystalBallPanel(state: GameState, dispatch: Dispatch): HTMLElement
   const panel = document.createElement('div');
   panel.className = 'crystal-ball-panel';
 
-  const crystalBal = (balance as Record<string, unknown>).crystalBall as { revealManaCost: number };
+  const crystalBal = bal.crystalBall;
   const manaCost = crystalBal.revealManaCost;
   const hasAnySpell = CRYSTAL_BALL_REVEALS.some(r => state.knownSpells.includes(r.requiredSpell));
 
@@ -484,10 +484,7 @@ function makeCrystalBallPanel(state: GameState, dispatch: Dispatch): HTMLElement
 
 // ── Project Panel (Sprint 20) ───────────────────────────────────────────────
 
-const projectsBal = (balance as any).projects as {
-  durationOptions: number[];
-  lowChillThreshold: number;
-};
+const projectsBal = bal.projects;
 
 function makeProjectPanel(state: GameState, dispatch: Dispatch): HTMLElement {
   const panel = document.createElement('div');

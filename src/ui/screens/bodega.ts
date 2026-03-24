@@ -34,7 +34,7 @@ const snackQtys: Record<string, number> = {};
 // ─── Render ───────────────────────────────────────────────────────────────────
 
 export function renderBodega(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   // Reset quantities on fresh render.
   for (const t of TICKET_TYPES) quantities[t.id] = 0;

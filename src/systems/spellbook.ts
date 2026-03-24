@@ -4,16 +4,11 @@
 import { snapToQuarter } from '../engine/time';
 import { getAllSpells, type SpellDef } from '../data/spells';
 import { randInt } from '../util/rng';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
 
-const universityBal = (balance as Record<string, unknown>).university as {
-  intelligenceSpeedFactor: number;
-};
+const universityBal = bal.university;
 
-const spellbookBal = (balance as Record<string, unknown>).spellbook as {
-  addTimeMultiplier: number;
-  removeTimeMultiplier: number;
-};
+const spellbookBal = bal.spellbook;
 
 // ─── Daily Class Selection ───────────────────────────────────────────────────
 
@@ -33,13 +28,13 @@ export function getDailyClasses(
   let seed = (year * 1000000 + month * 10000 + day * 100 + 7) | 0;
 
   const indices: number[] = [];
-  const available = allSpells.map((_, i) => i);
+  let available = allSpells.map((_, i) => i);
 
   for (let i = 0; i < numClasses; i++) {
     const [roll, nextSeed] = randInt(available.length, seed);
     seed = nextSeed;
     indices.push(available[roll]);
-    available.splice(roll, 1);
+    available = available.filter((_, idx) => idx !== roll);
   }
 
   return indices.map(i => allSpells[i]);
@@ -101,9 +96,7 @@ export function calcRemoveFromBookTime(castingTime: number): number {
 
 // ─── Misfire (Sprint 15) ─────────────────────────────────────────────────────
 
-const spellsBal = (balance as Record<string, unknown>).spells as {
-  chillMisfireScaling: number;
-};
+const spellsBal = bal.spells;
 
 // Returns the effective misfire chance for a spell, factoring in Chill level.
 // Formula: baseMisfireChance + max(0, 50 − chill) × chillMisfireScaling

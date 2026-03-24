@@ -16,7 +16,7 @@ import { getAllSpells } from '../../src/data/spells';
 describe('Sprint 14: Spellbook & University', () => {
   describe('SAVE_VERSION', () => {
     it('is 15', () => {
-      expect(SAVE_VERSION).toBe(15);
+      expect(SAVE_VERSION).toBe(18);
     });
   });
 

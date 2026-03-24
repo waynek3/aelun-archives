@@ -10,7 +10,7 @@ import { formatClock } from '../../engine/time';
 type Dispatch = (action: GameAction) => void;
 
 export function renderPassout(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   const screen = document.createElement('div');
   screen.className = 'screen passout-screen';

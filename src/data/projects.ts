@@ -3,7 +3,7 @@
 // One active project at a time; canceling loses all progress.
 // Completed projects produce inventory items.
 
-import balance from './balance.json';
+import { bal } from './balance-types';
 
 export type ProjectId =
   | 'longevity_potion'
@@ -25,7 +25,7 @@ export interface ProjectDef {
   };
 }
 
-const defs = (balance as any).projects.definitions;
+const defs = bal.projects.definitions;
 
 export const PROJECTS: ProjectDef[] = [
   {

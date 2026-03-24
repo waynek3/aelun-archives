@@ -8,7 +8,7 @@ import { rng, weightedRandom, randInt } from '../util/rng';
 import { calcScratchTimeCost } from '../util/format';
 import { applyChillLoss, applyChillGain } from './chill';
 import { calcAffinityPayoutMultiplier } from './affinity';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
 
 // ─── Ticket Generation ────────────────────────────────────────────────────────
 
@@ -51,10 +51,10 @@ function generateTicket(
   let s = seed;
 
   // ── Determine win or loss ──
-  let r: number;
-  [r, s] = rng(s);
+  const [winRoll, s2] = rng(s);
+  s = s2;
   const effectiveWinChance = Math.min(1, type.winChance + winChanceBonus);
-  const isWin = r < effectiveWinChance;
+  const isWin = winRoll < effectiveWinChance;
 
   if (isWin) {
     // ── Pick match count ──
@@ -65,8 +65,7 @@ function generateTicket(
     // ── Pick winning symbol (Sprint 24: weighted by neighborhood god strength) ──
     let symIdx: number;
     if (dominantGods.length > 0) {
-      const nbStr = (balance as Record<string, unknown>).neighborhoodGodStrength as { symbolWeightBonus: number };
-      const weights = SYMBOLS.map(sym => dominantGods.includes(sym.god) ? 1 + nbStr.symbolWeightBonus : 1);
+      const weights = SYMBOLS.map(sym => dominantGods.includes(sym.god) ? 1 + bal.neighborhoodGodStrength.symbolWeightBonus : 1);
       [symIdx, s] = weightedRandom(weights, s);
     } else {
       [symIdx, s] = randInt(SYMBOLS.length, s);
@@ -161,7 +160,7 @@ function fillLossCells(
 
   // Sprint 24: pre-compute weight bonus for dominant gods.
   const nbStr = dominantGods.length > 0
-    ? (balance as Record<string, unknown>).neighborhoodGodStrength as { symbolWeightBonus: number }
+    ? bal.neighborhoodGodStrength
     : null;
 
   // Track counts to avoid accidental 3+ of any non-excluded symbol.
@@ -298,9 +297,9 @@ export function scratchCell(
 
     // Sprint 5: chill reacts to scratch outcomes.
     if (newTicket.isWin) {
-      newChill = applyChillGain(newChill, balance.chill.gainPerScratchWin);
+      newChill = applyChillGain(newChill, bal.chill.gainPerScratchWin);
     } else {
-      newChill = applyChillLoss(newChill, balance.chill.lossPerScratchLoss);
+      newChill = applyChillLoss(newChill, bal.chill.lossPerScratchLoss);
     }
   }
 

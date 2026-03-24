@@ -20,7 +20,7 @@ export function renderScratch(
   container: HTMLElement,
   dispatch: Dispatch,
 ): void {
-  container.innerHTML = '';
+  container.replaceChildren();
   if (!state.scratchSession) return;
 
   const session = state.scratchSession;
@@ -247,7 +247,7 @@ function buildGrid(ticket: GeneratedTicket, dispatch: Dispatch): HTMLElement {
 }
 
 function populateResult(el: HTMLElement, ticket: GeneratedTicket): void {
-  el.innerHTML = '';
+  el.replaceChildren();
   el.appendChild(makeDivider());
 
   if (ticket.isWin) {

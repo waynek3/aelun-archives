@@ -2,7 +2,26 @@
 // All functions are pure — no side effects, no state mutation.
 
 import type { GameState } from '../state/types';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
+
+// ─── Calendar Constants ──────────────────────────────────────────────────────
+// Game uses a simplified calendar: 30-day months, 12 months, 360-day years.
+
+export const MINUTES_PER_QUARTER = 15;
+export const MINUTES_PER_DAY = 1440;
+export const DAYS_PER_MONTH = 30;
+export const MONTHS_PER_YEAR = 12;
+export const DAYS_PER_YEAR = DAYS_PER_MONTH * MONTHS_PER_YEAR; // 360
+
+// ─── Timestamp Math ──────────────────────────────────────────────────────────
+
+/** Convert a game timestamp to total minutes for comparison. */
+export function toTotalMinutes(year: number, month: number, day: number, clock: number): number {
+  return year * DAYS_PER_YEAR * MINUTES_PER_DAY
+    + month * DAYS_PER_MONTH * MINUTES_PER_DAY
+    + day * MINUTES_PER_DAY
+    + clock;
+}
 
 // ─── Clock Math ───────────────────────────────────────────────────────────────
 
@@ -10,7 +29,7 @@ import balance from '../data/balance.json';
 // e.g. 605 → 615, 615 → 615, 620 → 630
 export function snapToQuarter(minutes: number): number {
   if (minutes <= 0) return 0;
-  return Math.ceil(minutes / 15) * 15;
+  return Math.ceil(minutes / MINUTES_PER_QUARTER) * MINUTES_PER_QUARTER;
 }
 
 // Advance the clock by a raw cost (snapped to next :15 boundary on arrival).
@@ -34,7 +53,7 @@ export function isCurfewBreached(
   clock: number,
   location: GameState['currentLocation'],
 ): boolean {
-  return clock >= balance.dayCycle.curfewTime && location !== 'tower';
+  return clock >= bal.dayCycle.curfewTime && location !== 'tower';
 }
 
 // ─── Calendar ─────────────────────────────────────────────────────────────────
@@ -48,8 +67,8 @@ export function advanceDay(
   let d = day + 1;
   let m = month;
   let y = year;
-  if (d > 30) { d = 1; m++; }
-  if (m > 12) { m = 1; y++; }
+  if (d > DAYS_PER_MONTH) { d = 1; m++; }
+  if (m > MONTHS_PER_YEAR) { m = 1; y++; }
   return { day: d, month: m, year: y };
 }
 
@@ -59,8 +78,7 @@ export function advanceDay(
 // advance to next day, reset to tower.
 // Call this when isCurfewBreached returns true.
 export function applyPassout(state: GameState): GameState {
-  const penalties = balance.passout as Record<string, { cashPenalty: number; chillRestore: number; manaRestore: number }>;
-  const entry = penalties[state.currentNeighborhood];
+  const entry = bal.passout[state.currentNeighborhood];
   const penalty = entry?.cashPenalty ?? 20;
   const chillRestore = entry?.chillRestore ?? 0.15;
   const manaRestore = entry?.manaRestore ?? 0.25;
@@ -71,7 +89,7 @@ export function applyPassout(state: GameState): GameState {
     cash: Math.max(0, state.cash - penalty),
     chill: Math.round(chillRestore * 100),
     mana: Math.round(manaRestore * state.maxMana),
-    clock: balance.dayCycle.wakeTime,
+    clock: bal.dayCycle.wakeTime,
     currentLocation: 'tower',
     lastPassoutPenalty: penalty,
     scratchSession: null,

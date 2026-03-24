@@ -44,7 +44,7 @@ let _screenEl: HTMLElement | null = null;
 
 function ensureLayout(container: HTMLElement): { hud: HTMLElement; screen: HTMLElement } {
   if (!_hudEl || !container.contains(_hudEl)) {
-    container.innerHTML = '';
+    container.replaceChildren();
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
 
@@ -58,7 +58,9 @@ function ensureLayout(container: HTMLElement): { hud: HTMLElement; screen: HTMLE
     container.appendChild(_screenEl);
     currentScreen = 'none';  // force full re-render after layout reset
   }
-  return { hud: _hudEl!, screen: _screenEl! };
+  // Both elements are guaranteed non-null here: either they existed and passed
+  // the contains() check, or they were just created above.
+  return { hud: _hudEl as HTMLElement, screen: _screenEl as HTMLElement };
 }
 
 // ─── Screen Routing ───────────────────────────────────────────────────────────

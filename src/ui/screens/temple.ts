@@ -20,17 +20,14 @@ import {
   getNeighborhoodBar,
 } from '../../data/locations';
 import { getGod } from '../../data/gods';
-import balance from '../../data/balance.json';
+import { bal } from '../../data/balance-types';
 
 type Dispatch = (action: GameAction) => void;
 
-const prayerBal = (balance as Record<string, unknown>).prayer as {
-  donationAmounts: number[];
-  durationOptions: number[];
-};
+const prayerBal = bal.prayer;
 
 export function renderTemple(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
-  container.innerHTML = '';
+  container.replaceChildren();
   const screen = document.createElement('div');
   screen.className = 'screen temple-screen';
 

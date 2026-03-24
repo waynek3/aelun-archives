@@ -44,7 +44,5 @@ export function renderHUD(state: GameState, el: HTMLElement): void {
   row2.appendChild(chillEl);
   row2.appendChild(manaEl);
 
-  el.innerHTML = '';
-  el.appendChild(row1);
-  el.appendChild(row2);
+  el.replaceChildren(row1, row2);
 }

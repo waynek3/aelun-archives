@@ -23,18 +23,14 @@ import {
   getNeighborhoodDadsHouse,
   getNeighborhoodBar,
 } from '../../data/locations';
-import balance from '../../data/balance.json';
+import { bal } from '../../data/balance-types';
 
 type Dispatch = (action: GameAction) => void;
 
-const scrollsBal = (balance as Record<string, unknown>).scrolls as {
-  priceByLevel: Record<string, number>;
-  bookstoreMarkup: number;
-  storePurchaseTimeCost: number;
-};
+const scrollsBal = bal.scrolls;
 
 export function renderUniversityBookstore(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   const screen = document.createElement('div');
   screen.className = 'screen university-bookstore-screen';

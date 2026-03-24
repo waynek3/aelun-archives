@@ -3,7 +3,7 @@
 
 import type { GameState, InventoryItem, GodId } from '../state/types';
 import { progressBar } from '../util/format';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
 import { getSpellDef } from '../data/spells';
 import { ALL_GOD_IDS, getGod } from '../data/gods';
 
@@ -199,7 +199,7 @@ export function makeStatsPanel(state: GameState): HTMLElement {
 
   panel.appendChild(makeHeader('STATS'));
 
-  const dm = balance.stats.displayMax;
+  const dm = bal.stats.displayMax;
   const stats: Array<{ label: string; value: number; max: number }> = [
     { label: 'INT ', value: state.intelligence,      max: dm.intelligence },
     { label: 'BIND', value: state.bookbinding,       max: dm.bookbinding },
