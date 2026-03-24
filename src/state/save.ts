@@ -135,6 +135,11 @@ const MIGRATIONS: Record<number, (s: unknown) => unknown> = {
     const state = s as Record<string, unknown>;
     return { ...state, peakWizardFame: 0 };
   },
+  // Sprint 27: add colorScheme preference (default blue; preserve if already present).
+  17: (s: unknown) => {
+    const state = s as Record<string, unknown>;
+    return { ...state, colorScheme: state['colorScheme'] ?? 'blue' };
+  },
 };
 
 function migrate(data: SaveData): GameState {
