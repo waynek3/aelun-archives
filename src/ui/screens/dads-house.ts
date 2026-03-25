@@ -20,15 +20,11 @@ import {
   getNeighborhoodBar,
 } from '../../data/locations';
 import { getAvailableLoanAmounts, calculateInterestRate } from '../../systems/loan';
-import balance from '../../data/balance.json';
+import { bal } from '../../data/balance-types';
 
 type Dispatch = (action: GameAction) => void;
 
-const dadBal = balance.dadsHouse as {
-  collateralThreshold: number;
-  graveManaRestore: number;
-  graveChillLoss: number;
-};
+const dadBal = bal.dadsHouse;
 
 export function renderDadsHouse(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
   const screen = document.createElement('div');
@@ -53,7 +49,7 @@ export function renderDadsHouse(state: GameState, container: HTMLElement, dispat
   // ── Travel ──
   renderTravelSection(state, screen, dispatch);
 
-  container.innerHTML = '';
+  container.replaceChildren();
   container.appendChild(screen);
 }
 
@@ -105,7 +101,7 @@ function renderDadAlive(state: GameState, screen: HTMLElement, dispatch: Dispatc
     screen.appendChild(makeHeader('REPAY'));
 
     const repayAmounts = [25, 50, 100, 250].filter(
-      a => a <= state.cash && a <= Math.ceil(state.loan!.principal),
+      a => a <= state.cash && state.loan !== null && a <= Math.ceil(state.loan.principal),
     );
     // Always offer "pay all" if affordable.
     const fullAmount = Math.ceil(state.loan.principal);
@@ -119,7 +115,7 @@ function renderDadAlive(state: GameState, screen: HTMLElement, dispatch: Dispatc
     }
 
     for (const amount of repayAmounts) {
-      const label = amount >= Math.ceil(state.loan!.principal)
+      const label = state.loan !== null && amount >= Math.ceil(state.loan.principal)
         ? `REPAY ALL (${formatCash(amount)})`
         : `REPAY ${formatCash(amount)}`;
       screen.appendChild(makeButton(

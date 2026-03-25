@@ -2,18 +2,18 @@
 // Hidden stat tracking scratcher dependency.
 // All functions are pure — no side effects, no held state.
 
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
 
 // Grow need when the player buys tickets (frequency-driven).
 // Called once per BUY_TICKETS action with the total ticket count purchased.
 export function growNeed(need: number, numTickets: number): number {
-  return need + numTickets * balance.addiction.needGrowthRate;
+  return need + numTickets * bal.addiction.needGrowthRate;
 }
 
 // Gain satisfaction from completing a scratch session.
 // Called at FINISH_SESSION with the total number of tickets scratched in the session.
 export function gainSatisfaction(satisfaction: number, numTickets: number): number {
-  return satisfaction + numTickets * balance.addiction.satisfactionPerTicket;
+  return satisfaction + numTickets * bal.addiction.satisfactionPerTicket;
 }
 
 // Compute effective restingRelaxation given current addiction need.
@@ -21,6 +21,6 @@ export function gainSatisfaction(satisfaction: number, numTickets: number): numb
 // from the starting base. Floors at 0.
 export function computeRestingRelaxation(need: number): number {
   const level = Math.floor(need);
-  const penalty = level * balance.addiction.restingRelaxationPenaltyPerLevel;
-  return Math.max(0, balance.starting.restingRelaxation - penalty);
+  const penalty = level * bal.addiction.restingRelaxationPenaltyPerLevel;
+  return Math.max(0, bal.starting.restingRelaxation - penalty);
 }

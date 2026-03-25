@@ -1,14 +1,14 @@
 import type { GameState } from './types';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
 
 export const SAVE_VERSION = 18;
 
 export function createInitialState(): GameState {
   return {
     phase: 'setup',
-    cash: balance.starting.cash,
+    cash: bal.starting.cash,
     // Sprint 2: time & calendar
-    clock: balance.dayCycle.wakeTime,  // 600 = 10:00 AM
+    clock: bal.dayCycle.wakeTime,  // 600 = 10:00 AM
     day: 1,
     month: 1,
     year: 1,
@@ -17,24 +17,24 @@ export function createInitialState(): GameState {
     currentLocation: 'tower',          // new runs start at the tower
     lastPassoutPenalty: null,
     // Sprint 5: chill meter
-    chill: balance.starting.chill,
+    chill: bal.starting.chill,
     // Sprint 6: mana pool
-    mana: balance.starting.mana,
-    maxMana: balance.starting.maxMana,
+    mana: bal.starting.mana,
+    maxMana: bal.starting.maxMana,
     // Sprint 7: inventory
     inventory: [null, null, null, null, null],
     // Sprint 8: player stats
-    intelligence: balance.starting.intelligence,
-    bookbinding: balance.starting.bookbinding,
-    wizardFame: balance.starting.wizardFame,
+    intelligence: bal.starting.intelligence,
+    bookbinding: bal.starting.bookbinding,
+    wizardFame: bal.starting.wizardFame,
     peakWizardFame: 0,  // Sprint 26: starts at 0, updated via dispatch post-processing
-    relaxationRate: balance.starting.relaxationRate,
-    restingRelaxation: balance.starting.restingRelaxation,
+    relaxationRate: bal.starting.relaxationRate,
+    restingRelaxation: bal.starting.restingRelaxation,
     // Sprint 17: hidden addiction stats
     addictionNeed: 0,
     addictionSatisfaction: 0,
     // Sprint 18 stub: age health score
-    ageHealthScore: balance.starting.ageHealthScore,
+    ageHealthScore: bal.starting.ageHealthScore,
     // Sprint 19: crystal ball reveal (transient)
     crystalBallReveal: null,
     // Sprint 13: furniture (start with one basic bed)

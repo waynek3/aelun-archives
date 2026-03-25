@@ -2,7 +2,7 @@
 // Sprint 13: Bed (3 tiers), Lab Table (placeholder), Bong.
 
 import type { FurnitureType } from '../state/types';
-import balance from './balance.json';
+import { bal } from './balance-types';
 
 export interface FurnitureDef {
   id: string;
@@ -12,12 +12,7 @@ export interface FurnitureDef {
   quality: number;
 }
 
-const furnitureBalance = balance.furniture as {
-  beds: Record<string, { cost: number; sleepMana: number; sleepChill: number }>;
-  lab_table: { cost: number };
-  bong: { cost: number; breakChance: number };
-  crystal_ball: { cost: number };
-};
+const furnitureBalance = bal.furniture;
 
 export const FURNITURE_CATALOG: FurnitureDef[] = [
   { id: 'bed_basic',    type: 'bed',       name: 'Dusty Mattress', cost: furnitureBalance.beds.bed_basic.cost,    quality: 1 },

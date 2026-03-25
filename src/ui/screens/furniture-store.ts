@@ -22,12 +22,12 @@ import {
 } from '../../data/locations';
 import { FURNITURE_CATALOG } from '../../data/furniture';
 import { getBed, hasFurnitureSlot } from '../../systems/furniture';
-import balance from '../../data/balance.json';
+import { bal } from '../../data/balance-types';
 
 type Dispatch = (action: GameAction) => void;
 
 export function renderFurnitureStore(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   const screen = document.createElement('div');
   screen.className = 'screen furniture-store-screen';
@@ -43,7 +43,7 @@ export function renderFurnitureStore(state: GameState, container: HTMLElement, d
   screen.appendChild(cashRow);
 
   // ── Tower slot count ──
-  const furnitureMax = (balance.furniture as { maxSlots: number }).maxSlots;
+  const furnitureMax = bal.furniture.maxSlots;
   const slotInfo = document.createElement('p');
   slotInfo.className = 'slot-info';
   slotInfo.textContent = `Tower: ${state.furniture.length}/${furnitureMax} slots`;

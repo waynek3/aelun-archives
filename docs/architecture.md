@@ -407,6 +407,7 @@ All UI elements reference custom properties. Theme toggle swaps `data-theme` on 
 │   │   └── events.ts              # Random event trigger and resolution
 │   ├── data/
 │   │   ├── balance.json           # All tuning values (see Section 8)
+│   │   ├── balance-types.ts      # Typed interface for balance.json (import `bal` from here)
 │   │   ├── gods.ts                # God definitions, opposition circle
 │   │   ├── symbols.ts             # 30 symbols, element/god/strength mapping
 │   │   ├── neighborhoods.ts       # 6 neighborhoods, god strengths
@@ -549,20 +550,21 @@ All gameplay-affecting numbers live in a single human-readable JSON file. This i
 ### How it works in code
 
 ```typescript
-import balance from './data/balance.json';
+import { bal } from './data/balance-types';
 
-// Systems reference balance values, never hardcode numbers
+// Systems reference balance values via the typed `bal` object — never
+// import balance.json directly and never hardcode numbers.
 function calculateChillDecay(elapsedMinutes: number): number {
-  return elapsedMinutes * balance.chill.decayPerMinute;
+  return elapsedMinutes * bal.chill.decayPerMinute;
 }
 
 function calculateAffinityPayout(basePayout: number, affinity: number): number {
-  const multiplier = 1 + (affinity * balance.affinity.scaleFactor);
+  const multiplier = 1 + (affinity * bal.affinity.scaleFactor);
   return Math.floor(basePayout * multiplier);
 }
 ```
 
-New tuning values are added to this file as systems are built. The file grows with each sprint but never needs restructuring.
+All balance access goes through the typed `bal` export from `src/data/balance-types.ts`. This gives compile-time checking for every balance key — a typo or renamed field causes a TypeScript error instead of a silent runtime bug. New tuning values are added to `balance.json` and the matching interface in `balance-types.ts` as systems are built.
 
 ---
 

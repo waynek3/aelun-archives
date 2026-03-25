@@ -3,7 +3,7 @@
 // Sprint 4: cross-neighborhood travel (15 min raw); currentNeighborhood updated on travel.
 
 import type { GameState, LocationId } from '../state/types';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
 import { advanceClock, isCurfewBreached, applyPassout, snapToQuarter } from '../engine/time';
 import { getLocationNeighborhood } from '../data/locations';
 
@@ -15,9 +15,9 @@ export function getTravelCostRaw(from: LocationId, to: LocationId): number {
   const fromNeighborhood = getLocationNeighborhood(from);
   const toNeighborhood   = getLocationNeighborhood(to);
   if (fromNeighborhood === toNeighborhood) {
-    return balance.travel.sameNeighborhoodMinutes;
+    return bal.travel.sameNeighborhoodMinutes;
   }
-  return balance.travel.crossNeighborhoodMinutes;
+  return bal.travel.crossNeighborhoodMinutes;
 }
 
 // How much the clock visually advances for this trip (snapped to :15).

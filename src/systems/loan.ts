@@ -1,9 +1,9 @@
 // Loan system — pure functions for Dad's House loans (Sprint 22).
 
 import type { GameState, LoanState } from '../state/types';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
 
-const cfg = balance.dadsHouse;
+const cfg = bal.dadsHouse;
 
 export function calculateLoanCap(wizardFame: number): number {
   return Math.min(cfg.maxLoanCap, cfg.baseLoanCap + wizardFame * cfg.fameCapBonus);

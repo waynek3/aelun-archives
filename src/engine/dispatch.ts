@@ -1,5 +1,17 @@
 // Central action dispatcher.
 // Every player action flows through here: validate → apply → save → render.
+//
+// ─── How to add a new action ──────────────────────────────────────────────────
+// 1. Add the action type to the GameAction union in actions.ts
+// 2. Add a case to the switch in applyAction() below
+// 3. Follow the validation pattern: check phase, location, and resources first
+// 4. If the action advances the clock, call advanceClock() and check
+//    isCurfewBreached() → applyPassout() before applying effects
+// 5. If it adds fields to GameState, bump SAVE_VERSION in initial.ts
+//    and add a migration in save.ts
+// 6. Use bal.X for balance data (never import balance.json directly)
+// 7. Use toTotalMinutes() from time.ts for timestamp comparisons
+// ──────────────────────────────────────────────────────────────────────────────
 
 import type { GameState } from '../state/types';
 import type { GameAction } from './actions';
@@ -14,7 +26,7 @@ import {
 } from '../systems/scratch';
 import { travel } from '../systems/travel';
 import { checkRent } from '../systems/rent';
-import { advanceDay, applyPassout, isCurfewBreached, advanceClock } from './time';
+import { advanceDay, applyPassout, isCurfewBreached, advanceClock, toTotalMinutes } from './time';
 import { calcScratchTimeCost } from '../util/format';
 import { applyManaRestore } from '../systems/mana';
 import { applyChillGain } from '../systems/chill';
@@ -49,12 +61,25 @@ import { getLocationType } from '../data/locations';
 import { checkForEvent, createActiveEvent, resolveEvent, applyLoanSharkInterest, collectLoanSharkDebt } from '../systems/events';
 import { RANDOM_EVENTS } from '../data/events';
 import { getDrink } from '../data/drinks';
-import balance from '../data/balance.json';
+import { bal, type SpellBalance } from '../data/balance-types';
 
 // ─── Spell balance reference ──────────────────────────────────────────────────
-const spellsBal = (balance as Record<string, unknown>).spells as Record<string, unknown> & {
-  lucky_fingers: { winChanceBonus: number; durationMinutes: number; baseMisfireChance: number };
-};
+const spellsBal = bal.spells;
+
+// ─── Shared Helpers ──────────────────────────────────────────────────────────
+
+/** Convert snack IDs into inventory items and add to inventory. */
+function addSnacksToInventory(
+  inventory: GameState['inventory'],
+  snackIds: string[],
+): GameState['inventory'] {
+  if (snackIds.length === 0) return inventory;
+  const items: InventoryItem[] = snackIds.map(id => {
+    const def = getSnack(id);
+    return { type: 'snack' as const, id: def.id, name: def.name, descriptor: def.descriptor };
+  });
+  return addMultipleItems(inventory, items) ?? inventory;
+}
 
 // Applies the category-specific effect of a spell or scroll to an already-clock-advanced,
 // already-mana-spent state. Returns the resulting state.
@@ -71,8 +96,7 @@ function applySpellEffect(
     case 'affinity': {
       if (!godId) break;
 
-      const affData = (spellsBal as Record<string, unknown>)[spellId] as
-        | { affinityGain?: number; affinityLoss?: number } | undefined;
+      const affData = spellsBal[spellId] as SpellBalance | undefined;
 
       const rawChange = affData?.affinityGain ?? (affData?.affinityLoss ? -(affData.affinityLoss) : 0);
       if (rawChange === 0) break;
@@ -82,7 +106,7 @@ function applySpellEffect(
       const hasTargetBuff = hasPrayerBuff(state.prayerBuffs, godId, newClock, state.day, state.month, state.year);
       const hasOpposedBuff = hasPrayerBuff(state.prayerBuffs, opposedGod, newClock, state.day, state.month, state.year);
 
-      const aff = balance.affinity;
+      const aff = bal.affinity;
       const isStrongMonth = getGod(godId).strongMonths.includes(state.month);
       const strongMult = isStrongMonth ? aff.strongMonthMultiplier : 1;
 
@@ -102,8 +126,7 @@ function applySpellEffect(
     }
 
     case 'chill': {
-      const chillData = (spellsBal as Record<string, unknown>)[spellId] as
-        | { chillRestore: number } | undefined;
+      const chillData = spellsBal[spellId] as SpellBalance | undefined;
       if (chillData?.chillRestore) {
         nextState = { ...nextState, chill: applyChillGain(nextState.chill, chillData.chillRestore) };
       }
@@ -111,8 +134,7 @@ function applySpellEffect(
     }
 
     case 'mana': {
-      const manaData = (spellsBal as Record<string, unknown>)[spellId] as
-        | { manaRestore: number } | undefined;
+      const manaData = spellsBal[spellId] as SpellBalance | undefined;
       if (manaData?.manaRestore) {
         nextState = { ...nextState, mana: applyManaRestore(nextState.mana, manaData.manaRestore, nextState.maxMana) };
       }
@@ -120,8 +142,7 @@ function applySpellEffect(
     }
 
     case 'luck': {
-      const luckData = (spellsBal as Record<string, unknown>)[spellId] as
-        | { durationMinutes: number } | undefined;
+      const luckData = spellsBal[spellId] as SpellBalance | undefined;
       if (luckData?.durationMinutes) {
         const expiry = addMinutesToTimestamp(newClock, state.day, state.month, state.year, luckData.durationMinutes);
         const newBuff: LuckBuff = {
@@ -149,9 +170,7 @@ function isLuckBuffActive(
   clock: number, day: number, month: number, year: number,
 ): boolean {
   if (!buff) return false;
-  const toMin = (y: number, mo: number, d: number, c: number) =>
-    y * 360 * 1440 + mo * 30 * 1440 + d * 1440 + c;
-  return toMin(year, month, day, clock) < toMin(buff.expiresInYear, buff.expiresInMonth, buff.expiresOnDay, buff.expiresAtClock);
+  return toTotalMinutes(year, month, day, clock) < toTotalMinutes(buff.expiresInYear, buff.expiresInMonth, buff.expiresOnDay, buff.expiresAtClock);
 }
 
 export type RenderFn = (state: GameState) => void;
@@ -232,20 +251,10 @@ function applyAction(state: GameState, action: GameAction): GameState {
       // Validate inventory space for snacks.
       if (snackIds.length > 0 && !canFitItems(state.inventory, snackIds.length)) return state;
 
-      // Add snacks to inventory.
-      let newInventory = state.inventory;
-      if (snackIds.length > 0) {
-        const items: InventoryItem[] = snackIds.map(id => {
-          const def = getSnack(id);
-          return { type: 'snack' as const, id: def.id, name: def.name, descriptor: def.descriptor };
-        });
-        newInventory = addMultipleItems(state.inventory, items) ?? state.inventory;
-      }
-
       let stateWithPurchase: GameState = {
         ...state,
         cash: state.cash - totalCost,
-        inventory: newInventory,
+        inventory: addSnacksToInventory(state.inventory, snackIds),
       };
 
       // If no tickets, just return (stay on bodega screen — snack-only purchase).
@@ -270,7 +279,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
 
       // Sprint 15: pass luck buff win-chance bonus if active.
       const luckBonus = isLuckBuffActive(stateWithPurchase.luckBuff, newClock, stateWithPurchase.day, stateWithPurchase.month, stateWithPurchase.year)
-        ? (spellsBal.lucky_fingers as { winChanceBonus: number }).winChanceBonus
+        ? spellsBal.lucky_fingers.winChanceBonus
         : 0;
 
       // Sprint 24: pass neighborhood dominant gods to bias symbol frequency.
@@ -322,7 +331,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       const cal = advanceDay(state.day, state.month, state.year);
       let nextState: GameState = {
         ...state,
-        clock: balance.dayCycle.wakeTime,
+        clock: bal.dayCycle.wakeTime,
         lastPassoutPenalty: null,
         mana: applyManaRestore(state.mana, bedRestore.sleepMana, state.maxMana),
         chill: applyChillGain(state.chill, bedRestore.sleepChill),
@@ -330,13 +339,13 @@ function applyAction(state: GameState, action: GameAction): GameState {
         ...cal,
       };
       // Sprint 22: accrue loan interest on rent day (before rent check).
-      if (nextState.day === balance.rent.dueDay) {
+      if (nextState.day === bal.rent.dueDay) {
         nextState = accrueInterest(nextState);
       }
       // Sprint 23: accrue loan shark interest daily.
       nextState = applyLoanSharkInterest(nextState);
       // Sprint 23: collect loan shark debt on rent day (before rent check).
-      if (nextState.day === balance.rent.dueDay) {
+      if (nextState.day === bal.rent.dueDay) {
         nextState = collectLoanSharkDebt(nextState);
       }
       return checkRent(nextState);
@@ -356,7 +365,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       const item = state.inventory[action.slotIndex];
       if (!item || item.type !== 'snack') return state;
 
-      const snackBalance = balance.snacks as { chillRestore: Record<string, number> };
+      const snackBalance = bal.snacks;
       const restoreAmount = snackBalance.chillRestore[item.descriptor] ?? 0;
 
       return {
@@ -407,7 +416,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
           state.prayerBuffs, state.clock, state.day, state.month, state.year,
           getNeighborhoodDominantGods(state.currentNeighborhood),
         ),
-        wizardFame: state.wizardFame + balance.affinity.publicDonationFameGain,
+        wizardFame: state.wizardFame + bal.affinity.publicDonationFameGain,
       };
     }
 
@@ -425,7 +434,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       }
 
       // Mana restore: per-quarter flat amount.
-      const prayerBal = (balance as Record<string, unknown>).prayer as { manaRestorePerQuarter: number };
+      const prayerBal = bal.prayer;
       const quarters = action.duration / 15;
       const newMana = Math.min(state.maxMana, state.mana + quarters * prayerBal.manaRestorePerQuarter);
 
@@ -453,7 +462,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       const def = getFurnitureDef(action.furnitureId);
       if (state.cash < def.cost) return state;
 
-      const furnitureBalance = balance.furniture as { maxSlots: number };
+      const furnitureBalance = bal.furniture;
       const item: FurnitureItem = {
         type: def.type,
         id: def.id,
@@ -483,8 +492,8 @@ function applyAction(state: GameState, action: GameAction): GameState {
       const item = state.furniture[action.furnitureIndex];
       if (!item || item.type !== 'bong') return state;
 
-      const bongBalance = (balance.furniture as { bong: { breakChance: number } }).bong;
-      const chillRestore = (balance.chill as { bongRestoreAmount: number }).bongRestoreAmount;
+      const bongBalance = bal.furniture.bong;
+      const chillRestore = bal.chill.bongRestoreAmount;
 
       // Restore chill first.
       let nextState: GameState = {
@@ -526,9 +535,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       if (locData.type !== 'university') return state;
 
       // Check university hours.
-      const uniBal = (balance as Record<string, unknown>).university as {
-        openTime: number; closeTime: number;
-      };
+      const uniBal = bal.university;
       if (state.clock < uniBal.openTime || state.clock >= uniBal.closeTime) return state;
 
       // Already known?
@@ -560,9 +567,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       const locData = getLocationData(state.currentLocation);
       if (locData.type !== 'university') return state;
 
-      const uniBal = (balance as Record<string, unknown>).university as {
-        openTime: number; closeTime: number;
-      };
+      const uniBal = bal.university;
       if (state.clock < uniBal.openTime || state.clock >= uniBal.closeTime) return state;
 
       if (state.cash < BOOKBINDING_CLASS.cost) return state;
@@ -644,12 +649,11 @@ function applyAction(state: GameState, action: GameAction): GameState {
 
       // ── Sprint 15: misfire check ──────────────────────────────────────────
       // Look up per-spell balance data (may be undefined for spells without effects yet).
-      const spellEntry = (spellsBal as Record<string, unknown>)[action.spellId] as
-        | { baseMisfireChance: number } | undefined;
+      const spellEntry = spellsBal[action.spellId] as SpellBalance | undefined;
       const baseMisfireChance = spellEntry?.baseMisfireChance ?? 0.05;
 
       const misfireChance = calcMisfireChance(baseMisfireChance, state.chill);
-      let [roll, nextSeed] = rng(state.rngSeed);
+      const [roll, nextSeed] = rng(state.rngSeed);
 
       if (roll < misfireChance) {
         // MISFIRE: spell fires but drains twice the mana.
@@ -663,7 +667,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       }
 
       // ── No misfire: apply spell effect by category ────────────────────────
-      let nextState: GameState = {
+      const nextState: GameState = {
         ...state,
         clock: newClock,
         mana: applyManaSpend(state.mana, spell.manaCost),
@@ -684,11 +688,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       if (isSpellKnown(state.knownSpells, action.spellId)) return state;
 
       const spell = getSpellDef(action.spellId);
-      const scrollsBal = (balance as Record<string, unknown>).scrolls as {
-        priceByLevel: Record<string, number>;
-        bookstoreMarkup: number;
-        storePurchaseTimeCost: number;
-      };
+      const scrollsBal = bal.scrolls;
       const basePrice = scrollsBal.priceByLevel[String(spell.level)] ?? 50;
       const price = locData.type === 'university_bookstore'
         ? Math.floor(basePrice * scrollsBal.bookstoreMarkup)
@@ -733,8 +733,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
         return applyPassout({ ...state, clock: newClock });
       }
 
-      const spellEntry = (spellsBal as Record<string, unknown>)[item.spellId] as
-        | { baseMisfireChance: number } | undefined;
+      const spellEntry = spellsBal[item.spellId] as SpellBalance | undefined;
       const baseMisfireChance = spellEntry?.baseMisfireChance ?? 0.05;
       const misfireChance = calcMisfireChance(baseMisfireChance, state.chill);
       const [roll, nextSeed] = rng(state.rngSeed);
@@ -788,23 +787,13 @@ function applyAction(state: GameState, action: GameAction): GameState {
         return applyPassout({ ...state, clock: newClock, cash: state.cash - totalCost });
       }
 
-      // Add snacks to inventory.
-      let newInventory = state.inventory;
-      if (snackIds.length > 0) {
-        const items: InventoryItem[] = snackIds.map(id => {
-          const def = getSnack(id);
-          return { type: 'snack' as const, id: def.id, name: def.name, descriptor: def.descriptor };
-        });
-        newInventory = addMultipleItems(state.inventory, items) ?? state.inventory;
-      }
-
       return {
         ...state,
         clock: newClock,
         cash: state.cash - totalCost,
         chill: applyChillGain(state.chill, drink.chillRestore),
         mana: applyManaSpend(state.mana, drink.manaReduction),
-        inventory: newInventory,
+        inventory: addSnacksToInventory(state.inventory, snackIds),
       };
     }
 
@@ -826,7 +815,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       // Reveal spells use knownSpells (not equippedSpells) — learning is the gate.
       if (!isSpellKnown(state.knownSpells, requiredSpell)) return state;
 
-      const crystalBal = (balance as Record<string, unknown>).crystalBall as { revealManaCost: number };
+      const crystalBal = bal.crystalBall;
       if (state.mana < crystalBal.revealManaCost) return state;
 
       // Compute the revealed value.
@@ -920,7 +909,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       if (!state.dadAlive) return state;
       const result = takeLoan(state, action.amount);
       if (!result) return state;
-      const dadBal = balance.dadsHouse as { visitTimeCost: number };
+      const dadBal = bal.dadsHouse;
       const newClock = advanceClock(result.clock, dadBal.visitTimeCost);
       if (isCurfewBreached(newClock, state.currentLocation)) {
         return applyPassout({ ...result, clock: newClock });
@@ -940,7 +929,7 @@ function applyAction(state: GameState, action: GameAction): GameState {
       if (state.phase !== 'playing') return state;
       if (getLocationType(state.currentLocation) !== 'dads_house') return state;
       if (state.dadAlive) return state;
-      const dadBal = balance.dadsHouse as { visitTimeCost: number; graveManaRestore: number; graveChillLoss: number };
+      const dadBal = bal.dadsHouse;
       const newClock = advanceClock(state.clock, dadBal.visitTimeCost);
       if (isCurfewBreached(newClock, state.currentLocation)) {
         return applyPassout({ ...state, clock: newClock });

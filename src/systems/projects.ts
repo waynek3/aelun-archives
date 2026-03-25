@@ -6,9 +6,9 @@ import type { GameState, InventoryItem, ProjectState } from '../state/types';
 import { getProjectDef } from '../data/projects';
 import { addItem, freeSlots } from './inventory';
 import { applyChillLoss } from './chill';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
 
-const proj = (balance as any).projects;
+const proj = bal.projects;
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 

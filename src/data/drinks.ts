@@ -1,7 +1,7 @@
 // Drink definitions for the University Bar (Sprint 25).
 // Values sourced from balance.json — never hardcode gameplay numbers here.
 
-import balance from './balance.json';
+import { bal } from './balance-types';
 
 export interface DrinkDefinition {
   id: string;
@@ -12,9 +12,7 @@ export interface DrinkDefinition {
   manaReduction: number;
 }
 
-type BarDrinkBalance = { cost: number; timeMinutes: number; chillRestore: number; manaReduction: number };
-
-const barBal = (balance as Record<string, unknown>).bar as { drinks: Record<string, BarDrinkBalance> };
+const barBal = bal.bar;
 
 export const DRINKS: DrinkDefinition[] = [
   {

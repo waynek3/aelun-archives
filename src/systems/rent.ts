@@ -3,7 +3,7 @@
 // Pure functions only; no side effects.
 
 import type { GameState } from '../state/types';
-import balance from '../data/balance.json';
+import { bal } from '../data/balance-types';
 
 // Compute days survived from the game calendar.
 // Day 1, Month 1, Year 1 = 0 days survived.
@@ -18,8 +18,8 @@ export function calcDaysSurvived(day: number, month: number, year: number): numb
 //   - day === dueDay, cash >= amount  →  deduct rent, continue
 //   - day === dueDay, cash < amount   →  game over
 export function checkRent(state: GameState): GameState {
-  if (state.day !== balance.rent.dueDay) return state;
-  const rentAmount = balance.rent.amount;
+  if (state.day !== bal.rent.dueDay) return state;
+  const rentAmount = bal.rent.amount;
   if (state.cash < rentAmount) {
     return { ...state, phase: 'game_over' };
   }

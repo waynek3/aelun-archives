@@ -33,7 +33,7 @@ const snackQtys: Record<string, number> = {};
 // ─── Render ───────────────────────────────────────────────────────────────────
 
 export function renderBar(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
-  container.innerHTML = '';
+  container.replaceChildren();
 
   // Reset snack quantities on fresh render.
   for (const s of SNACKS) snackQtys[s.id] = 0;
