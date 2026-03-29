@@ -1,11 +1,28 @@
 // Reusable DOM component builders.
 // All return HTMLElement instances; no innerHTML string injection.
 
-import type { GameState, InventoryItem, GodId } from '../state/types';
+import type { GameState, InventoryItem, GodId, LocationId } from '../state/types';
+import type { GameAction } from '../engine/actions';
 import { progressBar } from '../util/format';
 import { bal } from '../data/balance-types';
 import { getSpellDef } from '../data/spells';
 import { ALL_GOD_IDS, getGod } from '../data/gods';
+import { formatClock, previewClock } from '../engine/time';
+import { getTravelCostRaw } from '../systems/travel';
+import {
+  NEIGHBORHOODS,
+  getNeighborhoodBodega,
+  getNeighborhoodTemples,
+  getNeighborhoodFurnitureStore,
+  getNeighborhoodUniversity,
+  getNeighborhoodScrollStore,
+  getNeighborhoodBookstore,
+  getNeighborhoodDadsHouse,
+  getNeighborhoodBar,
+  getLocationData,
+} from '../data/locations';
+
+type Dispatch = (action: GameAction) => void;
 
 // ── Button ────────────────────────────────────────────────────────────────────
 
@@ -129,7 +146,7 @@ export function makeResultLine(text: string, className?: string): HTMLElement {
   return p;
 }
 
-// ── Inventory panel ──────────────────────────────────────────────────────
+// ── Inventory panel ──────────────────────────────────────────────────────────
 // Reusable panel showing current inventory with EAT buttons for snacks
 // and USE buttons for spell scrolls.
 
@@ -179,6 +196,11 @@ export function makeInventoryPanel(
           panel.appendChild(useBtn);
         }
       }
+    } else if (item && item.type === 'monument') {
+      const el = document.createElement('p');
+      el.className = 'inv-monument';
+      el.textContent = item.name;
+      panel.appendChild(el);
     } else {
       const el = document.createElement('p');
       el.className = 'inv-empty';
@@ -190,29 +212,151 @@ export function makeInventoryPanel(
   return panel;
 }
 
-// ── Stats panel ──────────────────────────────────────────────────────────
-// Reusable panel showing player stats as progress bars (no numeric values).
+// ── Stats panel ──────────────────────────────────────────────────────────────
+// Compact 2-row layout: labels row + bars row. No header label.
 
 export function makeStatsPanel(state: GameState): HTMLElement {
   const panel = document.createElement('div');
   panel.className = 'stats-panel';
 
-  panel.appendChild(makeHeader('STATS'));
-
   const dm = bal.stats.displayMax;
   const stats: Array<{ label: string; value: number; max: number }> = [
-    { label: 'INT ', value: state.intelligence,      max: dm.intelligence },
+    { label: 'INT',  value: state.intelligence,      max: dm.intelligence },
     { label: 'BIND', value: state.bookbinding,       max: dm.bookbinding },
     { label: 'FAME', value: state.wizardFame,        max: dm.wizardFame },
     { label: 'RELX', value: state.relaxationRate,    max: dm.relaxationRate },
     { label: 'REST', value: state.restingRelaxation, max: dm.restingRelaxation },
   ];
 
+  const compact = document.createElement('div');
+  compact.className = 'stats-compact';
+
+  const labelsRow = document.createElement('div');
+  labelsRow.className = 'stats-labels';
+
+  const barsRow = document.createElement('div');
+  barsRow.className = 'stats-bars';
+
   for (const s of stats) {
-    const row = document.createElement('p');
-    row.className = 'stat-row';
-    row.textContent = `${s.label} ${progressBar(s.value, s.max, 20)}`;
-    panel.appendChild(row);
+    const lbl = document.createElement('span');
+    lbl.textContent = s.label;
+    labelsRow.appendChild(lbl);
+
+    const bar = document.createElement('span');
+    bar.textContent = progressBar(s.value, s.max, 8);
+    barsRow.appendChild(bar);
+  }
+
+  compact.appendChild(labelsRow);
+  compact.appendChild(barsRow);
+  panel.appendChild(compact);
+
+  return panel;
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+// DOS-style overlay with inverted title bar. Tap outside or CLOSE to dismiss.
+
+export function makeModal(title: string, body: HTMLElement, onClose: () => void): HTMLElement {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const box = document.createElement('div');
+  box.className = 'modal-box';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'modal-title';
+  titleEl.textContent = title;
+
+  const bodyEl = document.createElement('div');
+  bodyEl.className = 'modal-body';
+  bodyEl.appendChild(body);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'btn modal-close-btn';
+  closeBtn.textContent = '[ CLOSE ]';
+  closeBtn.addEventListener('click', onClose);
+
+  // Tap outside the box to close.
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) onClose();
+  });
+
+  box.appendChild(titleEl);
+  box.appendChild(bodyEl);
+  box.appendChild(closeBtn);
+  overlay.appendChild(box);
+
+  return overlay;
+}
+
+// ── Travel panel ──────────────────────────────────────────────────────────────
+// Shared travel destination list used by all location screens via TRAVEL modal.
+// Filters out state.currentLocation. If at tower, no TOWER HOME button.
+// Uses neighborhood-label + individual-button layout throughout for consistency.
+
+export function makeTravelPanel(state: GameState, dispatch: Dispatch): HTMLElement {
+  const panel = document.createElement('div');
+  panel.className = 'travel-panel';
+
+  const currentLoc = state.currentLocation;
+  const isAtTower = currentLoc === 'tower';
+
+  // TOWER (HOME) — shown from all non-tower locations.
+  if (!isAtTower) {
+    const towerLoc = 'tower' as LocationId;
+    const cost = getTravelCostRaw(currentLoc, towerLoc);
+    const clock = previewClock(state.clock, cost);
+    panel.appendChild(makeButton(
+      `TOWER (HOME)  \u2192  ${formatClock(clock)}`,
+      () => dispatch({ type: 'TRAVEL', destination: towerLoc }),
+      'nav-btn',
+    ));
+  }
+
+  // Per-neighborhood sections.
+  for (const neighborhood of NEIGHBORHOODS) {
+    const bodegaId = getNeighborhoodBodega(neighborhood.id);
+    const temples = getNeighborhoodTemples(neighborhood.id);
+    const fsId = getNeighborhoodFurnitureStore(neighborhood.id);
+    const uniId = getNeighborhoodUniversity(neighborhood.id);
+    const ssId = getNeighborhoodScrollStore(neighborhood.id);
+    const bsId = getNeighborhoodBookstore(neighborhood.id);
+    const dhId = getNeighborhoodDadsHouse(neighborhood.id);
+    const barId = getNeighborhoodBar(neighborhood.id);
+
+    const destinations: LocationId[] = [
+      bodegaId,
+      ...temples.map(t => t.id),
+      fsId,
+      ...(uniId ? [uniId] : []),
+      ssId,
+      ...(bsId ? [bsId] : []),
+      ...(dhId ? [dhId] : []),
+      ...(barId ? [barId] : []),
+    ].filter(id => id !== currentLoc);
+
+    if (destinations.length === 0) continue;
+
+    const nbLabel = document.createElement('p');
+    nbLabel.className = 'neighborhood-label';
+    nbLabel.textContent = neighborhood.name.toUpperCase();
+    panel.appendChild(nbLabel);
+
+    for (const destId of destinations) {
+      const destData = getLocationData(destId);
+      const cost = getTravelCostRaw(currentLoc, destId);
+      const clock = previewClock(state.clock, cost);
+      // Dad's house uses "DAD'S GRAVE" label when dad has passed.
+      const displayName = (destId === dhId && !state.dadAlive)
+        ? "DAD'S GRAVE"
+        : destData.displayName;
+      panel.appendChild(makeButton(
+        `${displayName}  \u2192  ${formatClock(clock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: destId }),
+        'nav-btn',
+      ));
+    }
   }
 
   return panel;

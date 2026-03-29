@@ -5,6 +5,7 @@
 import type { GameState } from '../state/types';
 import type { GameAction } from '../engine/actions';
 import { renderHUD } from './hud';
+import { resetAllModals } from './modal';
 import { renderBodega } from './screens/bodega';
 import { renderScratch, updateScratchCell } from './screens/scratch';
 import { renderTower } from './screens/tower';
@@ -94,9 +95,14 @@ export function render(
   const { hud, screen } = ensureLayout(container);
 
   // HUD always re-renders (it's fast text — no perf concern).
-  renderHUD(state, hud);
+  renderHUD(state, hud, dispatch);
 
   const targetScreen = getTargetScreen(state);
+
+  // Reset all modal state when navigating to a different screen.
+  if (targetScreen !== currentScreen) {
+    resetAllModals();
+  }
 
   if (targetScreen === 'setup') {
     currentScreen = 'setup';

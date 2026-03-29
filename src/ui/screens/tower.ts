@@ -2,24 +2,15 @@
 // Actions: travel to any neighborhood's store, sleep (end the day).
 // Sprint 13: furniture panel with bong USE / recycle buttons.
 // Sprint 14: spellbook panel with CAST / ADD / REMOVE.
+// Redesign: INVENTORY / SPELLBOOK / FURNITURE / TRAVEL open DOS-style modals.
 
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
-import { makeButton, makeHeader, makeDivider, makeInventoryPanel, makeStatsPanel } from '../components';
-import { formatClock, previewClock } from '../../engine/time';
-import { getTravelCostRaw } from '../../systems/travel';
 import {
-  NEIGHBORHOODS,
-  getNeighborhoodBodega,
-  getNeighborhoodTemples,
-  getNeighborhoodFurnitureStore,
-  getNeighborhoodUniversity,
-  getNeighborhoodScrollStore,
-  getNeighborhoodBookstore,
-  getNeighborhoodDadsHouse,
-  getNeighborhoodBar,
-  getLocationData,
-} from '../../data/locations';
+  makeButton, makeHeader, makeDivider, makeInventoryPanel, makeStatsPanel,
+  makeModal, makeTravelPanel,
+} from '../components';
+import { formatClock, previewClock } from '../../engine/time';
 import { getBed } from '../../systems/furniture';
 import { getSpellDef } from '../../data/spells';
 import { canAddToBook } from '../../systems/spellbook';
@@ -29,6 +20,7 @@ import { getProjectProgress, isProjectComplete } from '../../systems/projects';
 import { freeSlots } from '../../systems/inventory';
 import { progressBar } from '../../util/format';
 import { bal } from '../../data/balance-types';
+import { getModal, openModal, closeModal } from '../modal';
 
 // Sprint 15: reuse the same timestamp comparison for luck buff display.
 function isLuckBuffActiveNow(state: GameState): boolean {
@@ -41,6 +33,8 @@ function isLuckBuffActiveNow(state: GameState): boolean {
 }
 
 type Dispatch = (action: GameAction) => void;
+
+const SCREEN = 'tower';
 
 export function renderTower(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
   container.replaceChildren();
@@ -58,137 +52,39 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
   flavor.textContent = 'Your dingy tower. Home sweet home.';
   screen.appendChild(flavor);
 
-  // ── Stats (Sprint 8) ──
+  // ── Stats (compact 2-row, no header) ──
   screen.appendChild(makeStatsPanel(state));
 
-  // ── Inventory (Sprint 7) ──
-  screen.appendChild(
-    makeInventoryPanel(
-      state.inventory,
-      (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
-      (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
-    ),
+  // ── Section buttons ──
+  const invCount = state.inventory.filter(i => i !== null).length;
+  const invBtn = makeButton(
+    `INVENTORY (${invCount}/${state.inventory.length})`,
+    () => openModal(SCREEN, 'inventory', () => renderTower(state, container, dispatch)),
+    'section-btn',
   );
+  screen.appendChild(invBtn);
 
-  // ── Spellbook (Sprint 14) ──
-  screen.appendChild(makeSpellbookPanel(state, dispatch));
+  const spellBtn = makeButton(
+    `SPELLBOOK (${state.equippedSpells.length}/${state.bookbinding})`,
+    () => openModal(SCREEN, 'spellbook', () => renderTower(state, container, dispatch)),
+    'section-btn',
+  );
+  screen.appendChild(spellBtn);
 
-  // ── Furniture (Sprint 13) ──
   const furnitureMax = bal.furniture.maxSlots;
-  screen.appendChild(makeFurniturePanel(state, furnitureMax, dispatch));
+  const furnitureBtn = makeButton(
+    `FURNITURE (${state.furniture.length}/${furnitureMax})`,
+    () => openModal(SCREEN, 'furniture', () => renderTower(state, container, dispatch)),
+    'section-btn',
+  );
+  screen.appendChild(furnitureBtn);
 
-  screen.appendChild(makeDivider());
-
-  // ── Travel destinations ──
-  // One section per neighborhood; each shows the neighborhood name and its bodega.
-  screen.appendChild(makeHeader('TRAVEL'));
-
-  for (const neighborhood of NEIGHBORHOODS) {
-    // Neighborhood label
-    const nbLabel = document.createElement('p');
-    nbLabel.className = 'neighborhood-label';
-    nbLabel.textContent = neighborhood.name.toUpperCase();
-    screen.appendChild(nbLabel);
-
-    const destId = getNeighborhoodBodega(neighborhood.id);
-    const destData = getLocationData(destId);
-    const travelCost = getTravelCostRaw('tower', destId);
-    const arrivalClock = previewClock(state.clock, travelCost);
-
-    const travelBtn = makeButton(
-      `${destData.displayName}  \u2192  ${formatClock(arrivalClock)}`,
-      () => dispatch({ type: 'TRAVEL', destination: destId }),
-      'nav-btn',
-    );
-    screen.appendChild(travelBtn);
-
-    // Sprint 9: temples in this neighborhood
-    const temples = getNeighborhoodTemples(neighborhood.id);
-    for (const temple of temples) {
-      const templeCost = getTravelCostRaw('tower', temple.id);
-      const templeClock = previewClock(state.clock, templeCost);
-      screen.appendChild(makeButton(
-        `${temple.displayName}  \u2192  ${formatClock(templeClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: temple.id }),
-        'nav-btn',
-      ));
-    }
-
-    // Sprint 13: furniture store in this neighborhood
-    const furnitureStoreId = getNeighborhoodFurnitureStore(neighborhood.id);
-    const furnitureStoreData = getLocationData(furnitureStoreId);
-    const fsCost = getTravelCostRaw('tower', furnitureStoreId);
-    const fsClock = previewClock(state.clock, fsCost);
-    screen.appendChild(makeButton(
-      `${furnitureStoreData.displayName}  \u2192  ${formatClock(fsClock)}`,
-      () => dispatch({ type: 'TRAVEL', destination: furnitureStoreId }),
-      'nav-btn',
-    ));
-
-    // Sprint 14: university in this neighborhood (only university_heights has one)
-    const uniId = getNeighborhoodUniversity(neighborhood.id);
-    if (uniId) {
-      const uniData = getLocationData(uniId);
-      const uniCost = getTravelCostRaw('tower', uniId);
-      const uniClock = previewClock(state.clock, uniCost);
-      screen.appendChild(makeButton(
-        `${uniData.displayName}  \u2192  ${formatClock(uniClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: uniId }),
-        'nav-btn',
-      ));
-    }
-
-    // Sprint 16: scroll store in this neighborhood
-    const ssId = getNeighborhoodScrollStore(neighborhood.id);
-    const ssData = getLocationData(ssId);
-    const ssCost = getTravelCostRaw('tower', ssId);
-    const ssClock = previewClock(state.clock, ssCost);
-    screen.appendChild(makeButton(
-      `${ssData.displayName}  \u2192  ${formatClock(ssClock)}`,
-      () => dispatch({ type: 'TRAVEL', destination: ssId }),
-      'nav-btn',
-    ));
-
-    // Sprint 16: university bookstore (only university_heights has one)
-    const bsId = getNeighborhoodBookstore(neighborhood.id);
-    if (bsId) {
-      const bsData = getLocationData(bsId);
-      const bsCost = getTravelCostRaw('tower', bsId);
-      const bsClock = previewClock(state.clock, bsCost);
-      screen.appendChild(makeButton(
-        `${bsData.displayName}  \u2192  ${formatClock(bsClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: bsId }),
-        'nav-btn',
-      ));
-    }
-
-    // Dad's House (Richville only)
-    const dhId = getNeighborhoodDadsHouse(neighborhood.id);
-    if (dhId && dhId !== state.currentLocation) {
-      const dhData = getLocationData(dhId);
-      const dhCost = getTravelCostRaw('tower', dhId);
-      const dhClock = previewClock(state.clock, dhCost);
-      const dhLabel = state.dadAlive ? dhData.displayName : "DAD'S GRAVE";
-      screen.appendChild(makeButton(
-        `${dhLabel}  \u2192  ${formatClock(dhClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: dhId }),
-        'nav-btn',
-      ));
-    }
-
-    // Sprint 25: University Bar (University Heights only)
-    const barId = getNeighborhoodBar(neighborhood.id);
-    if (barId) {
-      const barData = getLocationData(barId);
-      const barCost = getTravelCostRaw('tower', barId);
-      const barClock = previewClock(state.clock, barCost);
-      screen.appendChild(makeButton(
-        `${barData.displayName}  \u2192  ${formatClock(barClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: barId }),
-        'nav-btn',
-      ));
-    }
-  }
+  const travelBtn = makeButton(
+    'TRAVEL',
+    () => openModal(SCREEN, 'travel', () => renderTower(state, container, dispatch)),
+    'section-btn',
+  );
+  screen.appendChild(travelBtn);
 
   screen.appendChild(makeDivider());
 
@@ -208,23 +104,35 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
   if (!bed) sleepBtn.disabled = true;
   screen.appendChild(sleepBtn);
 
-  // ── Theme toggle ──
-  screen.appendChild(makeDivider());
-  const themeRow = document.createElement('div');
-  themeRow.className = 'theme-row';
-  const themes: Array<{ scheme: GameState['colorScheme']; label: string }> = [
-    { scheme: 'blue', label: 'BLU' },
-    { scheme: 'green', label: 'GRN' },
-    { scheme: 'orange', label: 'AMB' },
-  ];
-  for (const { scheme, label } of themes) {
-    const btn = makeButton(label, () => dispatch({ type: 'SET_THEME', scheme }), 'theme-btn');
-    if (state.colorScheme === scheme) btn.classList.add('active');
-    themeRow.appendChild(btn);
-  }
-  screen.appendChild(themeRow);
-
   container.appendChild(screen);
+
+  // ── Active modal ──
+  const activeModal = getModal(SCREEN);
+  if (activeModal !== null) {
+    const onClose = () => closeModal(SCREEN, () => renderTower(state, container, dispatch));
+    let body: HTMLElement;
+    let title: string;
+
+    if (activeModal === 'inventory') {
+      title = 'INVENTORY';
+      body = makeInventoryPanel(
+        state.inventory,
+        (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
+        (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
+      );
+    } else if (activeModal === 'spellbook') {
+      title = 'SPELLBOOK';
+      body = makeSpellbookPanel(state, dispatch);
+    } else if (activeModal === 'furniture') {
+      title = 'FURNITURE';
+      body = makeFurniturePanel(state, furnitureMax, dispatch);
+    } else {
+      title = 'TRAVEL';
+      body = makeTravelPanel(state, dispatch);
+    }
+
+    container.appendChild(makeModal(title, body, onClose));
+  }
 }
 
 // ── Spellbook Panel (Sprint 14) ──────────────────────────────────────────────
@@ -232,8 +140,6 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
 function makeSpellbookPanel(state: GameState, dispatch: Dispatch): HTMLElement {
   const panel = document.createElement('div');
   panel.className = 'spellbook-panel';
-
-  panel.appendChild(makeHeader(`SPELLBOOK (${state.equippedSpells.length}/${state.bookbinding})`));
 
   if (state.knownSpells.length === 0) {
     const empty = document.createElement('p');

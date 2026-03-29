@@ -123,6 +123,7 @@ html, body {
 /* Sprint 5: Chill bar row */
 .hud-bars {
   display: flex;
+  justify-content: space-between;
   gap: 12px;
 }
 
@@ -521,6 +522,131 @@ html, body {
   min-height: 48px;
   color: var(--fg);
   border-color: var(--border);
+}
+
+/* ─── Compact Stats (redesign) ───────────────────────────────────────────────── */
+
+.stats-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.stats-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--accent);
+  font-size: 0.8em;
+  letter-spacing: 0.04em;
+}
+
+.stats-bars {
+  display: flex;
+  justify-content: space-between;
+  color: var(--bar-fill);
+  font-size: 0.8em;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Modal (redesign) ───────────────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.modal-box {
+  background: var(--bg);
+  border: 2px solid var(--border);
+  width: 100%;
+  max-width: 460px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-title {
+  background: var(--border);
+  color: var(--bg);
+  font-weight: bold;
+  text-align: center;
+  padding: 6px 12px;
+  letter-spacing: 0.08em;
+  font-size: 1em;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+.modal-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.modal-close-btn {
+  width: 100%;
+  font-size: 0.9em;
+  letter-spacing: 0.08em;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 44px;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+}
+
+/* ─── Section launch buttons (redesign) ──────────────────────────────────────── */
+
+.section-btn {
+  width: 100%;
+  font-size: 1em;
+  letter-spacing: 0.06em;
+  min-height: 48px;
+  color: var(--accent);
+  border-color: var(--accent);
+  margin-top: 4px;
+}
+
+/* ─── HUD theme buttons (redesign) ───────────────────────────────────────────── */
+
+.hud-theme-btn {
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: 1px solid var(--border);
+  font-family: inherit;
+  font-size: 0.75em;
+  padding: 2px 6px;
+  min-height: 0;
+  min-width: 0;
+  cursor: pointer;
+  line-height: 1.2;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hud-theme-btn:hover {
+  background: var(--btn-hover);
+}
+
+.hud-theme-btn.active {
+  background: var(--border);
+  color: var(--bg);
+}
+
+.hud-theme-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
