@@ -1,29 +1,21 @@
 // Dad's House screen (Sprint 22).
 // When dadAlive: loan interface. When !dadAlive: Dad's Grave (visit for mana/chill).
+// Redesign: INVENTORY and TRAVEL moved to modal popups.
 
 import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
-import { makeButton, makeHeader, makeDivider, makeInventoryPanel, makeResultLine } from '../components';
-import { formatCash } from '../../util/format';
-import { formatClock, previewClock } from '../../engine/time';
-import { getTravelCostRaw } from '../../systems/travel';
 import {
-  getLocationData,
-  getNeighborhoodTemples,
-  NEIGHBORHOODS,
-  getNeighborhoodBodega,
-  getNeighborhoodFurnitureStore,
-  getNeighborhoodUniversity,
-  getNeighborhoodScrollStore,
-  getNeighborhoodBookstore,
-  getNeighborhoodDadsHouse,
-  getNeighborhoodBar,
-} from '../../data/locations';
+  makeButton, makeHeader, makeDivider, makeInventoryPanel, makeResultLine,
+  makeModal, makeTravelPanel,
+} from '../components';
+import { formatCash } from '../../util/format';
 import { getAvailableLoanAmounts, calculateInterestRate } from '../../systems/loan';
 import { bal } from '../../data/balance-types';
+import { getModal, openModal, closeModal } from '../modal';
 
 type Dispatch = (action: GameAction) => void;
 
+const SCREEN = 'dads_house';
 const dadBal = bal.dadsHouse;
 
 export function renderDadsHouse(state: GameState, container: HTMLElement, dispatch: Dispatch): void {
@@ -36,21 +28,46 @@ export function renderDadsHouse(state: GameState, container: HTMLElement, dispat
     renderDadGrave(state, screen, dispatch);
   }
 
-  // ── Inventory ──
+  // ── Section buttons ──
   screen.appendChild(makeDivider());
-  screen.appendChild(
-    makeInventoryPanel(
-      state.inventory,
-      (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
-      (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
-    ),
-  );
 
-  // ── Travel ──
-  renderTravelSection(state, screen, dispatch);
+  const invCount = state.inventory.filter(i => i !== null).length;
+  screen.appendChild(makeButton(
+    `INVENTORY (${invCount}/${state.inventory.length})`,
+    () => openModal(SCREEN, 'inventory', () => renderDadsHouse(state, container, dispatch)),
+    'section-btn',
+  ));
+
+  screen.appendChild(makeButton(
+    'TRAVEL',
+    () => openModal(SCREEN, 'travel', () => renderDadsHouse(state, container, dispatch)),
+    'section-btn',
+  ));
 
   container.replaceChildren();
   container.appendChild(screen);
+
+  // ── Active modal ──
+  const activeModal = getModal(SCREEN);
+  if (activeModal !== null) {
+    const onClose = () => closeModal(SCREEN, () => renderDadsHouse(state, container, dispatch));
+    let body: HTMLElement;
+    let title: string;
+
+    if (activeModal === 'inventory') {
+      title = 'INVENTORY';
+      body = makeInventoryPanel(
+        state.inventory,
+        (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
+        (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
+      );
+    } else {
+      title = 'TRAVEL';
+      body = makeTravelPanel(state, dispatch);
+    }
+
+    container.appendChild(makeModal(title, body, onClose));
+  }
 }
 
 function renderDadAlive(state: GameState, screen: HTMLElement, dispatch: Dispatch): void {
@@ -138,124 +155,4 @@ function renderDadGrave(_state: GameState, screen: HTMLElement, dispatch: Dispat
     'action-btn',
   ));
   screen.appendChild(makeResultLine(`(+${dadBal.graveManaRestore} mana, -${dadBal.graveChillLoss} chill)`));
-}
-
-function renderTravelSection(state: GameState, screen: HTMLElement, dispatch: Dispatch): void {
-  screen.appendChild(makeDivider());
-  screen.appendChild(makeHeader('TRAVEL'));
-
-  // Tower (home)
-  const towerCost = getTravelCostRaw(state.currentLocation, 'tower');
-  const towerClock = previewClock(state.clock, towerCost);
-  screen.appendChild(makeButton(
-    `TOWER (HOME)  \u2192  ${formatClock(towerClock)}`,
-    () => dispatch({ type: 'TRAVEL', destination: 'tower' }),
-    'nav-btn',
-  ));
-
-  for (const neighborhood of NEIGHBORHOODS) {
-    const nbLabel = document.createElement('p');
-    nbLabel.className = 'neighborhood-label';
-    nbLabel.textContent = neighborhood.name.toUpperCase();
-    screen.appendChild(nbLabel);
-
-    // Bodega
-    const bodegaId = getNeighborhoodBodega(neighborhood.id);
-    const bodegaData = getLocationData(bodegaId);
-    const bodegaCost = getTravelCostRaw(state.currentLocation, bodegaId);
-    const bodegaClock = previewClock(state.clock, bodegaCost);
-    screen.appendChild(makeButton(
-      `${bodegaData.displayName}  \u2192  ${formatClock(bodegaClock)}`,
-      () => dispatch({ type: 'TRAVEL', destination: bodegaId }),
-      'nav-btn',
-    ));
-
-    // Temples
-    const temples = getNeighborhoodTemples(neighborhood.id);
-    for (const temple of temples) {
-      if (temple.id === state.currentLocation) continue;
-      const tCost = getTravelCostRaw(state.currentLocation, temple.id);
-      const tClock = previewClock(state.clock, tCost);
-      screen.appendChild(makeButton(
-        `${temple.displayName}  \u2192  ${formatClock(tClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: temple.id }),
-        'nav-btn',
-      ));
-    }
-
-    // Furniture store
-    const fsId = getNeighborhoodFurnitureStore(neighborhood.id);
-    const fsData = getLocationData(fsId);
-    const fsCost = getTravelCostRaw(state.currentLocation, fsId);
-    const fsClock = previewClock(state.clock, fsCost);
-    screen.appendChild(makeButton(
-      `${fsData.displayName}  \u2192  ${formatClock(fsClock)}`,
-      () => dispatch({ type: 'TRAVEL', destination: fsId }),
-      'nav-btn',
-    ));
-
-    // University
-    const uniId = getNeighborhoodUniversity(neighborhood.id);
-    if (uniId) {
-      const uniData = getLocationData(uniId);
-      const uniCost = getTravelCostRaw(state.currentLocation, uniId);
-      const uniClock = previewClock(state.clock, uniCost);
-      screen.appendChild(makeButton(
-        `${uniData.displayName}  \u2192  ${formatClock(uniClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: uniId }),
-        'nav-btn',
-      ));
-    }
-
-    // Scroll store
-    const ssId = getNeighborhoodScrollStore(neighborhood.id);
-    const ssData = getLocationData(ssId);
-    const ssCost = getTravelCostRaw(state.currentLocation, ssId);
-    const ssClock = previewClock(state.clock, ssCost);
-    screen.appendChild(makeButton(
-      `${ssData.displayName}  \u2192  ${formatClock(ssClock)}`,
-      () => dispatch({ type: 'TRAVEL', destination: ssId }),
-      'nav-btn',
-    ));
-
-    // University bookstore
-    const bsId = getNeighborhoodBookstore(neighborhood.id);
-    if (bsId) {
-      const bsData = getLocationData(bsId);
-      const bsCost = getTravelCostRaw(state.currentLocation, bsId);
-      const bsClock = previewClock(state.clock, bsCost);
-      screen.appendChild(makeButton(
-        `${bsData.displayName}  \u2192  ${formatClock(bsClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: bsId }),
-        'nav-btn',
-      ));
-    }
-
-    // Dad's House (Richville only)
-    const dhId = getNeighborhoodDadsHouse(neighborhood.id);
-    if (dhId && dhId !== state.currentLocation) {
-      const dhData = getLocationData(dhId);
-      const dhCost = getTravelCostRaw(state.currentLocation, dhId);
-      const dhClock = previewClock(state.clock, dhCost);
-      const dhLabel = state.dadAlive ? dhData.displayName : "DAD'S GRAVE";
-      screen.appendChild(makeButton(
-        `${dhLabel}  \u2192  ${formatClock(dhClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: dhId }),
-        'nav-btn',
-      ));
-    }
-
-    // Sprint 25: University Bar (University Heights only)
-    const barId = getNeighborhoodBar(neighborhood.id);
-    if (barId) {
-      const barData = getLocationData(barId);
-      const barCost = getTravelCostRaw(state.currentLocation, barId);
-      const barClock = previewClock(state.clock, barCost);
-      screen.appendChild(makeButton(
-        `${barData.displayName}  \u2192  ${formatClock(barClock)}`,
-        () => dispatch({ type: 'TRAVEL', destination: barId }),
-        'nav-btn',
-      ));
-    }
-  }
 }
