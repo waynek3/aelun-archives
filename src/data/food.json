@@ -1,0 +1,14 @@
+[
+  { "id": "gas_station_burrito", "name": "Greasy Burrito",    "descriptor": "greasy", "cost": 2 },
+  { "id": "greasy_slice",        "name": "Greasy Slice",       "descriptor": "greasy", "cost": 3 },
+  { "id": "bag_o_chips",         "name": "Salty Chips",        "descriptor": "salty",  "cost": 1 },
+  { "id": "pretzel_rod",         "name": "Salty Pretzel",      "descriptor": "salty",  "cost": 2 },
+  { "id": "mystery_candy",       "name": "Sugary Candy",       "descriptor": "sugary", "cost": 1 },
+  { "id": "frosted_doughnut",    "name": "Sugary Doughnut",    "descriptor": "sugary", "cost": 2 },
+  { "id": "plain_crackers",      "name": "Bland Crackers",     "descriptor": "bland",  "cost": 1 },
+  { "id": "rice_cake",           "name": "Bland Rice Cake",    "descriptor": "bland",  "cost": 1 },
+  { "id": "banana",              "name": "Healthy Banana",     "descriptor": "healthy","cost": 2 },
+  { "id": "trail_mix",           "name": "Healthy Trail Mix",  "descriptor": "healthy","cost": 3 },
+  { "id": "artisan_sandwich",    "name": "Gourmet Sandwich",   "descriptor": "gourmet","cost": 8 },
+  { "id": "fancy_cheese",        "name": "Gourmet Cheese",     "descriptor": "gourmet","cost": 10 }
+]

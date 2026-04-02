@@ -8,13 +8,12 @@ import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
 import {
   makeButton, makeHeader, makeDivider, makeInventoryPanel, makeStatsPanel,
-  makeModal, makeTravelPanel,
+  makeModal, makeTravelPanel, makeGodSelectPanel,
 } from '../components';
 import { formatClock, previewClock } from '../../engine/time';
 import { getBed } from '../../systems/furniture';
 import { getSpellDef } from '../../data/spells';
 import { canAddToBook } from '../../systems/spellbook';
-import { ALL_GOD_IDS, getGod } from '../../data/gods';
 import { PROJECTS, getProjectDef } from '../../data/projects';
 import { getProjectProgress, isProjectComplete } from '../../systems/projects';
 import { freeSlots } from '../../systems/inventory';
@@ -104,40 +103,85 @@ export function renderTower(state: GameState, container: HTMLElement, dispatch: 
   if (!bed) sleepBtn.disabled = true;
   screen.appendChild(sleepBtn);
 
+  screen.appendChild(makeButton(
+    'NEW GAME',
+    () => openModal(SCREEN, 'confirm_new_game', () => renderTower(state, container, dispatch)),
+    'section-btn',
+  ));
+
   container.appendChild(screen);
 
   // ── Active modal ──
   const activeModal = getModal(SCREEN);
   if (activeModal !== null) {
-    const onClose = () => closeModal(SCREEN, () => renderTower(state, container, dispatch));
-    let body: HTMLElement;
-    let title: string;
+    const rerender = () => renderTower(state, container, dispatch);
+    const onClose = () => closeModal(SCREEN, rerender);
 
     if (activeModal === 'inventory') {
-      title = 'INVENTORY';
-      body = makeInventoryPanel(
-        state.inventory,
-        (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
-        (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
-      );
+      container.appendChild(makeModal({
+        title: 'INVENTORY',
+        body: makeInventoryPanel(
+          state.inventory,
+          (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
+          (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
+          (slotIndex) => openModal(SCREEN, `god_select:${slotIndex}`, rerender),
+        ),
+        onClose,
+      }));
+    } else if (activeModal.startsWith('god_select:')) {
+      const slotIndex = parseInt(activeModal.slice(11), 10);
+      container.appendChild(makeModal({
+        title: 'SELECT GOD',
+        body: makeGodSelectPanel((godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId })),
+        onClose,
+        onBack: () => openModal(SCREEN, 'inventory', rerender),
+      }));
     } else if (activeModal === 'spellbook') {
-      title = 'SPELLBOOK';
-      body = makeSpellbookPanel(state, dispatch);
+      container.appendChild(makeModal({
+        title: 'SPELLBOOK',
+        body: makeSpellbookPanel(state, dispatch, SCREEN, rerender),
+        onClose,
+      }));
+    } else if (activeModal.startsWith('god_cast:')) {
+      const spellId = activeModal.slice(9);
+      container.appendChild(makeModal({
+        title: 'SELECT GOD',
+        body: makeGodSelectPanel((godId) => dispatch({ type: 'CAST_SPELL', spellId, godId })),
+        onClose,
+        onBack: () => openModal(SCREEN, 'spellbook', rerender),
+      }));
     } else if (activeModal === 'furniture') {
-      title = 'FURNITURE';
-      body = makeFurniturePanel(state, furnitureMax, dispatch);
-    } else {
-      title = 'TRAVEL';
-      body = makeTravelPanel(state, dispatch);
+      container.appendChild(makeModal({
+        title: 'FURNITURE',
+        body: makeFurniturePanel(state, furnitureMax, dispatch),
+        onClose,
+      }));
+    } else if (activeModal === 'confirm_new_game') {
+      const body = document.createElement('div');
+      body.appendChild(makeButton('[ YES \u2014 END RUN ]', () => dispatch({ type: 'NEW_GAME' }), 'action-btn'));
+      body.appendChild(makeButton('[ NO \u2014 KEEP PLAYING ]', onClose, 'action-btn'));
+      container.appendChild(makeModal({
+        title: 'NEW GAME',
+        text: ['Start over? Your current run will be lost.'],
+        body,
+        onClose,
+      }));
+    } else if (activeModal === 'travel' || activeModal.startsWith('travel:')) {
+      const isLevel2 = activeModal.startsWith('travel:');
+      const nbName = isLevel2 ? activeModal.slice(7).replace(/_/g, ' ').toUpperCase() : 'TRAVEL';
+      container.appendChild(makeModal({
+        title: nbName,
+        body: makeTravelPanel(state, dispatch, SCREEN, activeModal, rerender),
+        onClose,
+        onBack: isLevel2 ? () => openModal(SCREEN, 'travel', rerender) : undefined,
+      }));
     }
-
-    container.appendChild(makeModal(title, body, onClose));
   }
 }
 
 // ── Spellbook Panel (Sprint 14) ──────────────────────────────────────────────
 
-function makeSpellbookPanel(state: GameState, dispatch: Dispatch): HTMLElement {
+function makeSpellbookPanel(state: GameState, dispatch: Dispatch, screenId: string, rerender: () => void): HTMLElement {
   const panel = document.createElement('div');
   panel.className = 'spellbook-panel';
 
@@ -163,19 +207,19 @@ function makeSpellbookPanel(state: GameState, dispatch: Dispatch): HTMLElement {
     row.appendChild(nameEl);
 
     if (spell.category === 'affinity') {
-      // Sprint 15: affinity spells need a target god. Show 10 small god buttons.
-      panel.appendChild(row);  // append name row first
+      // Affinity spells open a god-selection sub-modal.
+      const castBtn = makeButton('[CAST \u2192]', () => {
+        openModal(screenId, `god_cast:${spellId}`, rerender);
+      }, 'spell-btn');
+      if (!canCast) castBtn.disabled = true;
+      row.appendChild(castBtn);
 
-      const godRow = document.createElement('div');
-      godRow.className = 'spell-god-row';
-      for (const godId of ALL_GOD_IDS) {
-        const godBtn = makeButton(getGod(godId).name.toUpperCase(), () => {
-          dispatch({ type: 'CAST_SPELL', spellId, godId });
-        }, 'spell-god-btn');
-        if (!canCast) godBtn.disabled = true;
-        godRow.appendChild(godBtn);
-      }
-      panel.appendChild(godRow);
+      const removeBtn = makeButton('[REMOVE]', () => {
+        dispatch({ type: 'REMOVE_SPELL_FROM_BOOK', spellId });
+      }, 'spell-btn');
+      row.appendChild(removeBtn);
+
+      panel.appendChild(row);
     } else {
       // Sprint 15: luck spells show an ACTIVE indicator when the buff is running.
       if (spell.category === 'luck' && isLuckBuffActiveNow(state)) {
@@ -197,17 +241,7 @@ function makeSpellbookPanel(state: GameState, dispatch: Dispatch): HTMLElement {
       row.appendChild(removeBtn);
 
       panel.appendChild(row);
-      continue;
     }
-
-    // Affinity spells: add REMOVE on a separate row.
-    const removeRow = document.createElement('div');
-    removeRow.className = 'spell-row';
-    const removeBtn = makeButton('[REMOVE]', () => {
-      dispatch({ type: 'REMOVE_SPELL_FROM_BOOK', spellId });
-    }, 'spell-btn');
-    removeRow.appendChild(removeBtn);
-    panel.appendChild(removeRow);
   }
 
   // Empty slots indicator.

@@ -6,6 +6,7 @@ import type { GameState } from '../../state/types';
 import type { GameAction } from '../../engine/actions';
 import {
   makeButton, makeHeader, makeDivider, makeInventoryPanel, makeModal, makeTravelPanel,
+  makeGodSelectPanel,
 } from '../components';
 import { formatCash } from '../../util/format';
 import { formatClock } from '../../engine/time';
@@ -137,22 +138,37 @@ export function renderUniversity(
   // ── Active modal ──
   const activeModal = getModal(SCREEN);
   if (activeModal !== null) {
-    const onClose = () => closeModal(SCREEN, () => renderUniversity(state, container, dispatch));
-    let body: HTMLElement;
-    let title: string;
+    const rerender = () => renderUniversity(state, container, dispatch);
+    const onClose = () => closeModal(SCREEN, rerender);
 
     if (activeModal === 'inventory') {
-      title = 'INVENTORY';
-      body = makeInventoryPanel(
-        state.inventory,
-        (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
-        (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
-      );
-    } else {
-      title = 'TRAVEL';
-      body = makeTravelPanel(state, dispatch);
+      container.appendChild(makeModal({
+        title: 'INVENTORY',
+        body: makeInventoryPanel(
+          state.inventory,
+          (slotIndex) => dispatch({ type: 'CONSUME_SNACK', slotIndex }),
+          (slotIndex, godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId }),
+          (slotIndex) => openModal(SCREEN, `god_select:${slotIndex}`, rerender),
+        ),
+        onClose,
+      }));
+    } else if (activeModal.startsWith('god_select:')) {
+      const slotIndex = parseInt(activeModal.slice(11), 10);
+      container.appendChild(makeModal({
+        title: 'SELECT GOD',
+        body: makeGodSelectPanel((godId) => dispatch({ type: 'USE_SCROLL', slotIndex, godId })),
+        onClose,
+        onBack: () => openModal(SCREEN, 'inventory', rerender),
+      }));
+    } else if (activeModal === 'travel' || activeModal.startsWith('travel:')) {
+      const isLevel2 = activeModal.startsWith('travel:');
+      const nbName = isLevel2 ? activeModal.slice(7).replace(/_/g, ' ').toUpperCase() : 'TRAVEL';
+      container.appendChild(makeModal({
+        title: nbName,
+        body: makeTravelPanel(state, dispatch, SCREEN, activeModal, rerender),
+        onClose,
+        onBack: isLevel2 ? () => openModal(SCREEN, 'travel', rerender) : undefined,
+      }));
     }
-
-    container.appendChild(makeModal(title, body, onClose));
   }
 }

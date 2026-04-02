@@ -1,7 +1,7 @@
 // Reusable DOM component builders.
 // All return HTMLElement instances; no innerHTML string injection.
 
-import type { GameState, InventoryItem, GodId, LocationId } from '../state/types';
+import type { GameState, InventoryItem, GodId, LocationId, NeighborhoodId, ActiveEvent } from '../state/types';
 import type { GameAction } from '../engine/actions';
 import { progressBar } from '../util/format';
 import { bal } from '../data/balance-types';
@@ -9,6 +9,7 @@ import { getSpellDef } from '../data/spells';
 import { ALL_GOD_IDS, getGod } from '../data/gods';
 import { formatClock, previewClock } from '../engine/time';
 import { getTravelCostRaw } from '../systems/travel';
+import { openModal } from './modal';
 import {
   NEIGHBORHOODS,
   getNeighborhoodBodega,
@@ -154,6 +155,7 @@ export function makeInventoryPanel(
   inventory: (InventoryItem | null)[],
   onConsume: (slotIndex: number) => void,
   onUseScroll?: (slotIndex: number, godId?: GodId) => void,
+  onAffinitySelect?: (slotIndex: number) => void,
 ): HTMLElement {
   const panel = document.createElement('div');
   panel.className = 'inventory-panel';
@@ -179,17 +181,23 @@ export function makeInventoryPanel(
 
       if (onUseScroll) {
         if (spell.category === 'affinity') {
-          // Affinity scrolls need a target god — show a row of god buttons.
-          const godRow = document.createElement('div');
-          godRow.className = 'spell-god-row';
           const capturedIndex = i;
-          for (const godId of ALL_GOD_IDS) {
-            const godBtn = makeButton(getGod(godId).name.toUpperCase(), () => {
-              onUseScroll(capturedIndex, godId);
-            }, 'spell-god-btn');
-            godRow.appendChild(godBtn);
+          if (onAffinitySelect) {
+            // Nested modal: show SELECT GOD button; caller handles god selection modal.
+            const selectBtn = makeButton('[ SELECT GOD \u2192 ]', () => onAffinitySelect(capturedIndex), 'inv-btn');
+            panel.appendChild(selectBtn);
+          } else {
+            // Fallback: inline god buttons.
+            const godRow = document.createElement('div');
+            godRow.className = 'spell-god-row';
+            for (const godId of ALL_GOD_IDS) {
+              const godBtn = makeButton(getGod(godId).name.toUpperCase(), () => {
+                onUseScroll(capturedIndex, godId);
+              }, 'spell-god-btn');
+              godRow.appendChild(godBtn);
+            }
+            panel.appendChild(godRow);
           }
-          panel.appendChild(godRow);
         } else {
           const capturedIndex = i;
           const useBtn = makeButton('[USE]', () => onUseScroll(capturedIndex), 'inv-btn');
@@ -209,6 +217,18 @@ export function makeInventoryPanel(
     }
   }
 
+  return panel;
+}
+
+// ── God Select panel ─────────────────────────────────────────────────────────
+// Reusable 10-button god selection grid used for affinity scrolls and spells.
+
+export function makeGodSelectPanel(onSelect: (godId: GodId) => void): HTMLElement {
+  const panel = document.createElement('div');
+  panel.className = 'god-select-panel';
+  for (const godId of ALL_GOD_IDS) {
+    panel.appendChild(makeButton(getGod(godId).name.toUpperCase(), () => onSelect(godId), 'spell-god-btn'));
+  }
   return panel;
 }
 
@@ -255,9 +275,28 @@ export function makeStatsPanel(state: GameState): HTMLElement {
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
-// DOS-style overlay with inverted title bar. Tap outside or CLOSE to dismiss.
+// Universal DOS-style overlay. One component for all modal needs:
+// travel, inventory, god-selection, confirmations, random events, etc.
+//
+// title    — inverted title bar text
+// text     — optional plain-text lines rendered above the body (flavor, prompts)
+// body     — HTMLElement with buttons/content
+// onClose  — called by CLOSE button and click-outside-to-dismiss
+// onBack   — if provided, a BACK button appears (for nested navigation)
+// blockClose — if true, hides CLOSE and disables outside-click (for forced choices)
 
-export function makeModal(title: string, body: HTMLElement, onClose: () => void): HTMLElement {
+export interface ModalConfig {
+  title: string;
+  text?: string[];
+  body: HTMLElement;
+  onClose: () => void;
+  onBack?: () => void;
+  blockClose?: boolean;
+}
+
+export function makeModal(config: ModalConfig): HTMLElement {
+  const { title, text, body, onClose, onBack, blockClose } = config;
+
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
 
@@ -267,87 +306,164 @@ export function makeModal(title: string, body: HTMLElement, onClose: () => void)
   const titleEl = document.createElement('div');
   titleEl.className = 'modal-title';
   titleEl.textContent = title;
+  box.appendChild(titleEl);
+
+  if (text && text.length > 0) {
+    for (const line of text) {
+      const p = document.createElement('p');
+      p.className = 'modal-text';
+      p.textContent = line;
+      box.appendChild(p);
+    }
+  }
 
   const bodyEl = document.createElement('div');
   bodyEl.className = 'modal-body';
   bodyEl.appendChild(body);
-
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'btn modal-close-btn';
-  closeBtn.textContent = '[ CLOSE ]';
-  closeBtn.addEventListener('click', onClose);
-
-  // Tap outside the box to close.
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) onClose();
-  });
-
-  box.appendChild(titleEl);
   box.appendChild(bodyEl);
-  box.appendChild(closeBtn);
-  overlay.appendChild(box);
 
+  if (onBack) {
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn modal-back-btn';
+    backBtn.textContent = '[ BACK ]';
+    backBtn.addEventListener('click', onBack);
+    box.appendChild(backBtn);
+  }
+
+  if (!blockClose) {
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'btn modal-close-btn';
+    closeBtn.textContent = '[ CLOSE ]';
+    closeBtn.addEventListener('click', onClose);
+    box.appendChild(closeBtn);
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) onClose();
+    });
+  }
+
+  overlay.appendChild(box);
   return overlay;
 }
 
-// ── Travel panel ──────────────────────────────────────────────────────────────
-// Shared travel destination list used by all location screens via TRAVEL modal.
-// Filters out state.currentLocation. If at tower, no TOWER HOME button.
-// Uses neighborhood-label + individual-button layout throughout for consistency.
+// ── Event Modal ───────────────────────────────────────────────────────────────
+// Builds an event overlay from an ActiveEvent. blockClose=true forces a choice.
+// Appended to the screen element in renderer.ts when state.activeEvent !== null.
 
-export function makeTravelPanel(state: GameState, dispatch: Dispatch): HTMLElement {
+export function makeEventModal(event: ActiveEvent, dispatch: Dispatch): HTMLElement {
+  const body = document.createElement('div');
+
+  if (!event.resolved) {
+    for (let i = 0; i < event.choices.length; i++) {
+      const idx = i;
+      body.appendChild(makeButton(
+        event.choices[i].label,
+        () => dispatch({ type: 'RESOLVE_EVENT', choiceIndex: idx }),
+        'action-btn',
+      ));
+    }
+  } else {
+    body.appendChild(makeButton(
+      'CONTINUE',
+      () => dispatch({ type: 'DISMISS_EVENT' }),
+      'action-btn',
+    ));
+  }
+
+  const text: string[] = [event.flavor];
+  if (event.resolved && event.outcomeText) {
+    text.push(event.outcomeText);
+  }
+
+  return makeModal({
+    title: 'SOMETHING HAPPENS',
+    text,
+    body,
+    blockClose: true,
+    onClose: () => {},
+  });
+}
+
+// ── Travel panel ──────────────────────────────────────────────────────────────
+// Two-level nested travel panel used inside the universal modal.
+//   Level 1 (currentModalId === 'travel'): 6 neighborhood buttons + TOWER HOME.
+//   Level 2 (currentModalId === 'travel:nbId'): destinations in that neighborhood.
+// The onBack for level 2 is wired by each caller screen via ModalConfig.onBack.
+
+function getNeighborhoodDestinations(
+  neighborhoodId: NeighborhoodId,
+  currentLoc: LocationId,
+  dadAlive: boolean,
+): LocationId[] {
+  const bodegaId = getNeighborhoodBodega(neighborhoodId);
+  const temples = getNeighborhoodTemples(neighborhoodId);
+  const fsId = getNeighborhoodFurnitureStore(neighborhoodId);
+  const uniId = getNeighborhoodUniversity(neighborhoodId);
+  const ssId = getNeighborhoodScrollStore(neighborhoodId);
+  const bsId = getNeighborhoodBookstore(neighborhoodId);
+  const dhId = getNeighborhoodDadsHouse(neighborhoodId);
+  const barId = getNeighborhoodBar(neighborhoodId);
+
+  // If dad has passed, dhId is still included but shown as "DAD'S GRAVE".
+  void dadAlive;  // used by caller for display name; included to keep signature clear
+
+  return [
+    bodegaId,
+    ...temples.map(t => t.id),
+    fsId,
+    ...(uniId ? [uniId] : []),
+    ssId,
+    ...(bsId ? [bsId] : []),
+    ...(dhId ? [dhId] : []),
+    ...(barId ? [barId] : []),
+  ].filter(id => id !== currentLoc);
+}
+
+export function makeTravelPanel(
+  state: GameState,
+  dispatch: Dispatch,
+  screenId: string,
+  currentModalId: string,
+  rerender: () => void,
+): HTMLElement {
   const panel = document.createElement('div');
   panel.className = 'travel-panel';
 
   const currentLoc = state.currentLocation;
-  const isAtTower = currentLoc === 'tower';
+  const isLevel2 = currentModalId.startsWith('travel:');
 
-  // TOWER (HOME) — shown from all non-tower locations.
-  if (!isAtTower) {
-    const towerLoc = 'tower' as LocationId;
-    const cost = getTravelCostRaw(currentLoc, towerLoc);
-    const clock = previewClock(state.clock, cost);
-    panel.appendChild(makeButton(
-      `TOWER (HOME)  \u2192  ${formatClock(clock)}`,
-      () => dispatch({ type: 'TRAVEL', destination: towerLoc }),
-      'nav-btn',
-    ));
-  }
+  if (!isLevel2) {
+    // Level 1: TOWER HOME shortcut + one button per neighborhood.
+    if (currentLoc !== 'tower') {
+      const towerLoc = 'tower' as LocationId;
+      const cost = getTravelCostRaw(currentLoc, towerLoc);
+      const clock = previewClock(state.clock, cost);
+      panel.appendChild(makeButton(
+        `TOWER (HOME)  \u2192  ${formatClock(clock)}`,
+        () => dispatch({ type: 'TRAVEL', destination: towerLoc }),
+        'nav-btn',
+      ));
+    }
 
-  // Per-neighborhood sections.
-  for (const neighborhood of NEIGHBORHOODS) {
-    const bodegaId = getNeighborhoodBodega(neighborhood.id);
-    const temples = getNeighborhoodTemples(neighborhood.id);
-    const fsId = getNeighborhoodFurnitureStore(neighborhood.id);
-    const uniId = getNeighborhoodUniversity(neighborhood.id);
-    const ssId = getNeighborhoodScrollStore(neighborhood.id);
-    const bsId = getNeighborhoodBookstore(neighborhood.id);
-    const dhId = getNeighborhoodDadsHouse(neighborhood.id);
-    const barId = getNeighborhoodBar(neighborhood.id);
-
-    const destinations: LocationId[] = [
-      bodegaId,
-      ...temples.map(t => t.id),
-      fsId,
-      ...(uniId ? [uniId] : []),
-      ssId,
-      ...(bsId ? [bsId] : []),
-      ...(dhId ? [dhId] : []),
-      ...(barId ? [barId] : []),
-    ].filter(id => id !== currentLoc);
-
-    if (destinations.length === 0) continue;
-
-    const nbLabel = document.createElement('p');
-    nbLabel.className = 'neighborhood-label';
-    nbLabel.textContent = neighborhood.name.toUpperCase();
-    panel.appendChild(nbLabel);
+    for (const neighborhood of NEIGHBORHOODS) {
+      const destinations = getNeighborhoodDestinations(neighborhood.id as NeighborhoodId, currentLoc, state.dadAlive);
+      if (destinations.length === 0) continue;
+      panel.appendChild(makeButton(
+        `${neighborhood.name.toUpperCase()}  (${destinations.length})`,
+        () => openModal(screenId, `travel:${neighborhood.id}`, rerender),
+        'nav-btn',
+      ));
+    }
+  } else {
+    // Level 2: destinations within the selected neighborhood.
+    const neighborhoodId = currentModalId.slice(7) as NeighborhoodId;  // strip 'travel:'
+    const dhId = getNeighborhoodDadsHouse(neighborhoodId);
+    const destinations = getNeighborhoodDestinations(neighborhoodId, currentLoc, state.dadAlive);
 
     for (const destId of destinations) {
       const destData = getLocationData(destId);
       const cost = getTravelCostRaw(currentLoc, destId);
       const clock = previewClock(state.clock, cost);
-      // Dad's house uses "DAD'S GRAVE" label when dad has passed.
       const displayName = (destId === dhId && !state.dadAlive)
         ? "DAD'S GRAVE"
         : destData.displayName;

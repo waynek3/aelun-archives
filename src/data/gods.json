@@ -1,0 +1,27 @@
+{
+  "gods": [
+    { "id": "mesin",   "name": "Mesin",   "element": "life",  "form": "Animating Energy",       "strongMonths": [3, 6] },
+    { "id": "gul",     "name": "Gul",     "element": "death", "form": "Hooded Figure of Death", "strongMonths": [9, 12] },
+    { "id": "klossa",  "name": "Klossa",  "element": "earth", "form": "Female Gnome",           "strongMonths": [2] },
+    { "id": "skarhol", "name": "Skarhol", "element": "earth", "form": "Male Dwarf",             "strongMonths": [8] },
+    { "id": "marena",  "name": "Marena",  "element": "water", "form": "Female Mermaid",         "strongMonths": [1] },
+    { "id": "azorius", "name": "Azorius", "element": "water", "form": "Male Human",             "strongMonths": [7] },
+    { "id": "ara",     "name": "Ara",     "element": "air",   "form": "Female Elf",             "strongMonths": [4] },
+    { "id": "finhorn", "name": "Finhorn", "element": "air",   "form": "Male Halfling",          "strongMonths": [10] },
+    { "id": "beroan",  "name": "Beroan",  "element": "fire",  "form": "Male Dragon",            "strongMonths": [5] },
+    { "id": "sofiel",  "name": "Sofiel",  "element": "fire",  "form": "Female Human",           "strongMonths": [11] }
+  ],
+  "opposition": {
+    "mesin": "gul",
+    "gul": "mesin",
+    "klossa": "sofiel",
+    "sofiel": "klossa",
+    "marena": "finhorn",
+    "finhorn": "marena",
+    "ara": "azorius",
+    "azorius": "ara",
+    "beroan": "skarhol",
+    "skarhol": "beroan"
+  },
+  "allIds": ["mesin", "gul", "klossa", "skarhol", "marena", "azorius", "ara", "finhorn", "beroan", "sofiel"]
+}

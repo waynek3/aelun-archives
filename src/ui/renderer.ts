@@ -18,15 +18,15 @@ import { renderUniversity } from './screens/university';
 import { renderSpellScrollStore } from './screens/spell-scroll-store';
 import { renderUniversityBookstore } from './screens/university-bookstore';
 import { renderDadsHouse } from './screens/dads-house';
-import { renderEvent } from './screens/event';
 import { renderBar } from './screens/bar';
+import { makeEventModal } from './components';
 import { getLocationType } from '../data/locations';
 
 type Dispatch = (action: GameAction) => void;
 
 type ScreenId = 'setup' | 'tower' | 'bodega' | 'temple' | 'furniture_store' | 'university'
   | 'university_bookstore' | 'spell_scroll_store' | 'dads_house' | 'university_bar'
-  | 'scratch' | 'passout' | 'game_over' | 'event' | 'none';
+  | 'scratch' | 'passout' | 'game_over' | 'none';
 let currentScreen: ScreenId = 'none';
 
 // The last action that triggered a render — used to decide partial vs full update.
@@ -70,9 +70,10 @@ function getTargetScreen(state: GameState): ScreenId {
   if (state.phase === 'setup') return 'setup';
   if (state.phase === 'game_over') return 'game_over';
   if (state.phase === 'passedout') return 'passout';
-  if (state.phase === 'event' && state.activeEvent !== null) return 'event';
   if (state.phase === 'scratching' && state.scratchSession !== null) return 'scratch';
-  if (state.phase === 'playing') {
+  // 'playing' and 'event' both route to the current location screen.
+  // When phase === 'event', the event modal is overlaid after the location renders.
+  if (state.phase === 'playing' || state.phase === 'event') {
     const locType = getLocationType(state.currentLocation);
     if (locType === 'tower') return 'tower';
     if (locType === 'temple') return 'temple';
@@ -145,9 +146,6 @@ export function render(
   } else if (targetScreen === 'university_bar') {
     currentScreen = 'university_bar';
     renderBar(state, screen, dispatch);
-  } else if (targetScreen === 'event') {
-    currentScreen = 'event';
-    renderEvent(state, screen, dispatch);
   } else if (targetScreen === 'passout') {
     currentScreen = 'passout';
     renderPassout(state, screen, dispatch);
@@ -158,6 +156,12 @@ export function render(
     // bodega
     currentScreen = 'bodega';
     renderBodega(state, screen, dispatch);
+  }
+
+  // Random events overlay the current location screen as a universal modal.
+  // blockClose=true forces an explicit choice — no dismiss-on-outside-click.
+  if (state.activeEvent !== null) {
+    screen.appendChild(makeEventModal(state.activeEvent, dispatch));
   }
 
   lastActionType = null;
