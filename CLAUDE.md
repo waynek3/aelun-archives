@@ -147,6 +147,7 @@ Always read `scope.md` before implementing any mechanic. If something isn't in s
 - **Use `bal` from `balance-types.ts`** for all balance data access. Never import `balance.json` directly.
 - **Use `toTotalMinutes()` from `time.ts`** for timestamp comparisons. Never reimplement locally.
 - **Use `container.replaceChildren()`** to clear DOM elements. Never use `innerHTML = ''`.
+- **Independently diagnose bugs before fixing.** When a user reports a visual or behavioral bug, read the relevant code first and derive your own root cause. Do not treat the user's description as a technical diagnosis — they describe symptoms, not causes.
 
 ## Style
 
