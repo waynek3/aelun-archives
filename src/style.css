@@ -333,26 +333,25 @@ html, body {
 }
 
 .scratch-cell {
-  background: var(--btn-bg);
+  background: transparent;
   color: var(--fg);
-  border: 1px solid var(--border);
+  border: none;
   cursor: pointer;
   font-family: inherit;
   font-size: 1.4em;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  min-width: 44px;
+  flex: 1;
+  height: 52px;
   min-height: 44px;
-  transition: background 0.08s;
+  transition: opacity 0.08s;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
 .scratch-cell:hover {
-  background: var(--btn-hover);
+  opacity: 0.75;
 }
 
 .scratch-cell.scratching {
@@ -361,7 +360,7 @@ html, body {
 
 .scratch-cell.revealed {
   background: transparent;
-  border-color: transparent;
+  border: none;
   cursor: default;
   font-size: 1.6em;
 }
@@ -492,7 +491,7 @@ html, body {
 
 .scratch-cells {
   display: flex;
-  gap: 6px;
+  gap: 0;
   flex: 1;
 }
 
@@ -649,12 +648,17 @@ html, body {
   flex-shrink: 0;
 }
 
+.hud-reset-btn {
+  color: var(--muted);
+  border-color: var(--muted);
+  margin-left: 4px;
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
 
 @media (max-width: 360px) {
   .scratch-cell {
-    width: 48px;
-    height: 48px;
+    height: 44px;
     font-size: 1.2em;
   }
 

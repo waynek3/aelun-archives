@@ -128,8 +128,8 @@ export interface LuckBuff {
 
 // ─── Scratch Session ──────────────────────────────────────────────────────────
 
-// 0 = █ covered, 1 = ▓, 2 = ▒, 3 = ░, 4 = glyph revealed
-export type CellState = 0 | 1 | 2 | 3 | 4;
+// 0 = █ covered, 1 = ▓, 2 = ░, 3 = glyph revealed (3 taps to reveal)
+export type CellState = 0 | 1 | 2 | 3;
 
 export interface TicketCell {
   symbolId: number;  // 1–30

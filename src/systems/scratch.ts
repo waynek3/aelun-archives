@@ -256,14 +256,14 @@ export function scratchCell(
   if (ticket.revealed) return state;
 
   const cell = ticket.cells[cellIndex];
-  if (!cell || cell.state >= 4) return state;
+  if (!cell || cell.state >= 3) return state;
 
   // Clone tickets array and the specific ticket.
   const newTickets = [...session.tickets];
   const newCells = [...ticket.cells];
   newCells[cellIndex] = { ...cell, state: (cell.state + 1) as CellState };
 
-  const allRevealed = newCells.every(c => c.state >= 4);
+  const allRevealed = newCells.every(c => c.state >= 3);
 
   const newTicket: GeneratedTicket = {
     ...ticket,
