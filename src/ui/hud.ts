@@ -43,6 +43,17 @@ export function renderHUD(state: GameState, el: HTMLElement, dispatch: Dispatch)
     themeGroup.appendChild(btn);
   }
 
+  const rstBtn = document.createElement('button');
+  rstBtn.className = 'hud-theme-btn hud-reset-btn';
+  rstBtn.textContent = 'RST';
+  rstBtn.title = 'Reset game (debug)';
+  rstBtn.addEventListener('click', () => {
+    if (window.confirm('Reset all progress and start a new game?')) {
+      dispatch({ type: 'NEW_GAME' });
+    }
+  });
+  themeGroup.appendChild(rstBtn);
+
   row1.appendChild(cashEl);
   row1.appendChild(clockEl);
   row1.appendChild(themeGroup);

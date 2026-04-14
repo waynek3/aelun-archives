@@ -10,8 +10,8 @@ import { makeButton, makeHeader, makePanel, makeDivider, makeResultLine } from '
 
 type Dispatch = (action: GameAction) => void;
 
-// Degradation sequence: covered → revealed.
-const CELL_CHARS = ['█', '▓', '▒', '░'];
+// Degradation sequence: covered → revealed (3 taps).
+const CELL_CHARS = ['█', '▓', '░'];
 
 // ─── Full Render ──────────────────────────────────────────────────────────────
 
@@ -110,7 +110,7 @@ export function renderScratch(
     const t = state.scratchSession.tickets[state.scratchSession.currentTicketIndex];
     if (!t || t.revealed) return;
     t.cells.forEach((cell, idx) => {
-      const steps = 4 - cell.state;
+      const steps = 3 - cell.state;
       for (let i = 0; i < steps; i++) {
         dispatch({ type: 'SCRATCH_CELL', cellIndex: idx });
       }
@@ -159,8 +159,8 @@ export function updateScratchCell(
   );
   if (!cellEl) return;
 
-  if (cell.state < 4) {
-    // Show the degradation char for the current state (0=█ 1=▓ 2=▒ 3=░).
+  if (cell.state < 3) {
+    // Show the degradation char for the current state (0=█ 1=▓ 2=░).
     cellEl.textContent = CELL_CHARS[cell.state] ?? CELL_CHARS[0];
     cellEl.className = cell.state > 0 ? 'scratch-cell scratching' : 'scratch-cell';
   } else {
@@ -211,7 +211,7 @@ function buildGrid(ticket: GeneratedTicket, dispatch: Dispatch): HTMLElement {
       btn.className = 'scratch-cell';
       btn.dataset.cellIndex = String(idx);
 
-      if (cell.state < 4) {
+      if (cell.state < 3) {
         btn.textContent = CELL_CHARS[cell.state];
         if (cell.state > 0) btn.classList.add('scratching');
       } else {
@@ -222,7 +222,7 @@ function buildGrid(ticket: GeneratedTicket, dispatch: Dispatch): HTMLElement {
         btn.setAttribute('aria-label', sym.name);
       }
 
-      if (cell.state < 4) {
+      if (cell.state < 3) {
         btn.addEventListener('click', () =>
           dispatch({ type: 'SCRATCH_CELL', cellIndex: idx }),
         );

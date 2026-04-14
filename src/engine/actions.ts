@@ -7,7 +7,7 @@ export type GameAction =
   // Buy tickets and/or snacks at a bodega.  Snacks are added to inventory;
   // if tickets > 0, a scratch session begins.
   | { type: 'BUY_TICKETS'; quantities: Record<string, number>; snacks?: string[] }
-  // Tap a scratch cell to advance its reveal state (0→1→2→3→4).
+  // Tap a scratch cell to advance its reveal state (0→1→2→3=revealed).
   | { type: 'SCRATCH_CELL'; cellIndex: number }
   // Move to the next ticket after the current one is fully revealed.
   | { type: 'ADVANCE_TICKET' }
